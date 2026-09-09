@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Eduarte Tools",
   "version": "1.0.0",
-  "description": "Automatisch inloggen, donkere modus en thema's voor Eduarte Portalen (Onderwijsgroep Tilburg). Geinspireerd door Study Tools.",
+  "description": "Automatisch inloggen, donkere modus en thema's voor Eduarte Portalen (Onderwijsgroep Tilburg). Geïnspireerd door Study Tools.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -20,12 +20,12 @@
   "host_permissions": [
     "https://*.onderwijsgroeptilburg.nl/*",
     "https://login.microsoftonline.com/*",
-    "https://tilburg-student.educus.nl/*"
+    "https://*.educus.nl/*"
   ],
   "web_accessible_resources": [
     {
       "resources": ["assets/wallpaper-human.jpg"],
-      "matches": ["https://tilburg-student.educus.nl/*"]
+      "matches": ["https://*.educus.nl/*"]
     }
   ],
   "content_scripts": [
@@ -40,7 +40,7 @@
     },
     {
       "matches": [
-        "https://tilburg-student.educus.nl/*"
+        "https://*.educus.nl/*"
       ],
       "js": ["theme.js"],
       "run_at": "document_start",
