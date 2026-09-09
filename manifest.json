@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Eduarte Tools",
   "version": "1.0.0",
-  "description": "Automatisch inloggen, donkere modus en thema's voor Eduarte Portalen (Onderwijsgroep Tilburg). Geinspireerd door Study Tools voor Magister.",
+  "description": "Automatisch inloggen, donkere modus en thema's voor Eduarte Portalen (Onderwijsgroep Tilburg). Geinspireerd door Study Tools.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
