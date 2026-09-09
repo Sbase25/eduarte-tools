@@ -1,7 +1,7 @@
 # Eduarte Tools
 
-Een Chrome-extensie die het Eduarte-studentenportaal (Onderwijsgroep Tilburg
-en vergelijkbare Eduarte-installaties) fijner maakt om te gebruiken:
+Een Chrome-extensie die het Eduarte-studentenportaal 
+fijner maakt om te gebruiken:
 automatisch inloggen, donkere modus, een eigen kleurenthema, en een
 glasmorfisme-preset. Geïnspireerd door [Study Tools voor
 Magister](https://github.com/QkeleQ10/Study-Tools).
