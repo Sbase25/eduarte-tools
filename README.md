@@ -1,3 +1,8 @@
+
+<img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/da601ae4-1599-4e6c-a09d-42d0209f5c85" />
+
+
+
 # Eduarte Tools
 
 Een Chrome-extensie die het Eduarte-studentenportaal 
