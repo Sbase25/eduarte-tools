@@ -22,6 +22,12 @@
     "https://login.microsoftonline.com/*",
     "https://tilburg-student.educus.nl/*"
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/wallpaper-human.jpg"],
+      "matches": ["https://tilburg-student.educus.nl/*"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": [
