@@ -235,14 +235,18 @@
   // real classes (nav.navigation, header-toolbar, now--soft/now--tomorrow,
   // agenda-filter, agenda--day li) since Magister's own classes
   // (.appbar, .main-menu, .st-widget, ...) don't exist here.
-  const HUMAN_WALLPAPER_URL = "https://i.imgur.com/9oyX79l.jpeg";
+  // No remote wallpaper: a hotlinked image URL baked into a shipped
+  // extension is exactly the pattern AV heuristics (e.g. Defender's
+  // "MalUri") flag on. A pure CSS gradient gives the same dark
+  // glassmorphism look with zero external dependency.
   const HUMAN_ACCENT = "#0852a6"; // hsl(212,91%,34%), same hue as the original preset
 
   const HUMAN_CSS = `
     html {
       background-color: #0a0e14 !important;
-      background-image: linear-gradient(rgba(10,14,20,.55), rgba(10,14,20,.55)),
-        url('${HUMAN_WALLPAPER_URL}') !important;
+      background-image:
+        radial-gradient(ellipse at top left, rgba(8,82,166,.35), transparent 60%),
+        radial-gradient(ellipse at bottom right, rgba(21,23,27,.9), #0a0e14 70%) !important;
       background-position: center center !important;
       background-size: cover !important;
       background-attachment: fixed !important;
