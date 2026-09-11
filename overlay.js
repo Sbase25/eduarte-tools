@@ -92,8 +92,7 @@
         "eduarteUserNotes",
         "eduarteAssignmentsEnabled",
         "msClientId",
-        "eduarteScheduleEnabled",
-        "eduarteScheduleCache",
+        "eduarteDeadlinesEnabled",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -106,9 +105,9 @@
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
         const showQuote = settings.eduarteQuoteEnabled !== false;
         const showAssignments = settings.eduarteAssignmentsEnabled !== false && !!settings.msClientId;
-        const showSchedule = settings.eduarteScheduleEnabled !== false;
+        const showDeadlines = settings.eduarteDeadlinesEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote && !showAssignments && !showSchedule) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote && !showAssignments && !showDeadlines) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -482,8 +481,23 @@
                 padding: 20px 8px;
               }
 
-              /* Rooster widget */
-              .et-schedule-list {
+              /* Huiswerk & Deadlines widget */
+              .et-deadline-form {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-bottom: 10px;
+              }
+              .et-deadline-form input {
+                padding: 8px 10px;
+                border-radius: 8px;
+                border: 1px solid var(--color-border-primary, #374151);
+                background: rgba(255,255,255,.04);
+                color: var(--color-text-primary, #f9fafb);
+                font-size: 12px;
+                outline: 0;
+              }
+              .et-deadlines-list {
                 list-style: none;
                 margin: 0;
                 padding: 0;
@@ -493,39 +507,48 @@
                 max-height: 230px;
                 overflow-y: auto;
               }
-              .et-schedule-item {
+              .et-deadline-item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
                 padding: 9px 12px;
                 border-radius: 10px;
                 background: rgba(255,255,255,.05);
+                border-left: 3px solid var(--color-bg-fill-action, #3b82f6);
                 font-size: 12px;
               }
-              .et-schedule-item.next {
-                background: color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 18%, transparent);
-                border: 1px solid color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 40%, transparent);
+              .et-deadline-item.soon { border-left-color: #f59e0b; }
+              .et-deadline-item.urgent { border-left-color: #ef4444; }
+              .et-deadline-item.overdue { border-left-color: #7f1d1d; opacity: 0.7; }
+              .et-deadline-main {
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                overflow: hidden;
               }
-              .et-schedule-time {
+              .et-deadline-subject-label {
                 font-weight: 700;
                 color: var(--color-text-primary, #f9fafb);
-                min-width: 82px;
-              }
-              .et-schedule-subject {
-                flex: 1 1 auto;
-                color: var(--color-text-secondary, #e5e7eb);
+                white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                white-space: nowrap;
               }
-              .et-schedule-room {
+              .et-deadline-desc-label {
+                font-size: 11px;
+                color: var(--color-text-tertiary, #9ca3af);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              .et-deadline-due {
                 font-size: 11px;
                 font-weight: 600;
-                color: var(--color-text-tertiary, #9ca3af);
-                background: rgba(255,255,255,.08);
-                padding: 2px 8px;
-                border-radius: 99px;
+                color: var(--color-text-secondary, #e5e7eb);
+                white-space: nowrap;
               }
+              .et-deadline-item.urgent .et-deadline-due,
+              .et-deadline-item.overdue .et-deadline-due { color: #ef4444; }
 
               @keyframes st-card-in {
                 from { opacity: 0; transform: translateY(6px); }
@@ -559,15 +582,19 @@
               </div>
             ` : ''}
 
-            <!-- Grid kaarten: Rooster, Snelkoppelingen, Notities, Pomodoro, Snelle Calculator, Teams-opdrachten & Quotes -->
-            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote || showAssignments || showSchedule) ? `
+            <!-- Grid kaarten: Huiswerk/Deadlines, Snelkoppelingen, Notities, Pomodoro, Snelle Calculator, Teams-opdrachten & Quotes -->
+            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote || showAssignments || showDeadlines) ? `
               <div class="et-grid">
-                ${showSchedule ? `
+                ${showDeadlines ? `
                   <div class="et-card">
-                    <h3 class="et-widget-title">🗓️ Rooster Vandaag</h3>
-                    <ul class="et-schedule-list" id="et-schedule-list">
-                      <li class="et-assignments-loading">Rooster laden…</li>
-                    </ul>
+                    <h3 class="et-widget-title">📌 Huiswerk & Deadlines</h3>
+                    <form class="et-deadline-form">
+                      <input type="text" class="et-deadline-subject" placeholder="Vak (bijv. Wiskunde)" />
+                      <input type="text" class="et-deadline-desc" placeholder="Omschrijving..." />
+                      <input type="date" class="et-deadline-date" />
+                      <button type="submit" class="et-notes-add">+ Toevoegen</button>
+                    </form>
+                    <ul class="et-deadlines-list"></ul>
                   </div>
                 ` : ''}
 
@@ -695,36 +722,81 @@
             fetchWeatherData();
           }
 
-          // Rooster van vandaag tonen (uit cache, bijgewerkt door bezoek aan /agenda)
-          if (showSchedule) {
-            const listEl = container.querySelector("#et-schedule-list");
-            const cache = settings.eduarteScheduleCache;
-            const today = new Date();
-            const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-            const nowMinutes = today.getHours() * 60 + today.getMinutes();
+          // Huiswerk & Deadlines tracker
+          if (showDeadlines) {
+            const listEl = container.querySelector(".et-deadlines-list");
+            const formEl = container.querySelector(".et-deadline-form");
+            const subjectInput = container.querySelector(".et-deadline-subject");
+            const descInput = container.querySelector(".et-deadline-desc");
+            const dateInput = container.querySelector(".et-deadline-date");
 
-            if (!cache || cache.date !== todayKey || !cache.lessons?.length) {
-              if (listEl) {
-                listEl.innerHTML = '<li class="et-assignments-empty">Nog geen rooster bekend. Bezoek eerst <a href="/agenda" style="color:inherit;text-decoration:underline;">Agenda</a> om vandaag te laden.</li>';
-              }
-            } else {
-              const upcoming = cache.lessons.filter((l) => l.endMinutes == null || l.endMinutes >= nowMinutes);
-              const toShow = (upcoming.length ? upcoming : cache.lessons).slice(0, 5);
-              if (listEl) {
-                listEl.innerHTML = toShow
-                  .map((l) => {
-                    const isNext = upcoming.length && l === upcoming[0];
-                    return `
-                      <li class="et-schedule-item${isNext ? " next" : ""}">
-                        <span class="et-schedule-time">${l.timeLabel}</span>
-                        <span class="et-schedule-subject">${l.subject}</span>
-                        ${l.room ? `<span class="et-schedule-room">${l.room}</span>` : ""}
-                      </li>
-                    `;
-                  })
-                  .join("");
-              }
+            let deadlines = Array.isArray(settings.eduarteDeadlines) ? settings.eduarteDeadlines : [];
+
+            function daysUntil(dateStr) {
+              const target = new Date(dateStr + "T00:00:00");
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              return Math.round((target - today) / (1000 * 60 * 60 * 24));
             }
+
+            function renderDeadlines() {
+              if (!listEl) return;
+              listEl.innerHTML = "";
+              const sorted = [...deadlines].sort((a, b) => new Date(a.date) - new Date(b.date));
+              if (!sorted.length) {
+                listEl.innerHTML = '<li class="et-assignments-empty">Nog geen huiswerk of deadlines toegevoegd.</li>';
+                return;
+              }
+              sorted.forEach((item) => {
+                const diff = daysUntil(item.date);
+                let urgency = "normal";
+                if (diff < 0) urgency = "overdue";
+                else if (diff <= 1) urgency = "urgent";
+                else if (diff <= 3) urgency = "soon";
+
+                let dueLabel;
+                if (diff < 0) dueLabel = `Verlopen (${Math.abs(diff)}d)`;
+                else if (diff === 0) dueLabel = "Vandaag";
+                else if (diff === 1) dueLabel = "Morgen";
+                else dueLabel = `Over ${diff} dagen`;
+
+                const li = document.createElement("li");
+                li.className = `et-deadline-item ${urgency}`;
+                li.innerHTML = `
+                  <div class="et-deadline-main">
+                    <span class="et-deadline-subject-label">${item.subject || "Algemeen"}</span>
+                    <span class="et-deadline-desc-label">${item.desc || ""}</span>
+                  </div>
+                  <span class="et-deadline-due">${dueLabel}</span>
+                  <button class="et-notes-del" title="Verwijderen">×</button>
+                `;
+                li.querySelector(".et-notes-del").addEventListener("click", () => {
+                  deadlines = deadlines.filter((d) => d.id !== item.id);
+                  saveAndRenderDeadlines();
+                });
+                listEl.appendChild(li);
+              });
+            }
+
+            function saveAndRenderDeadlines() {
+              chrome.storage.local.set({ eduarteDeadlines: deadlines });
+              renderDeadlines();
+            }
+
+            formEl?.addEventListener("submit", (e) => {
+              e.preventDefault();
+              const subject = subjectInput.value.trim();
+              const desc = descInput.value.trim();
+              const date = dateInput.value;
+              if (!date || (!subject && !desc)) return;
+              deadlines.push({ id: Date.now(), subject, desc, date });
+              subjectInput.value = "";
+              descInput.value = "";
+              dateInput.value = "";
+              saveAndRenderDeadlines();
+            });
+
+            renderDeadlines();
           }
 
           // Teams-opdrachten ophalen via Microsoft Graph
@@ -1033,6 +1105,7 @@
           <div class="actions"><button class="action" data-action="add">+ Cijfer</button><button class="action primary" data-action="scan">Cijferlijst scannen</button></div>
           <div class="settings"><label>Doelgemiddelde<input class="target" type="number" min="1" max="10" step=".1" value="5.5"></label><label>Weging volgend cijfer<input class="future" type="number" min=".1" step=".1" value="1"></label></div>
           <div class="metrics"><div class="metric"><b class="average">—</b><span>Gewogen gemiddelde</span></div><div class="metric"><b class="median">—</b><span>Mediaan</span></div><div class="metric"><b class="needed">—</b><span>Benodigd cijfer</span></div><div class="metric"><b class="result">—</b><span>Nieuw gemiddelde</span></div></div>
+          <div class="actions"><button class="action" data-action="export">⬇️ Exporteer als CSV</button></div>
           <p class="message">Klik op “Cijferlijst scannen” als je cijfers nog niet zijn gevonden.</p>
         </aside>
       `;
@@ -1079,6 +1152,33 @@
         message.textContent = needed > 10 ? `Je hebt een ${format(needed)} nodig; dat is niet haalbaar met één cijfer.` : `Je hebt ongeveer een ${format(needed)} nodig voor een gemiddelde van ${format(target)}.`;
       }
 
+      function exportCsv() {
+        const values = [...rows.querySelectorAll(".row")].map((row) => ({
+          grade: row.querySelector(".grade").value,
+          weight: row.querySelector(".weight").value,
+        })).filter(({ grade, weight }) => grade !== "" && weight !== "");
+
+        if (!values.length) {
+          message.textContent = "Geen cijfers om te exporteren. Voeg cijfers toe of scan je cijferlijst.";
+          return;
+        }
+
+        const header = "Cijfer,Weging\n";
+        const body = values.map(({ grade, weight }) => `${grade.replace(".", ",")},${weight.replace(".", ",")}`).join("\n");
+        const csvContent = header + body;
+
+        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const dateStr = new Date().toISOString().slice(0, 10);
+        link.href = url;
+        link.download = `eduarte-cijfers-${dateStr}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        message.textContent = `${values.length} cijfers geëxporteerd naar CSV.`;
+      }
+
       function readGradeCells() {
         const selectors = [
           ".result-overview--grades td",
@@ -1109,6 +1209,7 @@
       shadow.querySelector(".close").addEventListener("click", () => { panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true"); });
       shadow.querySelector('[data-action="add"]').addEventListener("click", () => { addRow(); calculate(); });
       shadow.querySelector('[data-action="scan"]').addEventListener("click", scan);
+      shadow.querySelector('[data-action="export"]').addEventListener("click", exportCsv);
       input("target").addEventListener("input", calculate);
       input("future").addEventListener("input", calculate);
       addRow();
@@ -1124,96 +1225,42 @@
     }
   }
 
+  function initShortcuts() {
+    const DEFAULT_SHORTCUTS = {
+      "/agenda": { key: "a", ctrl: true, alt: false, shift: false },
+      "/resultaten": { key: "r", ctrl: true, alt: false, shift: false },
+    };
+
+    chrome.storage.local.get(["eduarteShortcutKeysEnabled", "eduarteShortcuts"], (data) => {
+      if (data.eduarteShortcutKeysEnabled === false) return;
+      const shortcuts = data.eduarteShortcuts || DEFAULT_SHORTCUTS;
+      const entries = Object.entries(shortcuts).filter(([, combo]) => combo && combo.key);
+      if (!entries.length) return;
+
+      document.addEventListener("keydown", (event) => {
+        const target = event.target;
+        const tag = target && target.tagName;
+        const isEditable = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (target && target.isContentEditable);
+        if (isEditable) return;
+
+        const key = event.key.toLowerCase();
+        const match = entries.find(([, combo]) =>
+          combo.key.toLowerCase() === key &&
+          !!combo.ctrl === (event.ctrlKey || event.metaKey) &&
+          !!combo.alt === event.altKey &&
+          !!combo.shift === event.shiftKey
+        );
+        if (!match) return;
+
+        event.preventDefault();
+        const [path] = match;
+        const base = location.origin;
+        location.href = path === "/" ? base + "/" : base + path;
+      });
+    });
+  }
+
   initStartWidget();
   initGradesOverlay();
-  initScheduleScanner();
-
-  // --- ROOSTER SCANNER: leest de agendapagina uit en cachet vandaag's lessen ---
-  function initScheduleScanner() {
-    if (!/\/agenda(?:\/|$)/i.test(location.pathname)) return;
-
-    chrome.storage.local.get(["eduarteScheduleEnabled"], (settings) => {
-      if (settings.eduarteScheduleEnabled === false) return;
-      scanAndCache();
-      const obs = new MutationObserver(() => scanAndCache());
-      obs.observe(document.documentElement, { childList: true, subtree: true });
-      setTimeout(() => obs.disconnect(), 15000);
-    });
-
-    function parseTimeToMinutes(str) {
-      const m = str.match(/(\d{1,2}):(\d{2})/);
-      if (!m) return null;
-      return Number(m[1]) * 60 + Number(m[2]);
-    }
-
-    function scanAndCache() {
-      // Generieke, tolerante selectors omdat Eduarte-omgevingen onderling
-      // kunnen verschillen in opmaak. We zoeken blokken die een tijdspatroon
-      // (HH:MM) bevatten en behandelen die als les-/agenda-items.
-      const selectors = [
-        "[class*='agenda-item']",
-        "[class*='agenda__item']",
-        "[class*='schedule-item']",
-        "[class*='lesson']",
-        ".now--soft, .now--tomorrow",
-        "#iddf > li",
-        "li[class*='now--']",
-        ".container-card li",
-        ".container-card tr",
-      ];
-      const nodes = [...new Set(selectors.flatMap((sel) => [...document.querySelectorAll(sel)]))];
-
-      const timePattern = /\b([01]?\d|2[0-3]):[0-5]\d\b/;
-      const items = [];
-
-      nodes.forEach((node) => {
-        const text = (node.innerText || "").trim();
-        if (!text || !timePattern.test(text)) return;
-        if (text.length > 300) return; // Waarschijnlijk een te grote wrapper, geen los item
-
-        const times = [...text.matchAll(/\b([01]?\d|2[0-3]):[0-5]\d\b/g)].map((m) => m[0]);
-        if (!times.length) return;
-        const startMinutes = parseTimeToMinutes(times[0]);
-        const endMinutes = times[1] ? parseTimeToMinutes(times[1]) : null;
-
-        // Probeer een vaknaam te vinden: de eerste tekstregel zonder tijd/cijfers,
-        // of anders de langste "woordachtige" regel in het blok.
-        const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-        const subjectLine = lines.find((l) => !timePattern.test(l) && /[a-zA-Z]{3,}/.test(l)) || "Les";
-        const roomMatch = text.match(/(?:lokaal|ruimte|zaal)\s*[:\-]?\s*([a-z0-9.\-]+)/i);
-
-        items.push({
-          startMinutes,
-          endMinutes,
-          timeLabel: times[1] ? `${times[0]} - ${times[1]}` : times[0],
-          subject: subjectLine.slice(0, 60),
-          room: roomMatch ? roomMatch[1] : null,
-        });
-      });
-
-      // Dedupliceren op tijd + vak, en sorteren op starttijd
-      const seen = new Set();
-      const unique = items
-        .filter((it) => {
-          const key = `${it.startMinutes}-${it.subject}`;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        })
-        .sort((a, b) => (a.startMinutes ?? 0) - (b.startMinutes ?? 0));
-
-      if (!unique.length) return;
-
-      const today = new Date();
-      const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-
-      chrome.storage.local.set({
-        eduarteScheduleCache: {
-          date: dateKey,
-          lessons: unique,
-          scannedAt: Date.now(),
-        },
-      });
-    }
-  }
+  initShortcuts();
 })();

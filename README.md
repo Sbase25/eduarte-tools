@@ -35,9 +35,13 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 - **Teams-opdrachten Widget** — koppel je Microsoft-schoolaccount en zie je
   openstaande Teams for Education-opdrachten met deadline direct op het
   Eduarte-dashboard.
-- **Rooster Vandaag Widget** — leest automatisch je Agenda-pagina uit
-  (zodra je die één keer bezoekt) en toont je eerstvolgende lessen van
-  vandaag, met tijd, vak en lokaal, direct op het dashboard.
+- **Huiswerk & Deadlines Widget** — houd zelf je huiswerk en deadlines bij
+  (vak, omschrijving, datum) met kleurcodering naar urgentie, direct op het
+  dashboard.
+- **CSV-export cijfers** — exporteer je ingevoerde cijfers en wegingen vanuit
+  de Cijfercalculator als CSV-bestand (Excel-compatibel) met één klik.
+- **Aanpasbare Sneltoetsen** — spring met een zelf ingestelde toetscombinatie
+  (bijv. Ctrl+A → Agenda, Ctrl+R → Resultaten) direct naar een Eduarte-pagina.
 - **Aan/uit-zetbare Widgets** — Pomodoro Focus Timer, Snelle Cijfercalculator,
   Snelnotities/Taken, Snelkoppelingen en Dagelijkse Studie-Tip, elk apart
   in- of uit te schakelen.

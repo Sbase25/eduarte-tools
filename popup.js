@@ -5,10 +5,63 @@ const ids = [
   "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled",
   "shortcutsEnabled", "notesEnabled", "pomodoroEnabled", "quickCalcEnabled", "quoteEnabled", "animationSpeed",
   "gradesEnabled", "gradeMin", "gradeMax", "passThreshold",
-  "msClientId", "assignmentsEnabled", "scheduleEnabled",
+  "msClientId", "assignmentsEnabled", "shortcutKeysEnabled", "deadlinesEnabled",
 ];
 const elements = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
-const titles = { theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start", grades: "Cijfers", teams: "Teams", elo: "ELO", about: "Over" };
+const titles = { theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start", grades: "Cijfers", teams: "Teams", shortcuts: "Sneltoetsen", elo: "ELO", about: "Over" };
+
+const DEFAULT_SHORTCUTS = {
+  "/agenda": { key: "a", ctrl: true, alt: false, shift: false },
+  "/resultaten": { key: "r", ctrl: true, alt: false, shift: false },
+};
+
+function formatShortcutLabel(combo) {
+  if (!combo) return "";
+  const parts = [];
+  if (combo.ctrl) parts.push("Ctrl");
+  if (combo.alt) parts.push("Alt");
+  if (combo.shift) parts.push("Shift");
+  parts.push(combo.key.length === 1 ? combo.key.toUpperCase() : combo.key);
+  return parts.join("+");
+}
+
+let currentShortcuts = { ...DEFAULT_SHORTCUTS };
+
+document.querySelectorAll(".shortcut-input").forEach((inp) => {
+  inp.addEventListener("focus", () => {
+    inp.classList.add("recording");
+    inp.value = "Druk een toets...";
+  });
+  inp.addEventListener("blur", () => {
+    inp.classList.remove("recording");
+    const page = inp.dataset.page;
+    const combo = currentShortcuts[page];
+    inp.value = combo ? formatShortcutLabel(combo) : "";
+  });
+  inp.addEventListener("keydown", (e) => {
+    e.preventDefault();
+    const page = inp.dataset.page;
+    if (e.key === "Escape") {
+      delete currentShortcuts[page];
+      inp.blur();
+      return;
+    }
+    if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;
+    const combo = { key: e.key.toLowerCase(), ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, shift: e.shiftKey };
+    currentShortcuts[page] = combo;
+    inp.value = formatShortcutLabel(combo);
+    inp.blur();
+  });
+});
+
+document.getElementById("shortcutsReset")?.addEventListener("click", () => {
+  currentShortcuts = { ...DEFAULT_SHORTCUTS };
+  document.querySelectorAll(".shortcut-input").forEach((inp) => {
+    const combo = currentShortcuts[inp.dataset.page];
+    inp.value = combo ? formatShortcutLabel(combo) : "";
+  });
+});
+
 const presets = {
   dark: { dark: true, accent: "#3b82f6", bg: "#111827", surface: "#1f2937", text: "#f9fafb", border: "#374151" },
   blue: { dark: true, accent: "#38bdf8", bg: "#0b192c", surface: "#13253f", text: "#f0f9ff", border: "#1e3a5f" },
@@ -81,7 +134,8 @@ function load() {
     "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled",
     "eduarteShortcutsEnabled", "eduarteNotesEnabled", "eduarteQuoteEnabled", "eduarteAnimationSpeed",
     "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum", "eduartePassThreshold",
-    "msClientId", "msTeamsToken", "eduarteAssignmentsEnabled", "eduarteScheduleEnabled",
+    "msClientId", "msTeamsToken", "eduarteAssignmentsEnabled", "eduarteDeadlinesEnabled",
+    "eduarteShortcutKeysEnabled", "eduarteShortcuts",
   ], (data) => {
     activePresetKey = data.eduarteThemePreset || "dark";
     const preset = presets[activePresetKey] || presets.dark;
@@ -122,7 +176,7 @@ function load() {
     elements.startEnabled.checked = data.eduarteStartEnabled !== false;
     elements.weatherEnabled.checked = data.eduarteWeatherEnabled !== false;
     elements.weatherCity.value = data.eduarteWeatherCity || "";
-    elements.scheduleEnabled.checked = data.eduarteScheduleEnabled !== false;
+    elements.deadlinesEnabled.checked = data.eduarteDeadlinesEnabled !== false;
     elements.greetingEnabled.checked = data.eduarteGreetingEnabled !== false;
     elements.shortcutsEnabled.checked = data.eduarteShortcutsEnabled !== false;
     elements.notesEnabled.checked = data.eduarteNotesEnabled !== false;
@@ -139,6 +193,13 @@ function load() {
     elements.msClientId.value = data.msClientId || "";
     elements.assignmentsEnabled.checked = data.eduarteAssignmentsEnabled !== false;
     updateTeamsStatus(!!data.msTeamsToken);
+
+    elements.shortcutKeysEnabled.checked = data.eduarteShortcutKeysEnabled !== false;
+    currentShortcuts = data.eduarteShortcuts || { ...DEFAULT_SHORTCUTS };
+    document.querySelectorAll(".shortcut-input").forEach((inp) => {
+      const page = inp.dataset.page;
+      inp.value = currentShortcuts[page] ? formatShortcutLabel(currentShortcuts[page]) : "";
+    });
 
     ["gradeMin", "gradeMax", "passThreshold", "wallpaperBlur", "wallpaperOverlay"].forEach((id) => elements[id]?.dispatchEvent(new Event("input")));
   });
@@ -173,7 +234,7 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteStartEnabled: elements.startEnabled.checked,
     eduarteWeatherEnabled: elements.weatherEnabled.checked,
     eduarteWeatherCity: elements.weatherCity.value.trim(),
-    eduarteScheduleEnabled: elements.scheduleEnabled.checked,
+    eduarteDeadlinesEnabled: elements.deadlinesEnabled.checked,
     eduarteGreetingEnabled: elements.greetingEnabled.checked,
     eduarteShortcutsEnabled: elements.shortcutsEnabled.checked,
     eduarteNotesEnabled: elements.notesEnabled.checked,
@@ -187,6 +248,8 @@ document.getElementById("save").addEventListener("click", () => {
     eduartePassThreshold: Number(elements.passThreshold.value),
     msClientId: elements.msClientId.value.trim(),
     eduarteAssignmentsEnabled: elements.assignmentsEnabled.checked,
+    eduarteShortcutKeysEnabled: elements.shortcutKeysEnabled.checked,
+    eduarteShortcuts: currentShortcuts,
   }, () => {
     const button = document.getElementById("save");
     button.textContent = "Opgeslagen ✓";
