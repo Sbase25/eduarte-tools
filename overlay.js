@@ -90,9 +90,6 @@
         "eduarteQuickCalcEnabled",
         "eduarteQuoteEnabled",
         "eduarteUserNotes",
-        "eduarteAssignmentsEnabled",
-        "msClientId",
-        "eduarteDeadlinesEnabled",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -104,10 +101,8 @@
         const showPomodoro = settings.eduartePomodoroEnabled !== false;
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
         const showQuote = settings.eduarteQuoteEnabled !== false;
-        const showAssignments = settings.eduarteAssignmentsEnabled !== false && !!settings.msClientId;
-        const showDeadlines = settings.eduarteDeadlinesEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote && !showAssignments && !showDeadlines) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -435,121 +430,6 @@
                 text-align: right;
               }
 
-              /* Teams-opdrachten widget */
-              .et-assignments-list {
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                max-height: 230px;
-                overflow-y: auto;
-              }
-              .et-assignment-item a {
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-                padding: 10px 12px;
-                border-radius: 10px;
-                background: rgba(255,255,255,.05);
-                border-left: 3px solid var(--color-bg-fill-action, #3b82f6);
-                text-decoration: none;
-                transition: background 0.18s ease, transform 0.18s ease;
-              }
-              .et-assignment-item a:hover { background: rgba(255,255,255,.09); transform: translateX(2px); }
-              .et-assignment-item.urgent a { border-left-color: #ef4444; }
-              .et-assignment-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: var(--color-text-primary, #f9fafb);
-              }
-              .et-assignment-class {
-                font-size: 11px;
-                color: var(--color-text-tertiary, #9ca3af);
-              }
-              .et-assignment-due {
-                font-size: 11px;
-                font-weight: 500;
-                color: var(--color-text-secondary, #e5e7eb);
-              }
-              .et-assignment-item.urgent .et-assignment-due { color: #ef4444; }
-              .et-assignments-empty, .et-assignments-loading {
-                font-size: 12px;
-                color: var(--color-text-tertiary, #9ca3af);
-                text-align: center;
-                padding: 20px 8px;
-              }
-
-              /* Huiswerk & Deadlines widget */
-              .et-deadline-form {
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                margin-bottom: 10px;
-              }
-              .et-deadline-form input {
-                padding: 8px 10px;
-                border-radius: 8px;
-                border: 1px solid var(--color-border-primary, #374151);
-                background: rgba(255,255,255,.04);
-                color: var(--color-text-primary, #f9fafb);
-                font-size: 12px;
-                outline: 0;
-              }
-              .et-deadlines-list {
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                max-height: 230px;
-                overflow-y: auto;
-              }
-              .et-deadline-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 9px 12px;
-                border-radius: 10px;
-                background: rgba(255,255,255,.05);
-                border-left: 3px solid var(--color-bg-fill-action, #3b82f6);
-                font-size: 12px;
-              }
-              .et-deadline-item.soon { border-left-color: #f59e0b; }
-              .et-deadline-item.urgent { border-left-color: #ef4444; }
-              .et-deadline-item.overdue { border-left-color: #7f1d1d; opacity: 0.7; }
-              .et-deadline-main {
-                flex: 1 1 auto;
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-                overflow: hidden;
-              }
-              .et-deadline-subject-label {
-                font-weight: 700;
-                color: var(--color-text-primary, #f9fafb);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              }
-              .et-deadline-desc-label {
-                font-size: 11px;
-                color: var(--color-text-tertiary, #9ca3af);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              }
-              .et-deadline-due {
-                font-size: 11px;
-                font-weight: 600;
-                color: var(--color-text-secondary, #e5e7eb);
-                white-space: nowrap;
-              }
-              .et-deadline-item.urgent .et-deadline-due,
-              .et-deadline-item.overdue .et-deadline-due { color: #ef4444; }
-
               @keyframes st-card-in {
                 from { opacity: 0; transform: translateY(6px); }
                 to { opacity: 1; transform: translateY(0); }
@@ -582,31 +462,9 @@
               </div>
             ` : ''}
 
-            <!-- Grid kaarten: Huiswerk/Deadlines, Snelkoppelingen, Notities, Pomodoro, Snelle Calculator, Teams-opdrachten & Quotes -->
-            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote || showAssignments || showDeadlines) ? `
+            <!-- Grid kaarten: Snelkoppelingen, Notities, Pomodoro, Snelle Calculator & Quotes -->
+            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote) ? `
               <div class="et-grid">
-                ${showDeadlines ? `
-                  <div class="et-card">
-                    <h3 class="et-widget-title">📌 Huiswerk & Deadlines</h3>
-                    <form class="et-deadline-form">
-                      <input type="text" class="et-deadline-subject" placeholder="Vak (bijv. Wiskunde)" />
-                      <input type="text" class="et-deadline-desc" placeholder="Omschrijving..." />
-                      <input type="date" class="et-deadline-date" />
-                      <button type="submit" class="et-notes-add">+ Toevoegen</button>
-                    </form>
-                    <ul class="et-deadlines-list"></ul>
-                  </div>
-                ` : ''}
-
-                ${showAssignments ? `
-                  <div class="et-card">
-                    <h3 class="et-widget-title">📚 Teams-opdrachten</h3>
-                    <ul class="et-assignments-list" id="et-assignments-list">
-                      <li class="et-assignments-loading">Opdrachten laden…</li>
-                    </ul>
-                  </div>
-                ` : ''}
-
                 ${showShortcuts ? `
                   <div class="et-card">
                     <h3 class="et-widget-title">🚀 Snelkoppelingen</h3>
@@ -720,134 +578,6 @@
 
             container.querySelector(".et-weather-refresh")?.addEventListener("click", fetchWeatherData);
             fetchWeatherData();
-          }
-
-          // Huiswerk & Deadlines tracker
-          if (showDeadlines) {
-            const listEl = container.querySelector(".et-deadlines-list");
-            const formEl = container.querySelector(".et-deadline-form");
-            const subjectInput = container.querySelector(".et-deadline-subject");
-            const descInput = container.querySelector(".et-deadline-desc");
-            const dateInput = container.querySelector(".et-deadline-date");
-
-            let deadlines = Array.isArray(settings.eduarteDeadlines) ? settings.eduarteDeadlines : [];
-
-            function daysUntil(dateStr) {
-              const target = new Date(dateStr + "T00:00:00");
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              return Math.round((target - today) / (1000 * 60 * 60 * 24));
-            }
-
-            function renderDeadlines() {
-              if (!listEl) return;
-              listEl.innerHTML = "";
-              const sorted = [...deadlines].sort((a, b) => new Date(a.date) - new Date(b.date));
-              if (!sorted.length) {
-                listEl.innerHTML = '<li class="et-assignments-empty">Nog geen huiswerk of deadlines toegevoegd.</li>';
-                return;
-              }
-              sorted.forEach((item) => {
-                const diff = daysUntil(item.date);
-                let urgency = "normal";
-                if (diff < 0) urgency = "overdue";
-                else if (diff <= 1) urgency = "urgent";
-                else if (diff <= 3) urgency = "soon";
-
-                let dueLabel;
-                if (diff < 0) dueLabel = `Verlopen (${Math.abs(diff)}d)`;
-                else if (diff === 0) dueLabel = "Vandaag";
-                else if (diff === 1) dueLabel = "Morgen";
-                else dueLabel = `Over ${diff} dagen`;
-
-                const li = document.createElement("li");
-                li.className = `et-deadline-item ${urgency}`;
-                li.innerHTML = `
-                  <div class="et-deadline-main">
-                    <span class="et-deadline-subject-label">${item.subject || "Algemeen"}</span>
-                    <span class="et-deadline-desc-label">${item.desc || ""}</span>
-                  </div>
-                  <span class="et-deadline-due">${dueLabel}</span>
-                  <button class="et-notes-del" title="Verwijderen">×</button>
-                `;
-                li.querySelector(".et-notes-del").addEventListener("click", () => {
-                  deadlines = deadlines.filter((d) => d.id !== item.id);
-                  saveAndRenderDeadlines();
-                });
-                listEl.appendChild(li);
-              });
-            }
-
-            function saveAndRenderDeadlines() {
-              chrome.storage.local.set({ eduarteDeadlines: deadlines });
-              renderDeadlines();
-            }
-
-            formEl?.addEventListener("submit", (e) => {
-              e.preventDefault();
-              const subject = subjectInput.value.trim();
-              const desc = descInput.value.trim();
-              const date = dateInput.value;
-              if (!date || (!subject && !desc)) return;
-              deadlines.push({ id: Date.now(), subject, desc, date });
-              subjectInput.value = "";
-              descInput.value = "";
-              dateInput.value = "";
-              saveAndRenderDeadlines();
-            });
-
-            renderDeadlines();
-          }
-
-          // Teams-opdrachten ophalen via Microsoft Graph
-          if (showAssignments) {
-            const listEl = container.querySelector("#et-assignments-list");
-
-            function formatDueDate(iso) {
-              if (!iso) return "Geen deadline";
-              const due = new Date(iso);
-              const now = new Date();
-              const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
-              const dateStr = due.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
-              if (diffDays < 0) return `Verlopen (${dateStr})`;
-              if (diffDays === 0) return `Vandaag, ${dateStr}`;
-              if (diffDays === 1) return `Morgen, ${dateStr}`;
-              return `Over ${diffDays} dagen, ${dateStr}`;
-            }
-
-            function renderAssignments(assignments) {
-              if (!listEl) return;
-              if (!assignments || !assignments.length) {
-                listEl.innerHTML = '<li class="et-assignments-empty">Geen openstaande opdrachten 🎉</li>';
-                return;
-              }
-              listEl.innerHTML = assignments
-                .slice(0, 6)
-                .map((a) => {
-                  const due = new Date(a.dueDateTime);
-                  const isUrgent = a.dueDateTime && (due - new Date()) / (1000 * 60 * 60 * 24) <= 2;
-                  return `
-                    <li class="et-assignment-item${isUrgent ? " urgent" : ""}">
-                      <a href="${a.webUrl || "https://teams.microsoft.com"}" target="_blank" rel="noreferrer">
-                        <span class="et-assignment-title">${a.title}</span>
-                        <span class="et-assignment-class">${a.className}</span>
-                        <span class="et-assignment-due">${formatDueDate(a.dueDateTime)}</span>
-                      </a>
-                    </li>
-                  `;
-                })
-                .join("");
-            }
-
-            chrome.runtime.sendMessage({ type: "TEAMS_GET_ASSIGNMENTS" }, (res) => {
-              if (chrome.runtime.lastError || !res || !res.success) {
-                if (listEl) {
-                  listEl.innerHTML = `<li class="et-assignments-empty">${res?.error || "Kon opdrachten niet ophalen. Controleer je Microsoft-koppeling in instellingen."}</li>`;
-                }
-                return;
-              }
-              renderAssignments(res.assignments);
-            });
           }
 
           // Quote instellen op basis van de dag

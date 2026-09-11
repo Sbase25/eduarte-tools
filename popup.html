@@ -6,12 +6,12 @@
 <style>
 :root{--surface:#101419;--surface-2:#171d25;--surface-3:#202832;--line:#354252;--text:#f3f7ff;--muted:#aeb9c8;--primary:#91cdfc;--primary-strong:#4f46e5}
 *{box-sizing:border-box}html,body{width:530px;height:600px;margin:0;overflow:hidden}body{background:var(--surface);color:var(--text);font:14px "Segoe UI",system-ui,sans-serif;overflow-x:hidden}
-#app{display:grid;grid-template-columns:128px 1fr;height:100%;overflow:hidden}
-.rail{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;background:#18212d;border-right:1px solid var(--line)}
+#app{display:grid;grid-template-columns:128px 1fr;grid-template-rows:minmax(0,1fr);height:100%;overflow:hidden}
+.rail{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;background:#18212d;border-right:1px solid var(--line);overflow-y:auto;min-height:0}
 .brand{width:78px;height:46px;display:grid;place-items:center;margin-bottom:8px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#9333ea);font-size:22px;box-shadow:0 8px 22px #2563eb55}
 .rail button{width:108px;min-height:66px;padding:8px 3px;border:0;border-radius:22px;color:var(--muted);background:transparent;cursor:pointer;font:15px inherit;white-space:nowrap;transition:.2s}
 .rail button span{display:grid;place-items:center;height:30px;margin-bottom:6px}.rail button svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.rail button:hover{color:var(--text);background:#ffffff0d;transform:translateY(-1px)}.rail button.active{color:#fff;background:linear-gradient(135deg,#30379b,#7040ed);box-shadow:0 8px 20px #4338ca66}
-.content{position:relative;min-width:0;overflow:auto;padding-bottom:72px}.topbar{position:sticky;top:0;z-index:2;padding:22px 22px 15px;background:linear-gradient(#101419 82%,transparent)}
+.content{position:relative;min-width:0;min-height:0;overflow-y:auto;padding-bottom:72px}.topbar{position:sticky;top:0;z-index:2;padding:22px 22px 15px;background:linear-gradient(#101419 82%,transparent)}
 h1{margin:0;font-size:21px;letter-spacing:-.03em}.topbar-subtitle{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:400}
 .panel{display:none;padding:0 22px 22px;animation:appear .22s ease}.panel.active{display:block}@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .setting{padding:15px 0;border-bottom:1px solid var(--line)}.setting:last-child{border-bottom:0}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:14px}.title{font-size:15px}.subtitle{max-width:340px;margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
@@ -35,7 +35,6 @@ input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:1
     <button data-tab="sidebar"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M9 4v16M12 8h5M12 12h5M12 16h5"/></svg></span>Menubalk</button>
     <button data-tab="start"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span>Start</button>
     <button data-tab="grades"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="m9 13-1 8 4-2 4 2-1-8M12 6v6M9 9h6"/></svg></span>Cijfers</button>
-    <button data-tab="teams"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 4v14"/></svg></span>Teams</button>
     <button data-tab="shortcuts"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg></span>Sneltoetsen</button>
     <button data-tab="elo"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v16H7.5A3.5 3.5 0 0 0 4 21.5v-16Z"/><path d="M4 5.5v16M8 6h8M8 10h8M8 14h5"/></svg></span>ELO</button>
     <button data-tab="about"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg></span>Over</button>
@@ -101,8 +100,6 @@ input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:1
       <div class="setting"><div class="setting-row"><div><div class="title">Weerbericht-widget</div><div class="subtitle">Toont het actuele weerbericht, temperatuur en neerslagkans.</div></div><label class="switch"><input id="weatherEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
       <div class="setting"><div class="title">Locatie / Plaatsnaam voor weer</div><div class="subtitle">Voer je woonplaats of schoolstad in (bijv. Utrecht, Amsterdam, Rotterdam).</div><input id="weatherCity" type="text" placeholder="Utrecht" autocomplete="off"></div>
 
-      <div class="setting"><div class="setting-row"><div><div class="title">Huiswerk & Deadlines-widget</div><div class="subtitle">Voeg zelf huiswerk of deadlines met vak en datum toe; toont ze gesorteerd met kleurcodering op je dashboard.</div></div><label class="switch"><input id="deadlinesEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
-
       <div class="setting"><div class="setting-row"><div><div class="title">Persoonlijke Begroeting & Datum</div><div class="subtitle">Toon een groet (bijv. Goedemorgen) en de datum bovenaan.</div></div><label class="switch"><input id="greetingEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
 
       <div class="setting"><div class="setting-row"><div><div class="title">Snelkoppelingen (Quick Links)</div><div class="subtitle">Knoppen naar Teams, Outlook Webmail, OneDrive, Office 365 en Cijfers.</div></div><label class="switch"><input id="shortcutsEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
@@ -122,18 +119,6 @@ input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:1
       <div class="setting"><div class="title">Ondergrens cijfers</div><input id="gradeMin" class="range" type="range" min="0" max="10" step=".1" value="1"><div class="range-value" id="gradeMinValue">1,0</div></div>
       <div class="setting"><div class="title">Bovengrens cijfers</div><input id="gradeMax" class="range" type="range" min="1" max="10" step=".1" value="10"><div class="range-value" id="gradeMaxValue">10,0</div></div>
       <div class="setting"><div class="title">Voldoendegrens</div><input id="passThreshold" class="range" type="range" min="1" max="10" step=".1" value="5.5"><div class="range-value" id="passThresholdValue">5,5</div></div>
-    </section>
-    <section class="panel" id="panel-teams">
-      <p class="note">Koppel je Microsoft-schoolaccount om je Teams-opdrachten (Education Assignments) direct op je Eduarte-dashboard te zien. Hiervoor is een eigen Azure App-registratie (Client ID) nodig — vraag dit na bij je schoolbeheerder of maak er zelf een aan via <strong>portal.azure.com → App registraties</strong>. Redirect URI: <code id="teamsRedirectUri">wordt geladen…</code></p>
-      <div class="setting"><div class="title">Azure App Client ID</div><div class="subtitle">De Application (client) ID van je Azure App-registratie met de EduAssignments.ReadBasic-machtiging.</div><input id="msClientId" type="text" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off"></div>
-      <div class="setting">
-        <div class="setting-row">
-          <div><div class="title">Verbindingsstatus</div><div class="subtitle" id="teamsStatus">Niet verbonden</div></div>
-          <button id="teamsConnect" style="padding:10px 16px;border:0;border-radius:9px;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed);font-weight:600;cursor:pointer;white-space:nowrap;">Verbinden</button>
-        </div>
-      </div>
-      <div class="setting"><div class="setting-row"><div><div class="title">Opdrachten-widget tonen</div><div class="subtitle">Toon je aankomende Teams-opdrachten (met deadline) op het Eduarte-dashboard.</div></div><label class="switch"><input id="assignmentsEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
-      <div class="setting"><button id="teamsDisconnect" style="padding:10px 16px;border:1px solid var(--line);border-radius:9px;color:var(--danger,#ff8e8e);background:transparent;cursor:pointer;">Ontkoppelen</button></div>
     </section>
     <section class="panel" id="panel-shortcuts">
       <p class="note">Stel je eigen sneltoetsen in om snel naar een Eduarte-pagina te springen. Klik op een veld en druk de gewenste toetscombinatie in (bijv. Ctrl+Agenda). Werkt overal binnen Eduarte/Educus.</p>

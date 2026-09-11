@@ -5,10 +5,10 @@ const ids = [
   "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled",
   "shortcutsEnabled", "notesEnabled", "pomodoroEnabled", "quickCalcEnabled", "quoteEnabled", "animationSpeed",
   "gradesEnabled", "gradeMin", "gradeMax", "passThreshold",
-  "msClientId", "assignmentsEnabled", "shortcutKeysEnabled", "deadlinesEnabled",
+  "shortcutKeysEnabled",
 ];
 const elements = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
-const titles = { theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start", grades: "Cijfers", teams: "Teams", shortcuts: "Sneltoetsen", elo: "ELO", about: "Over" };
+const titles = { theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start", grades: "Cijfers", shortcuts: "Sneltoetsen", elo: "ELO", about: "Over" };
 
 const DEFAULT_SHORTCUTS = {
   "/agenda": { key: "a", ctrl: true, alt: false, shift: false },
@@ -134,7 +134,6 @@ function load() {
     "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled",
     "eduarteShortcutsEnabled", "eduarteNotesEnabled", "eduarteQuoteEnabled", "eduarteAnimationSpeed",
     "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum", "eduartePassThreshold",
-    "msClientId", "msTeamsToken", "eduarteAssignmentsEnabled", "eduarteDeadlinesEnabled",
     "eduarteShortcutKeysEnabled", "eduarteShortcuts",
   ], (data) => {
     activePresetKey = data.eduarteThemePreset || "dark";
@@ -176,7 +175,6 @@ function load() {
     elements.startEnabled.checked = data.eduarteStartEnabled !== false;
     elements.weatherEnabled.checked = data.eduarteWeatherEnabled !== false;
     elements.weatherCity.value = data.eduarteWeatherCity || "";
-    elements.deadlinesEnabled.checked = data.eduarteDeadlinesEnabled !== false;
     elements.greetingEnabled.checked = data.eduarteGreetingEnabled !== false;
     elements.shortcutsEnabled.checked = data.eduarteShortcutsEnabled !== false;
     elements.notesEnabled.checked = data.eduarteNotesEnabled !== false;
@@ -189,10 +187,6 @@ function load() {
     elements.gradeMin.value = data.eduarteGradeMinimum ?? 1;
     elements.gradeMax.value = data.eduarteGradeMaximum ?? 10;
     elements.passThreshold.value = data.eduartePassThreshold ?? 5.5;
-
-    elements.msClientId.value = data.msClientId || "";
-    elements.assignmentsEnabled.checked = data.eduarteAssignmentsEnabled !== false;
-    updateTeamsStatus(!!data.msTeamsToken);
 
     elements.shortcutKeysEnabled.checked = data.eduarteShortcutKeysEnabled !== false;
     currentShortcuts = data.eduarteShortcuts || { ...DEFAULT_SHORTCUTS };
@@ -234,7 +228,6 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteStartEnabled: elements.startEnabled.checked,
     eduarteWeatherEnabled: elements.weatherEnabled.checked,
     eduarteWeatherCity: elements.weatherCity.value.trim(),
-    eduarteDeadlinesEnabled: elements.deadlinesEnabled.checked,
     eduarteGreetingEnabled: elements.greetingEnabled.checked,
     eduarteShortcutsEnabled: elements.shortcutsEnabled.checked,
     eduarteNotesEnabled: elements.notesEnabled.checked,
@@ -246,8 +239,6 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteGradeMinimum: Number(elements.gradeMin.value),
     eduarteGradeMaximum: Number(elements.gradeMax.value),
     eduartePassThreshold: Number(elements.passThreshold.value),
-    msClientId: elements.msClientId.value.trim(),
-    eduarteAssignmentsEnabled: elements.assignmentsEnabled.checked,
     eduarteShortcutKeysEnabled: elements.shortcutKeysEnabled.checked,
     eduarteShortcuts: currentShortcuts,
   }, () => {
@@ -255,53 +246,6 @@ document.getElementById("save").addEventListener("click", () => {
     button.textContent = "Opgeslagen ✓";
     button.classList.add("saved");
     setTimeout(() => { button.textContent = "Opslaan"; button.classList.remove("saved"); }, 1400);
-  });
-});
-
-// --- Microsoft Teams koppeling ---
-function updateTeamsStatus(connected) {
-  const statusEl = document.getElementById("teamsStatus");
-  const connectBtn = document.getElementById("teamsConnect");
-  if (!statusEl || !connectBtn) return;
-  if (connected) {
-    statusEl.textContent = "✓ Verbonden met Microsoft";
-    statusEl.style.color = "#10b981";
-    connectBtn.textContent = "Opnieuw verbinden";
-  } else {
-    statusEl.textContent = "Niet verbonden";
-    statusEl.style.color = "";
-    connectBtn.textContent = "Verbinden";
-  }
-}
-
-const redirectUriEl = document.getElementById("teamsRedirectUri");
-if (redirectUriEl && chrome.identity) {
-  redirectUriEl.textContent = chrome.identity.getRedirectURL("teams-auth");
-}
-
-document.getElementById("teamsConnect")?.addEventListener("click", () => {
-  const clientId = elements.msClientId.value.trim();
-  if (!clientId) {
-    alert("Vul eerst je Azure App Client ID in en klik op Opslaan.");
-    return;
-  }
-  chrome.storage.local.set({ msClientId: clientId }, () => {
-    const btn = document.getElementById("teamsConnect");
-    btn.textContent = "Verbinden…";
-    chrome.runtime.sendMessage({ type: "TEAMS_CONNECT" }, (response) => {
-      if (response?.success) {
-        updateTeamsStatus(true);
-      } else {
-        updateTeamsStatus(false);
-        alert("Verbinden mislukt: " + (response?.error || "Onbekende fout"));
-      }
-    });
-  });
-});
-
-document.getElementById("teamsDisconnect")?.addEventListener("click", () => {
-  chrome.runtime.sendMessage({ type: "TEAMS_DISCONNECT" }, () => {
-    updateTeamsStatus(false);
   });
 });
 

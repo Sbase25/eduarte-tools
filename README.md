@@ -32,9 +32,6 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   geïnspireerd op Study Tools voor Magister (door Nick Verbruggen).
 - **Eigen thema** — kies 4 basiskleuren (achtergrond, oppervlak, tekst,
   randen); de rest wordt automatisch afgeleid.
-- **Teams-opdrachten Widget** — koppel je Microsoft-schoolaccount en zie je
-  openstaande Teams for Education-opdrachten met deadline direct op het
-  Eduarte-dashboard.
 - **Huiswerk & Deadlines Widget** — houd zelf je huiswerk en deadlines bij
   (vak, omschrijving, datum) met kleurcodering naar urgentie, direct op het
   dashboard.
@@ -45,27 +42,6 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 - **Aan/uit-zetbare Widgets** — Pomodoro Focus Timer, Snelle Cijfercalculator,
   Snelnotities/Taken, Snelkoppelingen en Dagelijkse Studie-Tip, elk apart
   in- of uit te schakelen.
-
-## Teams-opdrachten koppelen
-
-Deze widget gebruikt de Microsoft Graph "Education" API en vereist een eigen
-Azure App-registratie (er is geen gedeelde client-ID omdat schooltenants
-toestemming per app vereisen):
-
-1. Ga naar [portal.azure.com](https://portal.azure.com) → **Microsoft Entra ID**
-   → **App-registraties** → **Nieuwe registratie**.
-2. Kies "Accounts in elke organisatiemap" (multitenant) als accounttype.
-3. Voeg onder **Verificatie** een platform **Single-page application (SPA)**
-   toe met als redirect-URI de waarde die in de Eduarte Tools-popup onder het
-   tabblad **Teams** wordt getoond (`chrome-extension://<jouw-id>/...`).
-4. Voeg onder **API-machtigingen** de Graph-machtiging
-   `EduAssignments.ReadBasic` (Delegated) toe.
-5. Kopieer de **Application (client) ID** naar het Client ID-veld in de
-   Eduarte Tools-popup en klik op **Verbinden**.
-
-Sommige schoolbeheerders staan geen eigen app-registraties toe (tenant
-restrictions) — vraag in dat geval de ICT-afdeling om deze app goed te
-keuren of een eigen registratie te maken en het Client ID met je te delen.
 
 ## Installatie
 
