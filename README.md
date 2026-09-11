@@ -43,9 +43,22 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 Gegevens worden alleen lokaal in je browser opgeslagen
 (`chrome.storage.local`) en nergens naartoe verzonden.
 
+## Publiceren
 
+### GitHub
 
+Maak eerst een repository aan en voer in deze projectmap uit:
 
+```bash
+git add .
+git commit -m "Prepare Eduarte Tools"
+git branch -M main
+git remote add origin https://github.com/<gebruikersnaam>/<repository>.git
+git push -u origin main
+```
+
+Bij een volgende wijziging is alleen `git add .`, `git commit -m "..."` en
+`git push` nodig.
 
 ### Chrome Web Store
 
@@ -59,6 +72,23 @@ Gegevens worden alleen lokaal in je browser opgeslagen
 
 Gebruik voor iedere nieuwe versie een hoger versienummer in `manifest.json` en
 upload opnieuw. Upload alleen de extensiebestanden; voeg geen `.git`-map toe.
+
+Voor automatisch uploaden na elke push naar `main` gebruikt deze repository de
+workflow `.github/workflows/chrome-webstore.yml` met het gratis hulpprogramma
+`cws`. Voeg in GitHub bij
+**Settings → Secrets and variables → Actions** deze secrets toe:
+
+```text
+CWS_EXTENSION_ID
+CWS_PUBLISHER_ID
+CWS_CLIENT_ID
+CWS_CLIENT_SECRET
+CWS_REFRESH_TOKEN
+```
+
+De workflow uploadt en publiceert alleen wanneer de versie in `manifest.json`
+wordt verhoogd. Google kan daarna nog een handmatige review uitvoeren voordat
+de nieuwe versie zichtbaar wordt.
 
 ## Waarom dit bestaat
 

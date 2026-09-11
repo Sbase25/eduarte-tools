@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Eduarte Tools",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Automatisch inloggen, donkere modus, thema's en een cijfercalculator voor Eduarte-portalen. Geïnspireerd door Study Tools.",
   "icons": {
     "16": "icons/icon16.png",
@@ -21,7 +21,6 @@
     "service_worker": "background.js"
   },
   "host_permissions": [
-    "https://*.onderwijsgroeptilburg.nl/*",
     "https://*.educus.nl/*",
     "https://*.eduarte.nl/*",
     "https://login.microsoftonline.com/*"
@@ -35,7 +34,6 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.onderwijsgroeptilburg.nl/*",
         "https://*.educus.nl/*",
         "https://*.eduarte.nl/*",
         "https://login.microsoftonline.com/*"
@@ -46,7 +44,6 @@
     },
     {
       "matches": [
-        "https://*.onderwijsgroeptilburg.nl/*",
         "https://*.educus.nl/*",
         "https://*.eduarte.nl/*"
       ],

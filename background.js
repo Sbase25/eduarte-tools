@@ -1,5 +1,4 @@
 const EDUARTE_PAGES = [
-  "https://*.onderwijsgroeptilburg.nl/*",
   "https://*.educus.nl/*",
   "https://*.eduarte.nl/*",
 ];
