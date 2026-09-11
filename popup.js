@@ -9,16 +9,18 @@ const ids = [
 const elements = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const titles = { theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start", grades: "Cijfers", elo: "ELO", about: "Over" };
 const presets = {
-  dark: { dark: true, accent: "#2563eb", bg: "#15171b", surface: "#1f2328", text: "#f4f4f6", border: "#545e6b" },
-  blue: { dark: true, accent: "#60a5fa", bg: "#0b1b2d", surface: "#12304a", text: "#f0f8ff", border: "#274e76" },
-  purple: { dark: true, accent: "#c084fc", bg: "#1c102b", surface: "#302047", text: "#faf5ff", border: "#593c82" },
-  emerald: { dark: true, accent: "#10b981", bg: "#06281e", surface: "#0b3d2e", text: "#ecfdf5", border: "#1d6850" },
-  sunset: { dark: true, accent: "#f97316", bg: "#241209", surface: "#3a1d12", text: "#fff7ed", border: "#6c3924" },
-  oled: { dark: true, accent: "#38bdf8", bg: "#000000", surface: "#0d0d0f", text: "#ffffff", border: "#27272a" },
-  nord: { dark: true, accent: "#88c0d0", bg: "#242933", surface: "#2e3440", text: "#eceff4", border: "#4c566a" },
-  cyberpunk: { dark: true, accent: "#ec4899", bg: "#090a16", surface: "#13142e", text: "#f0f9ff", border: "#262957" },
-  light: { dark: false, accent: "#2563eb", bg: "#f4f7fb", surface: "#ffffff", text: "#1e293b", border: "#cbd5e1" },
+  dark: { dark: true, accent: "#3b82f6", bg: "#111827", surface: "#1f2937", text: "#f9fafb", border: "#374151" },
+  blue: { dark: true, accent: "#38bdf8", bg: "#0b192c", surface: "#13253f", text: "#f0f9ff", border: "#1e3a5f" },
+  purple: { dark: true, accent: "#c084fc", bg: "#130e24", surface: "#20163b", text: "#faf5ff", border: "#3b2d64" },
+  emerald: { dark: true, accent: "#34d399", bg: "#062319", surface: "#0b3829", text: "#ecfdf5", border: "#14533d" },
+  sunset: { dark: true, accent: "#fb923c", bg: "#1c0f0a", surface: "#2e1810", text: "#fff7ed", border: "#542d1f" },
+  oled: { dark: true, accent: "#38bdf8", bg: "#000000", surface: "#09090b", text: "#ffffff", border: "#27272a" },
+  nord: { dark: true, accent: "#88c0d0", bg: "#242933", surface: "#2e3440", text: "#eceff4", border: "#434c5e" },
+  cyberpunk: { dark: true, accent: "#f43f5e", bg: "#090717", surface: "#140e2b", text: "#fdf4ff", border: "#2e1c59" },
+  light: { dark: false, accent: "#2563eb", bg: "#f8fafc", surface: "#ffffff", text: "#0f172a", border: "#e2e8f0" },
 };
+
+let activePresetKey = "dark";
 
 document.querySelectorAll(".rail button").forEach((button) => {
   button.addEventListener("click", () => {
@@ -44,22 +46,34 @@ updateRange("wallpaperOverlay", "wallpaperOverlayValue", "%");
 
 document.querySelectorAll(".preset").forEach((button) => {
   button.addEventListener("click", () => {
-    const preset = presets[button.dataset.preset];
+    const presetKey = button.dataset.preset;
+    const preset = presets[presetKey];
     if (!preset) return;
+    activePresetKey = presetKey;
     elements.darkmode.checked = preset.dark;
     elements.accent.value = preset.accent;
     elements.customBg.value = preset.bg;
     elements.customSurface.value = preset.surface;
     elements.customText.value = preset.text;
     elements.customBorder.value = preset.border;
+    elements.customenabled.checked = false; // Using a preset
     document.querySelectorAll(".preset").forEach((item) => item.classList.remove("selected"));
     button.classList.add("selected");
   });
 });
 
+elements.customenabled.addEventListener("change", () => {
+  if (elements.customenabled.checked) {
+    document.querySelectorAll(".preset").forEach((item) => item.classList.remove("selected"));
+  } else {
+    const btn = document.querySelector(`.preset[data-preset="${activePresetKey}"]`);
+    if (btn) btn.classList.add("selected");
+  }
+});
+
 function load() {
   chrome.storage.local.get([
-    "eduarteDarkMode", "eduarteAccentColor", "eduarteModernStyle", "eduarteHumanTheme",
+    "eduarteThemePreset", "eduarteDarkMode", "eduarteAccentColor", "eduarteModernStyle", "eduarteHumanTheme",
     "eduarteWallpaperUrl", "eduarteWallpaperBlur", "eduarteWallpaperOverlay", "eduarteFont", "eduarteCustomCss",
     "eduarteCustomTheme", "eduarteCustomColors", "eduarteEnabled", "eduarteUsername", "eduartePassword",
     "eduarteAutosubmit", "eduarteModernNav", "eduarteAnimations", "eduarteFloatingCards",
@@ -67,9 +81,12 @@ function load() {
     "eduarteShortcutsEnabled", "eduarteNotesEnabled", "eduarteQuoteEnabled", "eduarteAnimationSpeed",
     "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum", "eduartePassThreshold",
   ], (data) => {
+    activePresetKey = data.eduarteThemePreset || "dark";
+    const preset = presets[activePresetKey] || presets.dark;
     const colors = data.eduarteCustomColors || {};
-    elements.darkmode.checked = !!data.eduarteDarkMode;
-    elements.accent.value = data.eduarteAccentColor || "#2563eb";
+    
+    elements.darkmode.checked = data.eduarteDarkMode !== undefined ? !!data.eduarteDarkMode : preset.dark;
+    elements.accent.value = data.eduarteAccentColor || preset.accent;
     elements.modernstyle.checked = data.eduarteModernStyle !== false;
     elements.humantheme.checked = !!data.eduarteHumanTheme;
     elements.wallpaperUrl.value = data.eduarteWallpaperUrl || "";
@@ -78,10 +95,18 @@ function load() {
     elements.font.value = data.eduarteFont || "default";
     elements.customCss.value = data.eduarteCustomCss || "";
     elements.customenabled.checked = !!data.eduarteCustomTheme;
-    elements.customBg.value = colors.bg || "#15171b";
-    elements.customSurface.value = colors.surface || "#1f2328";
-    elements.customText.value = colors.text || "#f4f4f6";
-    elements.customBorder.value = colors.border || "#545e6b";
+    elements.customBg.value = colors.bg || preset.bg;
+    elements.customSurface.value = colors.surface || preset.surface;
+    elements.customText.value = colors.text || preset.text;
+    elements.customBorder.value = colors.border || preset.border;
+
+    document.querySelectorAll(".preset").forEach((item) => {
+      if (item.dataset.preset === activePresetKey && !data.eduarteCustomTheme) {
+        item.classList.add("selected");
+      } else {
+        item.classList.remove("selected");
+      }
+    });
 
     elements.enabled.checked = data.eduarteEnabled !== false;
     elements.username.value = data.eduarteUsername || "";
@@ -112,6 +137,7 @@ function load() {
 
 document.getElementById("save").addEventListener("click", () => {
   chrome.storage.local.set({
+    eduarteThemePreset: activePresetKey,
     eduarteDarkMode: elements.darkmode.checked,
     eduarteAccentColor: elements.accent.value,
     eduarteModernStyle: elements.modernstyle.checked,

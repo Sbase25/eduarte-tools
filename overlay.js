@@ -122,22 +122,25 @@
               #${CONTAINER_ID} {
                 display: flex;
                 flex-direction: column;
-                gap: 14px;
-                margin-bottom: 22px;
+                gap: 16px;
+                margin-bottom: 24px;
                 animation: st-card-in 320ms ease both;
               }
               .et-card {
-                padding: 16px 20px;
-                background: var(--color-bg-surface, #1f2328);
-                border: 1px solid var(--color-border-primary, #3f4650);
-                border-radius: var(--border-radius-600, 18px);
-                box-shadow: 0 4px 20px rgba(0,0,0,.08);
-                color: var(--color-text-primary, #f4f4f6);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                padding: 18px 22px;
+                background: var(--color-bg-surface, #1f2937);
+                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
+                border-radius: 20px;
+                box-shadow: 0 4px 20px rgba(0,0,0,.12);
+                color: var(--color-text-primary, #f9fafb);
+                transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
               }
               .et-card:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 8px 26px rgba(0,0,0,.14);
+                box-shadow: 0 10px 30px rgba(0,0,0,.18);
+                border-color: var(--color-bg-fill-action, #3b82f6);
               }
               .et-top-card {
                 display: flex;
@@ -145,117 +148,128 @@
                 align-items: center;
                 justify-content: space-between;
                 gap: 16px;
+                background: linear-gradient(135deg, var(--color-bg-surface, #1f2937), color-mix(in srgb, var(--color-bg-surface, #1f2937) 85%, var(--color-bg-fill-action, #3b82f6) 15%));
               }
               .et-greeting-section {
                 display: flex;
                 flex-direction: column;
-                gap: 4px;
+                gap: 5px;
               }
               .et-greeting-title {
                 margin: 0;
-                font-size: 20px;
+                font-size: 22px;
                 font-weight: 700;
                 letter-spacing: -0.02em;
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 10px;
               }
               .et-greeting-date {
                 font-size: 13px;
-                color: var(--color-text-tertiary, #94a3b8);
+                color: var(--color-text-tertiary, #9ca3af);
                 text-transform: capitalize;
+                display: flex;
+                align-items: center;
+                gap: 6px;
               }
               .et-weather-section {
                 display: flex;
                 align-items: center;
                 gap: 14px;
-                background: rgba(255,255,255,.05);
-                padding: 8px 14px;
-                border-radius: var(--border-radius-400, 12px);
-                border: 1px solid rgba(255,255,255,.08);
+                background: rgba(255,255,255,.06);
+                padding: 10px 16px;
+                border-radius: 16px;
+                border: 1px solid rgba(255,255,255,.1);
               }
-              .et-weather-icon { font-size: 28px; line-height: 1; }
+              .et-weather-icon { font-size: 32px; line-height: 1; }
               .et-weather-info { display: flex; flex-direction: column; gap: 2px; }
-              .et-weather-temp { font-size: 16px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
-              .et-weather-desc { font-size: 11px; color: var(--color-text-tertiary, #94a3b8); }
-              .et-weather-chips { display: flex; align-items: center; gap: 8px; margin-left: 6px; font-size: 11px; color: var(--color-text-tertiary, #94a3b8); }
-              .et-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,.08); padding: 3px 7px; border-radius: 99px; }
+              .et-weather-temp { font-size: 18px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
+              .et-weather-desc { font-size: 12px; color: var(--color-text-tertiary, #9ca3af); }
+              .et-weather-chips { display: flex; align-items: center; gap: 8px; margin-left: 6px; font-size: 11px; color: var(--color-text-tertiary, #9ca3af); }
+              .et-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,.09); padding: 4px 9px; border-radius: 99px; font-weight: 500; }
               .et-weather-refresh {
-                border: 0; background: transparent; color: var(--color-text-tertiary, #94a3b8);
-                cursor: pointer; font-size: 14px; padding: 4px; border-radius: 6px; transition: transform 0.2s, color 0.2s;
+                border: 0; background: transparent; color: var(--color-text-tertiary, #9ca3af);
+                cursor: pointer; font-size: 16px; padding: 6px; border-radius: 8px; transition: transform 0.25s ease, color 0.2s;
               }
-              .et-weather-refresh:hover { color: var(--color-text-primary, #fff); transform: rotate(90deg); }
+              .et-weather-refresh:hover { color: var(--color-text-primary, #fff); transform: rotate(180deg); }
 
-              /* Extra Grid for widgets */
+              /* Grid for widgets */
               .et-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 14px;
+                gap: 16px;
               }
               .et-widget-title {
-                margin: 0 0 12px 0;
+                margin: 0 0 14px 0;
                 font-size: 14px;
                 font-weight: 600;
-                color: var(--color-text-secondary, #cbd5e1);
+                color: var(--color-text-secondary, #e5e7eb);
                 display: flex;
                 align-items: center;
-                gap: 6px;
+                gap: 8px;
+                letter-spacing: -0.01em;
               }
 
               /* Shortcuts styling */
               .et-shortcuts-list {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
+                gap: 9px;
               }
               .et-shortcut-btn {
                 display: inline-flex;
                 align-items: center;
                 gap: 8px;
-                padding: 8px 14px;
-                background: rgba(255,255,255,.06);
+                padding: 9px 15px;
+                background: rgba(255,255,255,.05);
                 border: 1px solid rgba(255,255,255,.1);
-                border-radius: var(--border-radius-300, 10px);
-                color: var(--color-text-primary, #f4f4f6);
+                border-radius: 12px;
+                color: var(--color-text-primary, #f9fafb);
                 text-decoration: none;
-                font-size: 12px;
+                font-size: 13px;
                 font-weight: 500;
-                transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+                transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
               }
               .et-shortcut-btn:hover {
-                background: color-mix(in srgb, var(--color-bg-fill-action, #2563eb) 22%, transparent);
-                border-color: var(--color-bg-fill-action, #2563eb);
+                background: color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 24%, transparent);
+                border-color: var(--color-bg-fill-action, #3b82f6);
                 transform: translateY(-2px);
+                box-shadow: 0 4px 14px rgba(0,0,0,.15);
               }
 
               /* Notes / To-Do styling */
               .et-notes-form {
                 display: flex;
                 gap: 8px;
-                margin-bottom: 10px;
+                margin-bottom: 12px;
               }
               .et-notes-input {
                 flex: 1;
-                padding: 8px 12px;
-                border: 1px solid var(--color-border-primary, #3f4650);
-                border-radius: var(--border-radius-200, 8px);
+                padding: 9px 14px;
+                border: 1px solid var(--color-border-primary, #374151);
+                border-radius: 10px;
                 background: rgba(0,0,0,.2);
-                color: var(--color-text-primary, #f4f4f6);
+                color: var(--color-text-primary, #f9fafb);
                 font-size: 12px;
                 outline: 0;
               }
               .et-notes-input:focus {
-                border-color: var(--color-bg-fill-action, #2563eb);
+                border-color: var(--color-bg-fill-action, #3b82f6);
               }
               .et-notes-add {
-                padding: 8px 14px;
+                padding: 9px 15px;
                 border: 0;
-                border-radius: var(--border-radius-200, 8px);
-                background: var(--color-bg-fill-action, #2563eb);
+                border-radius: 10px;
+                background: var(--color-bg-fill-action, #3b82f6);
                 color: #fff;
                 cursor: pointer;
                 font-size: 12px;
                 font-weight: 600;
+                transition: filter 0.15s ease, transform 0.15s ease;
+              }
+              .et-notes-add:hover {
+                filter: brightness(1.12);
+                transform: translateY(-1px);
               }
               .et-notes-items {
                 list-style: none;
@@ -264,50 +278,63 @@
                 display: flex;
                 flex-direction: column;
                 gap: 6px;
-                max-height: 180px;
+                max-height: 190px;
                 overflow-y: auto;
               }
               .et-notes-item {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding: 6px 10px;
+                padding: 8px 12px;
                 background: rgba(255,255,255,.04);
-                border-radius: 6px;
+                border: 1px solid rgba(255,255,255,.06);
+                border-radius: 8px;
                 font-size: 12px;
+                transition: background-color 0.15s ease;
+              }
+              .et-notes-item:hover {
+                background: rgba(255,255,255,.07);
               }
               .et-notes-text {
                 flex: 1;
                 cursor: pointer;
-                transition: opacity 0.2s;
+                transition: opacity 0.2s, text-decoration 0.2s;
               }
               .et-notes-text.done {
                 text-decoration: line-through;
-                opacity: 0.5;
+                opacity: 0.45;
               }
               .et-notes-del {
                 border: 0;
                 background: transparent;
-                color: var(--color-text-tertiary, #94a3b8);
+                color: var(--color-text-tertiary, #9ca3af);
                 cursor: pointer;
-                font-size: 13px;
+                font-size: 14px;
                 padding: 2px 6px;
+                border-radius: 4px;
+                transition: color 0.15s;
               }
               .et-notes-del:hover {
-                color: #ff6b6b;
+                color: #ef4444;
               }
 
               /* Quote styling */
+              .et-quote-card {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+              }
               .et-quote-text {
                 font-style: italic;
-                font-size: 13px;
-                line-height: 1.5;
-                margin: 0 0 6px 0;
-                color: var(--color-text-primary, #f4f4f6);
+                font-size: 13.5px;
+                line-height: 1.55;
+                margin: 0 0 10px 0;
+                color: var(--color-text-primary, #f9fafb);
               }
               .et-quote-author {
-                font-size: 11px;
-                color: var(--color-text-tertiary, #94a3b8);
+                font-size: 12px;
+                font-weight: 500;
+                color: var(--color-text-tertiary, #9ca3af);
                 text-align: right;
               }
 
