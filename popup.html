@@ -92,11 +92,21 @@ input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:1
       <div class="setting"><div class="setting-row"><div><div class="title">Kaarten laten zweven</div><div class="subtitle">Voeg diepte en hover-effecten toe aan Eduarte-kaarten.</div></div><label class="switch"><input id="floatingcards" type="checkbox"><span class="track"></span></label></div></div>
     </section>
     <section class="panel" id="panel-start">
-      <div class="setting"><div class="setting-row"><div><div class="title">Moderne startpagina</div><div class="subtitle">Verbeter de startpagina met de nieuwe kaartstijl en widgets.</div></div><label class="switch"><input id="startEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
-      <div class="setting"><div class="setting-row"><div><div class="title">Weer-widget</div><div class="subtitle">Toont het actuele weerbericht en temperatuur op het dashboard.</div></div><label class="switch"><input id="weatherEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
-      <div class="setting"><div class="title">Locatie / Plaatsnaam voor weer</div><div class="subtitle">Voer je woonplaats of schoolstad in (bijv. Utrecht, Rotterdam, Eindhoven).</div><input id="weatherCity" type="text" placeholder="Utrecht" autocomplete="off"></div>
-      <div class="setting"><div class="setting-row"><div><div class="title">Persoonlijke begroeting</div><div class="subtitle">Toon een tijdgebonden begroeting en datum bovenaan.</div></div><label class="switch"><input id="greetingEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
-      <div class="setting"><div class="title">Kaartanimatie</div><input id="animationSpeed" class="range" type="range" min="0" max="100" value="60"><div class="range-value">Animatie-intensiteit</div></div>
+      <p class="note">Kies welke widgets je op je Eduarte startpagina / dashboard wilt zien.</p>
+      <div class="setting"><div class="setting-row"><div><div class="title">Startpagina Verbeteringen</div><div class="subtitle">Schakel de aangepaste widget-laag en animaties in.</div></div><label class="switch"><input id="startEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+      
+      <div class="setting"><div class="setting-row"><div><div class="title">Weerbericht-widget</div><div class="subtitle">Toont het actuele weerbericht, temperatuur en neerslagkans.</div></div><label class="switch"><input id="weatherEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+      <div class="setting"><div class="title">Locatie / Plaatsnaam voor weer</div><div class="subtitle">Voer je woonplaats of schoolstad in (bijv. Utrecht, Amsterdam, Rotterdam).</div><input id="weatherCity" type="text" placeholder="Utrecht" autocomplete="off"></div>
+
+      <div class="setting"><div class="setting-row"><div><div class="title">Persoonlijke Begroeting & Datum</div><div class="subtitle">Toon een groet (bijv. Goedemorgen) en de datum bovenaan.</div></div><label class="switch"><input id="greetingEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+
+      <div class="setting"><div class="setting-row"><div><div class="title">Snelkoppelingen (Quick Links)</div><div class="subtitle">Knoppen naar Teams, Outlook Webmail, OneDrive, Office 365 en Cijfers.</div></div><label class="switch"><input id="shortcutsEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+
+      <div class="setting"><div class="setting-row"><div><div class="title">Snelnotities / To-Do lijst</div><div class="subtitle">Een interactief notitie- en takenblokje direct op je startpagina.</div></div><label class="switch"><input id="notesEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+
+      <div class="setting"><div class="setting-row"><div><div class="title">Dagelijkse Studie Quote & Tips</div><div class="subtitle">Inspirerende quotes en handige studietips die dagelijks wisselen.</div></div><label class="switch"><input id="quoteEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+
+      <div class="setting"><div class="title">Kaartanimatie Intensiteit</div><input id="animationSpeed" class="range" type="range" min="0" max="100" value="60"><div class="range-value">Animatie-snelheid</div></div>
     </section>
     <section class="panel" id="panel-grades">
       <div class="setting"><div class="setting-row"><div><div class="title">Cijferoverzicht verbeteren</div><div class="subtitle">Toon de Study Tools-achtige calculator als overlay op /resultaten.</div></div><label class="switch"><input id="gradesEnabled" type="checkbox" checked><span class="track"></span></label></div></div>

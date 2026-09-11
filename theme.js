@@ -234,8 +234,23 @@
       font-weight: var(--font-weight-600);
       box-shadow: inset 3px 0 0 0 var(--color-bg-fill-action);
     }
-    header.header .header-toolbar {
+    header.header,
+    header.header .header-toolbar,
+    .header,
+    .header-toolbar,
+    .header-wrapper,
+    .header-top,
+    .app-header {
+      background-color: var(--color-bg-surface) !important;
+      color: var(--color-text-primary) !important;
+      border-bottom: 1px solid color-mix(in srgb, var(--color-border-primary) 55%, transparent) !important;
       box-shadow: 0 1px 10px rgba(0,0,0,.12);
+      transition: background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+    }
+    header.header .header-toolbar *,
+    .header *,
+    .header-toolbar * {
+      color: var(--color-text-primary) !important;
     }
     .now--wrapper > h1 {
       letter-spacing: var(--font-letter-spacing-dense);
@@ -365,10 +380,14 @@
       -webkit-backdrop-filter: blur(14px);
       border-right: none !important;
     }
-    header.header .header-toolbar {
-      background-color: rgba(8,19,44,.45) !important;
+    header.header, header.header .header-toolbar, .header, .header-toolbar, .header-wrapper, .app-header {
+      background-color: rgba(15,20,30,.55) !important;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,.1) !important;
+    }
+    header.header .header-toolbar *, .header * {
+      color: #f4f4f6 !important;
     }
     li.now--soft, li.now--tomorrow, li[class*="now--"], .agenda-filter, .agenda--day li,
     .popover, .card, .table, table, thead, .container-studiewijzer {
@@ -407,10 +426,14 @@
       -webkit-backdrop-filter: blur(${blur}px);
       border-right: none !important;
     }
-    header.header .header-toolbar {
-      background-color: rgba(8,19,44,.5) !important;
+    header.header, header.header .header-toolbar, .header, .header-toolbar, .header-wrapper, .app-header {
+      background-color: rgba(15,20,30,.6) !important;
       backdrop-filter: blur(${blur}px);
       -webkit-backdrop-filter: blur(${blur}px);
+      border-bottom: 1px solid rgba(255,255,255,.1) !important;
+    }
+    header.header .header-toolbar *, .header * {
+      color: #f4f4f6 !important;
     }
     li.now--soft, li.now--tomorrow, li[class*="now--"], .agenda-filter, .agenda--day li,
     .popover, .card, .table, table, thead, .container-studiewijzer, .container-card, .eduarte-tools-weather-card {
@@ -455,8 +478,12 @@
     if (effectiveDark) {
       css += `html { color-scheme: dark; }\n`;
       const fallbackBg = useCustom ? s.custom.bg : "#15171b";
+      const fallbackSurface = useCustom ? s.custom.surface : "#1f2328";
       const fallbackText = useCustom ? s.custom.text : "#f4f4f6";
+      const fallbackBorder = useCustom ? s.custom.border : "#545e6b";
       css += `html, body { background-color: ${fallbackBg} !important; color: ${fallbackText} !important; }\n`;
+      css += `header.header, header.header .header-toolbar, .header, .header-toolbar, .header-wrapper, .app-header { background-color: ${fallbackSurface} !important; border-bottom: 1px solid ${fallbackBorder} !important; }\n`;
+      css += `header.header .header-toolbar *, .header * { color: ${fallbackText} !important; }\n`;
     }
     if (s.font && FONT_MAP[s.font]) {
       css += `body, input, button, select, textarea, .navigation-item__label, h1, h2, h3, h4, p, span, td, th { font-family: ${FONT_MAP[s.font]} !important; }\n`;

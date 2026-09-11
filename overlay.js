@@ -41,10 +41,20 @@
     }).format(new Date());
   }
 
-  // --- STARTPAGINA WEER- & BEGROETING WIDGET ---
+  const STUDY_QUOTES = [
+    { quote: "Succes is de som van kleine inspanningen, dag in dag uit herhaald.", author: "Robert Collier" },
+    { quote: "Focus op vooruitgang, niet op perfectie.", author: "Studietip" },
+    { quote: "Begin gewoon: de motivatie volgt vaak pas tijdens het werken.", author: "Productiviteit" },
+    { quote: "Elke expert was ooit een beginner.", author: "Helen Hayes" },
+    { quote: "Neem op tijd een pauze: 25 minuten focus en 5 minuten rust (Pomodoro).", author: "Studietip" },
+    { quote: "Geloof dat je het kunt en je bent al op de helft.", author: "Theodore Roosevelt" },
+    { quote: "Moeilijke wegen leiden vaak naar prachtige bestemmingen.", author: "Motivatie" },
+  ];
+
+  // --- STARTPAGINA DASHBOARD WIDGETS ---
   function initStartWidget() {
-    const WIDGET_ID = "eduarte-tools-start-widget";
-    if (document.getElementById(WIDGET_ID)) return;
+    const CONTAINER_ID = "eduarte-tools-widgets-container";
+    if (document.getElementById(CONTAINER_ID)) return;
 
     chrome.storage.local.get(
       [
@@ -52,13 +62,24 @@
         "eduarteWeatherEnabled",
         "eduarteGreetingEnabled",
         "eduarteWeatherCity",
+        "eduarteShortcutsEnabled",
+        "eduarteNotesEnabled",
+        "eduarteQuoteEnabled",
+        "eduarteUserNotes",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
-        if (settings.eduarteWeatherEnabled === false && settings.eduarteGreetingEnabled === false) return;
+
+        const showWeather = settings.eduarteWeatherEnabled !== false;
+        const showGreeting = settings.eduarteGreetingEnabled !== false;
+        const showShortcuts = settings.eduarteShortcutsEnabled !== false;
+        const showNotes = settings.eduarteNotesEnabled !== false;
+        const showQuote = settings.eduarteQuoteEnabled !== false;
+
+        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showQuote) return;
 
         function tryMount() {
-          if (document.getElementById(WIDGET_ID)) return;
+          if (document.getElementById(CONTAINER_ID)) return;
           const target = document.querySelector(".now--wrapper") ||
             document.querySelector("#iddf")?.parentElement ||
             document.querySelector(".l-flex-content main") ||
@@ -66,30 +87,36 @@
 
           if (!target) return;
 
-          const widget = document.createElement("div");
-          widget.id = WIDGET_ID;
-          widget.className = "eduarte-tools-weather-card";
-          widget.innerHTML = `
+          const container = document.createElement("div");
+          container.id = CONTAINER_ID;
+          container.innerHTML = `
             <style>
-              #${WIDGET_ID} {
+              #${CONTAINER_ID} {
                 display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                justify-content: space-between;
-                gap: 16px;
-                padding: 18px 22px;
-                margin-bottom: 18px;
+                flex-direction: column;
+                gap: 14px;
+                margin-bottom: 22px;
+                animation: st-card-in 320ms ease both;
+              }
+              .et-card {
+                padding: 16px 20px;
                 background: var(--color-bg-surface, #1f2328);
                 border: 1px solid var(--color-border-primary, #3f4650);
                 border-radius: var(--border-radius-600, 18px);
                 box-shadow: 0 4px 20px rgba(0,0,0,.08);
                 color: var(--color-text-primary, #f4f4f6);
-                animation: st-card-in 320ms ease both;
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
               }
-              #${WIDGET_ID}:hover {
+              .et-card:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 8px 26px rgba(0,0,0,.14);
+              }
+              .et-top-card {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
               }
               .et-greeting-section {
                 display: flex;
@@ -119,130 +146,323 @@
                 border-radius: var(--border-radius-400, 12px);
                 border: 1px solid rgba(255,255,255,.08);
               }
-              .et-weather-icon {
-                font-size: 28px;
-                line-height: 1;
+              .et-weather-icon { font-size: 28px; line-height: 1; }
+              .et-weather-info { display: flex; flex-direction: column; gap: 2px; }
+              .et-weather-temp { font-size: 16px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
+              .et-weather-desc { font-size: 11px; color: var(--color-text-tertiary, #94a3b8); }
+              .et-weather-chips { display: flex; align-items: center; gap: 8px; margin-left: 6px; font-size: 11px; color: var(--color-text-tertiary, #94a3b8); }
+              .et-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,.08); padding: 3px 7px; border-radius: 99px; }
+              .et-weather-refresh {
+                border: 0; background: transparent; color: var(--color-text-tertiary, #94a3b8);
+                cursor: pointer; font-size: 14px; padding: 4px; border-radius: 6px; transition: transform 0.2s, color 0.2s;
               }
-              .et-weather-info {
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
+              .et-weather-refresh:hover { color: var(--color-text-primary, #fff); transform: rotate(90deg); }
+
+              /* Extra Grid for widgets */
+              .et-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 14px;
               }
-              .et-weather-temp {
-                font-size: 16px;
-                font-weight: 700;
+              .et-widget-title {
+                margin: 0 0 12px 0;
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--color-text-secondary, #cbd5e1);
                 display: flex;
-                align-items: baseline;
+                align-items: center;
                 gap: 6px;
               }
-              .et-weather-desc {
-                font-size: 11px;
-                color: var(--color-text-tertiary, #94a3b8);
-              }
-              .et-weather-chips {
+
+              /* Shortcuts styling */
+              .et-shortcuts-list {
                 display: flex;
-                align-items: center;
+                flex-wrap: wrap;
                 gap: 8px;
-                margin-left: 6px;
-                font-size: 11px;
-                color: var(--color-text-tertiary, #94a3b8);
               }
-              .et-chip {
+              .et-shortcut-btn {
                 display: inline-flex;
                 align-items: center;
-                gap: 4px;
-                background: rgba(255,255,255,.08);
-                padding: 3px 7px;
-                border-radius: 99px;
+                gap: 8px;
+                padding: 8px 14px;
+                background: rgba(255,255,255,.06);
+                border: 1px solid rgba(255,255,255,.1);
+                border-radius: var(--border-radius-300, 10px);
+                color: var(--color-text-primary, #f4f4f6);
+                text-decoration: none;
+                font-size: 12px;
+                font-weight: 500;
+                transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
               }
-              .et-weather-refresh {
+              .et-shortcut-btn:hover {
+                background: color-mix(in srgb, var(--color-bg-fill-action, #2563eb) 22%, transparent);
+                border-color: var(--color-bg-fill-action, #2563eb);
+                transform: translateY(-2px);
+              }
+
+              /* Notes / To-Do styling */
+              .et-notes-form {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 10px;
+              }
+              .et-notes-input {
+                flex: 1;
+                padding: 8px 12px;
+                border: 1px solid var(--color-border-primary, #3f4650);
+                border-radius: var(--border-radius-200, 8px);
+                background: rgba(0,0,0,.2);
+                color: var(--color-text-primary, #f4f4f6);
+                font-size: 12px;
+                outline: 0;
+              }
+              .et-notes-input:focus {
+                border-color: var(--color-bg-fill-action, #2563eb);
+              }
+              .et-notes-add {
+                padding: 8px 14px;
+                border: 0;
+                border-radius: var(--border-radius-200, 8px);
+                background: var(--color-bg-fill-action, #2563eb);
+                color: #fff;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 600;
+              }
+              .et-notes-items {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                max-height: 180px;
+                overflow-y: auto;
+              }
+              .et-notes-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 6px 10px;
+                background: rgba(255,255,255,.04);
+                border-radius: 6px;
+                font-size: 12px;
+              }
+              .et-notes-text {
+                flex: 1;
+                cursor: pointer;
+                transition: opacity 0.2s;
+              }
+              .et-notes-text.done {
+                text-decoration: line-through;
+                opacity: 0.5;
+              }
+              .et-notes-del {
                 border: 0;
                 background: transparent;
                 color: var(--color-text-tertiary, #94a3b8);
                 cursor: pointer;
-                font-size: 14px;
-                padding: 4px;
-                border-radius: 6px;
-                transition: transform 0.2s, color 0.2s;
+                font-size: 13px;
+                padding: 2px 6px;
               }
-              .et-weather-refresh:hover {
-                color: var(--color-text-primary, #fff);
-                transform: rotate(90deg);
+              .et-notes-del:hover {
+                color: #ff6b6b;
               }
+
+              /* Quote styling */
+              .et-quote-text {
+                font-style: italic;
+                font-size: 13px;
+                line-height: 1.5;
+                margin: 0 0 6px 0;
+                color: var(--color-text-primary, #f4f4f6);
+              }
+              .et-quote-author {
+                font-size: 11px;
+                color: var(--color-text-tertiary, #94a3b8);
+                text-align: right;
+              }
+
               @keyframes st-card-in {
                 from { opacity: 0; transform: translateY(6px); }
                 to { opacity: 1; transform: translateY(0); }
               }
             </style>
-            <div class="et-greeting-section">
-              <h2 class="et-greeting-title"><span class="et-greeting-emoji">${getGreeting().icon}</span> <span class="et-greeting-text">${getGreeting().text}</span></h2>
-              <div class="et-greeting-date">${getFormattedDate()}</div>
-            </div>
-            <div class="et-weather-section">
-              <div class="et-weather-icon">⏳</div>
-              <div class="et-weather-info">
-                <div class="et-weather-temp"><span class="et-temp-val">—</span></div>
-                <div class="et-weather-desc">Weerbericht laden...</div>
+
+            <!-- Bovenste kaart: Weer & Begroeting -->
+            ${(showGreeting || showWeather) ? `
+              <div class="et-card et-top-card">
+                ${showGreeting ? `
+                  <div class="et-greeting-section">
+                    <h2 class="et-greeting-title"><span class="et-greeting-emoji">${getGreeting().icon}</span> <span class="et-greeting-text">${getGreeting().text}</span></h2>
+                    <div class="et-greeting-date">${getFormattedDate()}</div>
+                  </div>
+                ` : ''}
+                ${showWeather ? `
+                  <div class="et-weather-section">
+                    <div class="et-weather-icon">⏳</div>
+                    <div class="et-weather-info">
+                      <div class="et-weather-temp"><span class="et-temp-val">—</span></div>
+                      <div class="et-weather-desc">Weerbericht laden...</div>
+                    </div>
+                    <div class="et-weather-chips">
+                      <span class="et-chip et-chip-city">📍 ${settings.eduarteWeatherCity || "Utrecht"}</span>
+                      <span class="et-chip et-chip-rain" style="display:none;">💧 <span class="et-rain-val">0</span>%</span>
+                    </div>
+                    <button class="et-weather-refresh" title="Ververs weerbericht">🔄</button>
+                  </div>
+                ` : ''}
               </div>
-              <div class="et-weather-chips">
-                <span class="et-chip et-chip-city">📍 ${settings.eduarteWeatherCity || "Utrecht"}</span>
-                <span class="et-chip et-chip-rain" style="display:none;">💧 <span class="et-rain-val">0</span>%</span>
+            ` : ''}
+
+            <!-- Grid kaarten: Snelkoppelingen, Notities & Quotes -->
+            ${(showShortcuts || showNotes || showQuote) ? `
+              <div class="et-grid">
+                ${showShortcuts ? `
+                  <div class="et-card">
+                    <h3 class="et-widget-title">🚀 Snelkoppelingen</h3>
+                    <div class="et-shortcuts-list">
+                      <a href="https://teams.microsoft.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>👥</span> Teams</a>
+                      <a href="https://outlook.office.com/mail" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>✉️</span> Outlook</a>
+                      <a href="https://onedrive.live.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>☁️</span> OneDrive</a>
+                      <a href="https://www.office.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📄</span> Office 365</a>
+                      <a href="/resultaten" class="et-shortcut-btn"><span>📊</span> Cijfers</a>
+                      <a href="/agenda" class="et-shortcut-btn"><span>📅</span> Agenda</a>
+                    </div>
+                  </div>
+                ` : ''}
+
+                ${showNotes ? `
+                  <div class="et-card">
+                    <h3 class="et-widget-title">📝 Snelnotities & Taken</h3>
+                    <form class="et-notes-form">
+                      <input type="text" class="et-notes-input" placeholder="+ Voeg een taak of herinnering toe..." />
+                      <button type="submit" class="et-notes-add">Toevoegen</button>
+                    </form>
+                    <ul class="et-notes-items"></ul>
+                  </div>
+                ` : ''}
+
+                ${showQuote ? `
+                  <div class="et-card">
+                    <h3 class="et-widget-title">💡 Dagelijkse Studie-Tip</h3>
+                    <p class="et-quote-text" id="et-quote-content"></p>
+                    <div class="et-quote-author" id="et-quote-by"></div>
+                  </div>
+                ` : ''}
               </div>
-              <button class="et-weather-refresh" title="Ververs weerbericht">🔄</button>
-            </div>
+            ` : ''}
           `;
 
-          if (settings.eduarteGreetingEnabled === false) {
-            widget.querySelector(".et-greeting-section").style.display = "none";
-          }
-          if (settings.eduarteWeatherEnabled === false) {
-            widget.querySelector(".et-weather-section").style.display = "none";
-          }
-
           if (target.firstChild) {
-            target.insertBefore(widget, target.firstChild);
+            target.insertBefore(container, target.firstChild);
           } else {
-            target.appendChild(widget);
+            target.appendChild(container);
           }
 
-          function fetchWeatherData() {
+          // Weer data ophalen
+          if (showWeather) {
             const city = settings.eduarteWeatherCity || "Utrecht";
-            const iconEl = widget.querySelector(".et-weather-icon");
-            const tempEl = widget.querySelector(".et-temp-val");
-            const descEl = widget.querySelector(".et-weather-desc");
-            const cityEl = widget.querySelector(".et-chip-city");
-            const rainEl = widget.querySelector(".et-chip-rain");
-            const rainVal = widget.querySelector(".et-rain-val");
+            const iconEl = container.querySelector(".et-weather-icon");
+            const tempEl = container.querySelector(".et-temp-val");
+            const descEl = container.querySelector(".et-weather-desc");
+            const cityEl = container.querySelector(".et-chip-city");
+            const rainEl = container.querySelector(".et-chip-rain");
+            const rainVal = container.querySelector(".et-rain-val");
 
-            iconEl.textContent = "⏳";
-            descEl.textContent = "Weer laden...";
+            function fetchWeatherData() {
+              if (!iconEl) return;
+              iconEl.textContent = "⏳";
+              descEl.textContent = "Weer laden...";
 
-            chrome.runtime.sendMessage({ type: "FETCH_WEATHER", city }, (res) => {
-              if (chrome.runtime.lastError || !res || !res.success) {
-                iconEl.textContent = "⛅";
-                tempEl.textContent = "—";
-                descEl.textContent = res?.error || "Weer niet beschikbaar";
+              chrome.runtime.sendMessage({ type: "FETCH_WEATHER", city }, (res) => {
+                if (chrome.runtime.lastError || !res || !res.success) {
+                  iconEl.textContent = "⛅";
+                  tempEl.textContent = "—";
+                  descEl.textContent = res?.error || "Weer niet beschikbaar";
+                  return;
+                }
+                const info = WEATHER_CODES[res.weathercode] || { text: "Onbekend", icon: "⛅" };
+                const currentIcon = res.is_day ? info.icon : (info.iconNight || info.icon);
+                iconEl.textContent = currentIcon;
+                tempEl.textContent = `${Math.round(res.temp)}°C`;
+                descEl.textContent = info.text;
+                cityEl.textContent = `📍 ${res.city}`;
+                if (res.precipitation > 0) {
+                  rainEl.style.display = "inline-flex";
+                  rainVal.textContent = res.precipitation;
+                } else {
+                  rainEl.style.display = "none";
+                }
+              });
+            }
+
+            container.querySelector(".et-weather-refresh")?.addEventListener("click", fetchWeatherData);
+            fetchWeatherData();
+          }
+
+          // Quote instellen op basis van de dag
+          if (showQuote) {
+            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const selectedQuote = STUDY_QUOTES[dayOfYear % STUDY_QUOTES.length];
+            const textEl = container.querySelector("#et-quote-content");
+            const authorEl = container.querySelector("#et-quote-by");
+            if (textEl && authorEl) {
+              textEl.textContent = `"${selectedQuote.quote}"`;
+              authorEl.textContent = `— ${selectedQuote.author}`;
+            }
+          }
+
+          // Notes / To-Do functionaliteit
+          if (showNotes) {
+            const notesList = container.querySelector(".et-notes-items");
+            const notesForm = container.querySelector(".et-notes-form");
+            const notesInput = container.querySelector(".et-notes-input");
+
+            let notes = Array.isArray(settings.eduarteUserNotes) ? settings.eduarteUserNotes : [
+              { id: 1, text: "Welkom bij Eduarte Tools! ✨", done: false }
+            ];
+
+            function renderNotes() {
+              notesList.innerHTML = "";
+              if (!notes.length) {
+                notesList.innerHTML = `<li style="font-size:11px;color:var(--color-text-tertiary,#94a3b8);padding:4px 0;">Geen taken op dit moment.</li>`;
                 return;
               }
-              const info = WEATHER_CODES[res.weathercode] || { text: "Onbekend", icon: "⛅" };
-              const currentIcon = res.is_day ? info.icon : (info.iconNight || info.icon);
-              iconEl.textContent = currentIcon;
-              tempEl.textContent = `${Math.round(res.temp)}°C`;
-              descEl.textContent = info.text;
-              cityEl.textContent = `📍 ${res.city}`;
-              if (res.precipitation > 0) {
-                rainEl.style.display = "inline-flex";
-                rainVal.textContent = res.precipitation;
-              } else {
-                rainEl.style.display = "none";
-              }
+              notes.forEach((item) => {
+                const li = document.createElement("li");
+                li.className = "et-notes-item";
+                li.innerHTML = `
+                  <span class="et-notes-text ${item.done ? 'done' : ''}">${item.text}</span>
+                  <button class="et-notes-del" title="Verwijderen">×</button>
+                `;
+                li.querySelector(".et-notes-text").addEventListener("click", () => {
+                  item.done = !item.done;
+                  saveAndRender();
+                });
+                li.querySelector(".et-notes-del").addEventListener("click", () => {
+                  notes = notes.filter((n) => n.id !== item.id);
+                  saveAndRender();
+                });
+                notesList.appendChild(li);
+              });
+            }
+
+            function saveAndRender() {
+              chrome.storage.local.set({ eduarteUserNotes: notes });
+              renderNotes();
+            }
+
+            notesForm?.addEventListener("submit", (e) => {
+              e.preventDefault();
+              const text = notesInput.value.trim();
+              if (!text) return;
+              notes.unshift({ id: Date.now(), text, done: false });
+              notesInput.value = "";
+              saveAndRender();
             });
-          }
 
-          widget.querySelector(".et-weather-refresh")?.addEventListener("click", fetchWeatherData);
-
-          if (settings.eduarteWeatherEnabled !== false) {
-            fetchWeatherData();
+            renderNotes();
           }
         }
 

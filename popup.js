@@ -2,7 +2,8 @@ const ids = [
   "darkmode", "modernstyle", "humantheme", "accent", "wallpaperUrl", "wallpaperBlur", "wallpaperOverlay", "font",
   "customenabled", "customBg", "customSurface", "customText", "customBorder", "customCss",
   "enabled", "username", "password", "autosubmit", "modernnav", "animations",
-  "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled", "animationSpeed",
+  "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled",
+  "shortcutsEnabled", "notesEnabled", "quoteEnabled", "animationSpeed",
   "gradesEnabled", "gradeMin", "gradeMax", "passThreshold",
 ];
 const elements = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
@@ -62,7 +63,8 @@ function load() {
     "eduarteWallpaperUrl", "eduarteWallpaperBlur", "eduarteWallpaperOverlay", "eduarteFont", "eduarteCustomCss",
     "eduarteCustomTheme", "eduarteCustomColors", "eduarteEnabled", "eduarteUsername", "eduartePassword",
     "eduarteAutosubmit", "eduarteModernNav", "eduarteAnimations", "eduarteFloatingCards",
-    "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled", "eduarteAnimationSpeed",
+    "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled",
+    "eduarteShortcutsEnabled", "eduarteNotesEnabled", "eduarteQuoteEnabled", "eduarteAnimationSpeed",
     "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum", "eduartePassThreshold",
   ], (data) => {
     const colors = data.eduarteCustomColors || {};
@@ -94,6 +96,9 @@ function load() {
     elements.weatherEnabled.checked = data.eduarteWeatherEnabled !== false;
     elements.weatherCity.value = data.eduarteWeatherCity || "";
     elements.greetingEnabled.checked = data.eduarteGreetingEnabled !== false;
+    elements.shortcutsEnabled.checked = data.eduarteShortcutsEnabled !== false;
+    elements.notesEnabled.checked = data.eduarteNotesEnabled !== false;
+    elements.quoteEnabled.checked = data.eduarteQuoteEnabled !== false;
     elements.animationSpeed.value = data.eduarteAnimationSpeed ?? 60;
 
     elements.gradesEnabled.checked = data.eduarteGradesEnabled !== false;
@@ -134,6 +139,9 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteWeatherEnabled: elements.weatherEnabled.checked,
     eduarteWeatherCity: elements.weatherCity.value.trim(),
     eduarteGreetingEnabled: elements.greetingEnabled.checked,
+    eduarteShortcutsEnabled: elements.shortcutsEnabled.checked,
+    eduarteNotesEnabled: elements.notesEnabled.checked,
+    eduarteQuoteEnabled: elements.quoteEnabled.checked,
     eduarteAnimationSpeed: Number(elements.animationSpeed.value),
     eduarteGradesEnabled: elements.gradesEnabled.checked,
     eduarteGradeMinimum: Number(elements.gradeMin.value),
