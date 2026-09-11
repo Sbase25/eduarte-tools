@@ -86,6 +86,8 @@
         "eduarteWeatherCity",
         "eduarteShortcutsEnabled",
         "eduarteNotesEnabled",
+        "eduartePomodoroEnabled",
+        "eduarteQuickCalcEnabled",
         "eduarteQuoteEnabled",
         "eduarteUserNotes",
       ],
@@ -96,9 +98,11 @@
         const showGreeting = settings.eduarteGreetingEnabled !== false;
         const showShortcuts = settings.eduarteShortcutsEnabled !== false;
         const showNotes = settings.eduarteNotesEnabled !== false;
+        const showPomodoro = settings.eduartePomodoroEnabled !== false;
+        const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
         const showQuote = settings.eduarteQuoteEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showQuote) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -318,6 +322,94 @@
                 color: #ef4444;
               }
 
+              /* Pomodoro styling */
+              .et-pomo-display {
+                font-size: 38px;
+                font-weight: 700;
+                text-align: center;
+                margin: 8px 0;
+                letter-spacing: -0.03em;
+                font-variant-numeric: tabular-nums;
+                color: var(--color-text-primary, #f9fafb);
+              }
+              .et-pomo-tabs {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 12px;
+              }
+              .et-pomo-tab {
+                flex: 1;
+                padding: 6px 4px;
+                border: 0;
+                border-radius: 8px;
+                background: rgba(255,255,255,.06);
+                color: var(--color-text-tertiary, #9ca3af);
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.15s, color 0.15s;
+              }
+              .et-pomo-tab.active {
+                background: var(--color-bg-fill-action, #3b82f6);
+                color: #ffffff;
+              }
+              .et-pomo-controls {
+                display: flex;
+                gap: 8px;
+              }
+              .et-pomo-btn {
+                flex: 1;
+                padding: 8px;
+                border: 0;
+                border-radius: 10px;
+                background: rgba(255,255,255,.08);
+                color: var(--color-text-primary, #f9fafb);
+                font-weight: 600;
+                font-size: 12px;
+                cursor: pointer;
+                transition: background-color 0.15s, transform 0.15s;
+              }
+              .et-pomo-btn.primary {
+                background: var(--color-bg-fill-action, #3b82f6);
+                color: #ffffff;
+              }
+              .et-pomo-btn:hover {
+                transform: translateY(-1px);
+                filter: brightness(1.1);
+              }
+
+              /* Quick Calc styling */
+              .et-calc-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin-bottom: 10px;
+              }
+              .et-calc-field label {
+                display: block;
+                font-size: 11px;
+                color: var(--color-text-tertiary, #9ca3af);
+                margin-bottom: 3px;
+              }
+              .et-calc-field input {
+                width: 100%;
+                padding: 6px 10px;
+                font-size: 12px;
+              }
+              .et-calc-result {
+                padding: 10px 12px;
+                border-radius: 10px;
+                background: rgba(255,255,255,.05);
+                border: 1px solid rgba(255,255,255,.08);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+              }
+              .et-calc-result b {
+                font-size: 16px;
+                color: var(--color-bg-fill-action, #3b82f6);
+              }
+
               /* Quote styling */
               .et-quote-card {
                 display: flex;
@@ -370,8 +462,8 @@
               </div>
             ` : ''}
 
-            <!-- Grid kaarten: Snelkoppelingen, Notities & Quotes -->
-            ${(showShortcuts || showNotes || showQuote) ? `
+            <!-- Grid kaarten: Snelkoppelingen, Notities, Pomodoro, Snelle Calculator & Quotes -->
+            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote) ? `
               <div class="et-grid">
                 ${showShortcuts ? `
                   <div class="et-card">
@@ -383,6 +475,38 @@
                       <a href="https://www.office.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📄</span> Office 365</a>
                       <a href="/resultaten" class="et-shortcut-btn"><span>📊</span> Cijfers</a>
                       <a href="/agenda" class="et-shortcut-btn"><span>📅</span> Agenda</a>
+                    </div>
+                  </div>
+                ` : ''}
+
+                ${showPomodoro ? `
+                  <div class="et-card">
+                    <h3 class="et-widget-title">⏱️ Pomodoro Focus Timer</h3>
+                    <div class="et-pomo-tabs">
+                      <button class="et-pomo-tab active" data-time="1500">Focus (25m)</button>
+                      <button class="et-pomo-tab" data-time="300">Pauze (5m)</button>
+                      <button class="et-pomo-tab" data-time="900">Lang (15m)</button>
+                    </div>
+                    <div class="et-pomo-display" id="et-pomo-time">25:00</div>
+                    <div class="et-pomo-controls">
+                      <button class="et-pomo-btn primary" id="et-pomo-toggle">Start</button>
+                      <button class="et-pomo-btn" id="et-pomo-reset">Reset</button>
+                    </div>
+                  </div>
+                ` : ''}
+
+                ${showQuickCalc ? `
+                  <div class="et-card">
+                    <h3 class="et-widget-title">🎯 Snelle Cijfercalculator</h3>
+                    <div class="et-calc-grid">
+                      <div class="et-calc-field"><label>Huidig Gemiddelde</label><input type="number" id="et-calc-avg" min="1" max="10" step=".1" value="6.5"></div>
+                      <div class="et-calc-field"><label>Huidige Weging</label><input type="number" id="et-calc-weights" min="1" step="1" value="3"></div>
+                      <div class="et-calc-field"><label>Streefgemiddelde</label><input type="number" id="et-calc-target" min="1" max="10" step=".1" value="7.0"></div>
+                      <div class="et-calc-field"><label>Weging Toets</label><input type="number" id="et-calc-future" min="1" step="1" value="1"></div>
+                    </div>
+                    <div class="et-calc-result">
+                      <span style="font-size:12px;color:var(--color-text-secondary,#e5e7eb);">Nodig voor streefcijfer:</span>
+                      <b id="et-calc-needed">8,5</b>
                     </div>
                   </div>
                 ` : ''}
@@ -466,6 +590,113 @@
               textEl.textContent = `"${selectedQuote.quote}"`;
               authorEl.textContent = `— ${selectedQuote.author}`;
             }
+          }
+
+          // Pomodoro Focus Timer logica
+          if (showPomodoro) {
+            const displayEl = container.querySelector("#et-pomo-time");
+            const toggleBtn = container.querySelector("#et-pomo-toggle");
+            const resetBtn = container.querySelector("#et-pomo-reset");
+            const tabs = container.querySelectorAll(".et-pomo-tab");
+
+            let currentDuration = 1500;
+            let timeLeft = 1500;
+            let timerId = null;
+
+            function formatPomo(seconds) {
+              const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+              const s = (seconds % 60).toString().padStart(2, "0");
+              return `${m}:${s}`;
+            }
+
+            function updateDisplay() {
+              if (displayEl) displayEl.textContent = formatPomo(timeLeft);
+            }
+
+            tabs.forEach((tab) => {
+              tab.addEventListener("click", () => {
+                tabs.forEach((t) => t.classList.remove("active"));
+                tab.classList.add("active");
+                clearInterval(timerId);
+                timerId = null;
+                if (toggleBtn) toggleBtn.textContent = "Start";
+                currentDuration = Number(tab.dataset.time);
+                timeLeft = currentDuration;
+                updateDisplay();
+              });
+            });
+
+            toggleBtn?.addEventListener("click", () => {
+              if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+                toggleBtn.textContent = "Hervat";
+              } else {
+                toggleBtn.textContent = "Pauze";
+                timerId = setInterval(() => {
+                  if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                  } else {
+                    clearInterval(timerId);
+                    timerId = null;
+                    toggleBtn.textContent = "Start";
+                    displayEl.textContent = "00:00 - Klaar!";
+                  }
+                }, 1000);
+              }
+            });
+
+            resetBtn?.addEventListener("click", () => {
+              clearInterval(timerId);
+              timerId = null;
+              if (toggleBtn) toggleBtn.textContent = "Start";
+              timeLeft = currentDuration;
+              updateDisplay();
+            });
+          }
+
+          // Snelle Cijfercalculator logica
+          if (showQuickCalc) {
+            const avgInput = container.querySelector("#et-calc-avg");
+            const weightsInput = container.querySelector("#et-calc-weights");
+            const targetInput = container.querySelector("#et-calc-target");
+            const futureInput = container.querySelector("#et-calc-future");
+            const neededOutput = container.querySelector("#et-calc-needed");
+
+            function calcNeeded() {
+              const curAvg = parseFloat(avgInput?.value || 0);
+              const curWeights = parseFloat(weightsInput?.value || 1);
+              const target = parseFloat(targetInput?.value || 0);
+              const futureWeight = parseFloat(futureInput?.value || 1);
+
+              if (isNaN(curAvg) || isNaN(curWeights) || isNaN(target) || isNaN(futureWeight) || futureWeight <= 0) {
+                if (neededOutput) neededOutput.textContent = "—";
+                return;
+              }
+
+              const totalCurrent = curAvg * curWeights;
+              const totalNewWeight = curWeights + futureWeight;
+              const needed = (target * totalNewWeight - totalCurrent) / futureWeight;
+
+              if (neededOutput) {
+                if (needed > 10) {
+                  neededOutput.textContent = `${needed.toFixed(1)} (Onhaalbaar)`;
+                  neededOutput.style.color = "#ef4444";
+                } else if (needed < 1) {
+                  neededOutput.textContent = `≤ 1,0 (Al gehaald!)`;
+                  neededOutput.style.color = "#10b981";
+                } else {
+                  neededOutput.textContent = needed.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                  neededOutput.style.color = "var(--color-bg-fill-action, #3b82f6)";
+                }
+              }
+            }
+
+            [avgInput, weightsInput, targetInput, futureInput].forEach((inp) => {
+              inp?.addEventListener("input", calcNeeded);
+            });
+            calcNeeded();
           }
 
           // Notes / To-Do functionaliteit
