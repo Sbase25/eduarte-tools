@@ -1,59 +1,82 @@
-// Eduarte Auto Login - theme.js
-// Eduarte's UI is built on a CSS custom-property token system
-// (--color-bg, --color-text-primary, --color-bg-fill-action, etc., defined
-// in :root). Theming here works by overriding just those semantic tokens,
-// so every component that already uses them (virtually the whole app)
-// re-themes itself automatically - no filter hacks, no guessing at markup.
+// Eduarte Tools - theme.js
+// Modern theming & styling engine for Eduarte and Educus portals.
 
 (function () {
-  const STYLE_ID = "study-tools-theme-style";
+  const STYLE_ID = "eduarte-tools-theme-style";
 
-  // Dark-mode values for the neutral tokens. Left untouched on purpose:
-  // "-onbrand" and "-inverse" tokens (e.g. --color-text-onbrand), since
-  // those are meant to stay legible against colored fills that are NOT
-  // being inverted here.
-  const DARK_VARS = {
-    "--color-bg": "#15171b",
-    "--color-input": "#1f2328",
-    "--color-bg-surface": "#1f2328",
-    "--color-bg-surface-hover": "#2a2f36",
-    "--color-bg-surface-active": "#2a2f36",
-    "--color-bg-surface-selected": "#353b43",
-    "--color-bg-surface-secondary": "#15171b",
-    "--color-bg-surface-secondary-hover": "#353b43",
-    "--color-bg-surface-secondary-active": "#3f4650",
-    "--color-bg-surface-secondary-selected": "#545e6b",
-    "--color-bg-surface-disabled": "#3f4650",
-    "--color-bg-fill": "#1f2328",
-    "--color-bg-fill-hover": "#2a2f36",
-    "--color-bg-fill-active": "#353b43",
-    "--color-bg-fill-secondary": "#2a2f36",
-    "--color-bg-fill-secondary-hover": "#3f4650",
-    "--color-bg-fill-secondary-active": "#545e6b",
-    "--color-bg-fill-disabled": "#3f4650",
-    "--color-bg-fill-selected": "#2a2f36",
-    "--color-bg-surface-brand": "#2a2f36",
-    "--color-bg-surface-brand-hover": "#353b43",
-    "--color-bg-surface-brand-active": "#3f4650",
-    "--color-border-primary": "#545e6b",
-    "--color-border-primary-hover": "#697586",
-    "--color-border-primary-active": "#87919e",
-    "--color-border-secondary": "#3f4650",
-    "--color-border-tertiary": "#2a2f36",
-    "--color-border-disabled": "#545e6b",
-    "--color-icon-primary": "#eef0f1",
-    "--color-icon-primary-hover": "#f4f4f6",
-    "--color-icon-primary-active": "#fff",
-    "--color-icon-secondary": "#dadde2",
-    "--color-icon-secondary-hover": "#eef0f1",
-    "--color-icon-secondary-active": "#f4f4f6",
-    "--color-icon-disabled": "#87919e",
-    "--color-icon-placeholder": "#87919e",
-    "--color-text-primary": "#f4f4f6",
-    "--color-text-secondary": "#eef0f1",
-    "--color-text-tertiary": "#cfd3d8",
-    "--color-text-disabled": "#87919e",
-    "--color-text-placeholder": "#87919e",
+  const PRESETS = {
+    dark: {
+      dark: true,
+      accent: "#3b82f6",
+      bg: "#111827",
+      surface: "#1f2937",
+      text: "#f9fafb",
+      border: "#374151",
+    },
+    blue: {
+      dark: true,
+      accent: "#38bdf8",
+      bg: "#0b192c",
+      surface: "#13253f",
+      text: "#f0f9ff",
+      border: "#1e3a5f",
+    },
+    purple: {
+      dark: true,
+      accent: "#c084fc",
+      bg: "#130e24",
+      surface: "#20163b",
+      text: "#faf5ff",
+      border: "#3b2d64",
+    },
+    emerald: {
+      dark: true,
+      accent: "#34d399",
+      bg: "#062319",
+      surface: "#0b3829",
+      text: "#ecfdf5",
+      border: "#14533d",
+    },
+    sunset: {
+      dark: true,
+      accent: "#fb923c",
+      bg: "#1c0f0a",
+      surface: "#2e1810",
+      text: "#fff7ed",
+      border: "#542d1f",
+    },
+    oled: {
+      dark: true,
+      accent: "#38bdf8",
+      bg: "#000000",
+      surface: "#09090b",
+      text: "#ffffff",
+      border: "#27272a",
+    },
+    nord: {
+      dark: true,
+      accent: "#88c0d0",
+      bg: "#242933",
+      surface: "#2e3440",
+      text: "#eceff4",
+      border: "#434c5e",
+    },
+    cyberpunk: {
+      dark: true,
+      accent: "#f43f5e",
+      bg: "#090717",
+      surface: "#140e2b",
+      text: "#fdf4ff",
+      border: "#2e1c59",
+    },
+    light: {
+      dark: false,
+      accent: "#2563eb",
+      bg: "#f8fafc",
+      surface: "#ffffff",
+      text: "#0f172a",
+      border: "#e2e8f0",
+    },
   };
 
   function clamp(n) {
@@ -76,7 +99,6 @@
     );
   }
 
-  // amount > 0 lightens, < 0 darkens (roughly, toward white/black).
   function shade(hex, amount) {
     const { r, g, b } = hexToRgb(hex);
     const target = amount > 0 ? 255 : 0;
@@ -92,7 +114,7 @@
     if (!accent) return {};
     const hover = shade(accent, -0.15);
     const active = shade(accent, -0.3);
-    const subtle = shade(accent, 0.85);
+    const subtle = shade(accent, 0.75);
     return {
       "--color-bg-fill-action": accent,
       "--color-bg-fill-action-hover": hover,
@@ -107,221 +129,55 @@
     };
   }
 
-  // Custom theme: the same neutral-token set as DARK_VARS, but every value
-  // is derived from just four colors the user picks (background, surface,
-  // text, border) using the shade() helper above for the hover/active
-  // variants - so a whole coherent palette comes from four color pickers.
-  function customVars(colors) {
+  function deriveThemeTokens(colors, isDark = true) {
     if (!colors || !colors.bg) return {};
     const { bg, surface, text, border } = colors;
+    const step = isDark ? 1 : -1;
     return {
       "--color-bg": bg,
       "--color-input": surface,
       "--color-bg-surface": surface,
-      "--color-bg-surface-hover": shade(surface, 0.1),
-      "--color-bg-surface-active": shade(surface, 0.1),
-      "--color-bg-surface-selected": shade(surface, 0.18),
+      "--color-bg-surface-hover": shade(surface, 0.08 * step),
+      "--color-bg-surface-active": shade(surface, 0.14 * step),
+      "--color-bg-surface-selected": shade(surface, 0.20 * step),
       "--color-bg-surface-secondary": bg,
-      "--color-bg-surface-secondary-hover": shade(surface, 0.18),
-      "--color-bg-surface-secondary-active": shade(surface, 0.28),
-      "--color-bg-surface-secondary-selected": shade(surface, 0.4),
-      "--color-bg-surface-disabled": shade(surface, 0.28),
+      "--color-bg-surface-secondary-hover": shade(surface, 0.15 * step),
+      "--color-bg-surface-secondary-active": shade(surface, 0.25 * step),
+      "--color-bg-surface-secondary-selected": shade(surface, 0.35 * step),
+      "--color-bg-surface-disabled": shade(surface, 0.25 * step),
       "--color-bg-fill": surface,
-      "--color-bg-fill-hover": shade(surface, 0.1),
-      "--color-bg-fill-active": shade(surface, 0.18),
-      "--color-bg-fill-secondary": shade(surface, 0.1),
-      "--color-bg-fill-secondary-hover": shade(surface, 0.28),
-      "--color-bg-fill-secondary-active": shade(surface, 0.4),
-      "--color-bg-fill-disabled": shade(surface, 0.28),
-      "--color-bg-fill-selected": shade(surface, 0.1),
-      "--color-bg-surface-brand": shade(surface, 0.1),
-      "--color-bg-surface-brand-hover": shade(surface, 0.18),
-      "--color-bg-surface-brand-active": shade(surface, 0.28),
+      "--color-bg-fill-hover": shade(surface, 0.08 * step),
+      "--color-bg-fill-active": shade(surface, 0.15 * step),
+      "--color-bg-fill-secondary": shade(surface, 0.10 * step),
+      "--color-bg-fill-secondary-hover": shade(surface, 0.25 * step),
+      "--color-bg-fill-secondary-active": shade(surface, 0.35 * step),
+      "--color-bg-fill-disabled": shade(surface, 0.25 * step),
+      "--color-bg-fill-selected": shade(surface, 0.12 * step),
+      "--color-bg-surface-brand": shade(surface, 0.10 * step),
+      "--color-bg-surface-brand-hover": shade(surface, 0.18 * step),
+      "--color-bg-surface-brand-active": shade(surface, 0.28 * step),
       "--color-border-primary": border,
-      "--color-border-primary-hover": shade(border, 0.2),
-      "--color-border-primary-active": shade(border, 0.35),
-      "--color-border-secondary": shade(border, -0.15),
-      "--color-border-tertiary": shade(border, -0.3),
+      "--color-border-primary-hover": shade(border, 0.20 * step),
+      "--color-border-primary-active": shade(border, 0.35 * step),
+      "--color-border-secondary": shade(border, -0.15 * step),
+      "--color-border-tertiary": shade(border, -0.30 * step),
       "--color-border-disabled": border,
       "--color-icon-primary": text,
-      "--color-icon-primary-hover": shade(text, 0.1),
-      "--color-icon-primary-active": "#fff",
-      "--color-icon-secondary": shade(text, -0.15),
-      "--color-icon-secondary-hover": shade(text, -0.05),
+      "--color-icon-primary-hover": isDark ? "#ffffff" : "#000000",
+      "--color-icon-primary-active": isDark ? "#ffffff" : "#000000",
+      "--color-icon-secondary": shade(text, -0.15 * step),
+      "--color-icon-secondary-hover": shade(text, -0.05 * step),
       "--color-icon-secondary-active": text,
-      "--color-icon-disabled": shade(text, -0.4),
-      "--color-icon-placeholder": shade(text, -0.4),
+      "--color-icon-disabled": shade(text, -0.40 * step),
+      "--color-icon-placeholder": shade(text, -0.40 * step),
       "--color-text-primary": text,
-      "--color-text-secondary": shade(text, -0.1),
-      "--color-text-tertiary": shade(text, -0.25),
-      "--color-text-disabled": shade(text, -0.4),
-      "--color-text-placeholder": shade(text, -0.4),
+      "--color-text-secondary": shade(text, -0.12 * step),
+      "--color-text-tertiary": shade(text, -0.25 * step),
+      "--color-text-disabled": shade(text, -0.45 * step),
+      "--color-text-placeholder": shade(text, -0.45 * step),
     };
   }
 
-  // "Modern style" layer: purely additive polish (shadows, rounding,
-  // hover motion, an accent indicator on the active nav item, a staggered
-  // fade-in for the home cards) built on the real classes from Eduarte's
-  // own markup/CSS - nothing here fights the existing layout.
-  const MODERN_CSS = `
-    @keyframes st-card-in {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    li.now--soft, li.now--tomorrow, li[class*="now--"] {
-      border-radius: var(--border-radius-600) !important;
-      box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.05);
-      border-left: 3px solid var(--color-bg-fill-action) !important;
-      transition: box-shadow 180ms ease, transform 180ms ease;
-      animation: st-card-in 320ms ease both;
-    }
-    #iddf > li:nth-child(1), #iddf > li:nth-child(2) { animation-delay: 0ms; }
-    #iddf > li:nth-child(3) { animation-delay: 60ms; }
-    #iddf > li:nth-child(4) { animation-delay: 120ms; }
-    #iddf > li:nth-child(5) { animation-delay: 180ms; }
-    #iddf > li:nth-child(6) { animation-delay: 240ms; }
-    #iddf > li:nth-child(7) { animation-delay: 300ms; }
-    li.now--soft:hover, li.now--tomorrow:hover, li[class*="now--"]:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,.10);
-    }
-    li.now--tomorrow.is-clickable {
-      cursor: pointer;
-    }
-    li.now--tomorrow.is-clickable:hover {
-      transform: translateY(-1px);
-    }
-    .now--wrapper ul#iddf {
-      display: flex;
-      flex-direction: column;
-      gap: .5rem;
-    }
-    .navigation-items--main > li > a {
-      display: flex !important;
-      align-items: center !important;
-      gap: .75rem !important;
-      min-height: 3rem !important;
-      border-radius: var(--border-radius-400) !important;
-      transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
-    }
-    .navigation-items--main > li > a > svg,
-    .navigation-items--main > li > a > i,
-    .navigation-items--main > li > a > span:first-child,
-    .navigation-items--main > li > a .icon {
-      position: static !important;
-      display: inline-flex !important;
-      flex: 0 0 1.65rem !important;
-      width: 1.65rem !important;
-      height: 1.65rem !important;
-      margin: 0 !important;
-      align-items: center !important;
-      justify-content: center !important;
-      line-height: 1 !important;
-      transform: none !important;
-    }
-    .navigation-items--main > li > a > span:last-child,
-    .navigation-items--main > li > a .navigation-item__label,
-    .navigation-items--main > li > a .label {
-      min-width: 0 !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-      white-space: nowrap !important;
-      line-height: 1.2 !important;
-    }
-    .navigation-items--main > li > a:hover {
-      transform: translateX(2px);
-    }
-    .navigation-items--main > li.is-selected > a {
-      font-weight: var(--font-weight-600);
-      box-shadow: inset 3px 0 0 0 var(--color-bg-fill-action);
-    }
-    header.header .header-toolbar {
-      box-shadow: 0 1px 10px rgba(0,0,0,.12);
-    }
-    .now--wrapper > h1 {
-      letter-spacing: var(--font-letter-spacing-dense);
-    }
-    body {
-      transition: background-color 240ms ease, color 240ms ease;
-    }
-    nav.navigation.navigation--student {
-      padding: .75rem !important;
-      box-shadow: 6px 0 24px rgba(15,23,42,.08);
-      transition: width 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
-    }
-    nav.navigation.navigation--student .navigation-items--main {
-      gap: .35rem;
-    }
-    nav.navigation.navigation--student .navigation-items--main > li > a {
-      padding: .7rem .85rem !important;
-      border-radius: .85rem !important;
-    }
-    nav.navigation.navigation--student .navigation-items--main > li.is-selected > a {
-      background: linear-gradient(90deg, color-mix(in srgb, var(--color-bg-fill-action) 16%, transparent), transparent) !important;
-      box-shadow: inset 3px 0 0 var(--color-bg-fill-action), 0 5px 16px rgba(15,23,42,.08);
-    }
-    header.header .header-toolbar {
-      border-bottom: 1px solid color-mix(in srgb, var(--color-border-primary) 55%, transparent);
-      transition: box-shadow 220ms ease, background-color 220ms ease;
-    }
-    .card, .table, table, .container-studiewijzer, .agenda-filter,
-    .result-overview, .result-overview--grades, .container-card {
-      border-radius: var(--border-radius-400) !important;
-      box-shadow: 0 8px 24px rgba(15,23,42,.06);
-      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
-    }
-    .card:hover, .container-studiewijzer:hover, .result-overview:hover, .container-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 34px rgba(15,23,42,.10);
-    }
-    .result-overview--grades table {
-      border-collapse: separate !important;
-      border-spacing: 0 !important;
-      overflow: hidden !important;
-    }
-    .result-overview--grades thead th {
-      position: sticky !important;
-      top: 0 !important;
-      z-index: 1 !important;
-      backdrop-filter: blur(12px) !important;
-    }
-    .result-overview--grades tbody tr {
-      transition: background-color 160ms ease, transform 160ms ease !important;
-    }
-    .result-overview--grades tbody tr:hover {
-      background: color-mix(in srgb, var(--color-bg-fill-action) 8%, transparent) !important;
-    }
-    button, [role="button"], a {
-      transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, color 160ms ease;
-    }
-    button:hover, [role="button"]:hover {
-      transform: translateY(-1px);
-    }
-    input, select, textarea {
-      border-radius: .7rem !important;
-      transition: border-color 160ms ease, box-shadow 160ms ease;
-    }
-    input:focus, select:focus, textarea:focus {
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-bg-fill-action) 18%, transparent);
-    }
-    .eduarte-tools-grade-source {
-      cursor: pointer !important;
-      transition: outline 160ms ease, background-color 160ms ease, transform 160ms ease;
-    }
-    .eduarte-tools-grade-source:hover {
-      outline: 2px solid var(--color-bg-fill-action) !important;
-      outline-offset: -2px;
-      transform: scale(1.04);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-    }
-  `;
-
-  // Eduarte's whole component kit (cards, tables, tabs, buttons,
-  // studiewijzer containers, ...) is built on this radius scale, e.g.
-  // `.card{border-radius:var(--border-radius-200)}`. Bumping the scale
-  // itself rounds everything site-wide in one shot, instead of guessing
-  // selectors page by page.
   const RADIUS_VARS = {
     "--border-radius-100": ".375rem",
     "--border-radius-200": ".625rem",
@@ -332,85 +188,398 @@
     "--border-radius-1600": "2.5rem",
   };
 
-  // "Human" preset (adapted from Study Tools voor Magister's "Human" theme
-  // by Nick Verbruggen): dark glassmorphism - a blurred background photo,
-  // translucent frosted panels, rounded corners. Built against Eduarte's
-  // real classes (nav.navigation, header-toolbar, now--soft/now--tomorrow,
-  // agenda-filter, agenda--day li) since Magister's own classes
-  // (.appbar, .main-menu, .st-widget, ...) don't exist here.
-  // Wallpaper is bundled locally (assets/wallpaper-human.jpg) and served
-  // via chrome.runtime.getURL, not hotlinked from a remote host. A remote
-  // image URL baked into shipped JS is exactly the pattern AV heuristics
-  // (e.g. Defender's "MalUri") flag on; a packaged asset has no such
-  // runtime network dependency.
   const HUMAN_WALLPAPER_URL = chrome.runtime.getURL("assets/wallpaper-human.jpg");
-  const HUMAN_ACCENT = "#0852a6"; // hsl(212,91%,34%), same hue as the original preset
+  const HUMAN_ACCENT = "#0852a6";
 
-  const HUMAN_CSS = `
+  const FONT_MAP = {
+    inter: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    roboto: "'Roboto', 'Segoe UI', Arial, sans-serif",
+    poppins: "'Poppins', 'Segoe UI', sans-serif",
+    lexend: "'Lexend', 'Segoe UI', sans-serif",
+    jetbrains: "'JetBrains Mono', Consolas, Monaco, monospace",
+  };
+
+  function getModernDesignCSS(effectiveBg, effectiveSurface, effectiveText, effectiveBorder, effectiveAccent, isDark) {
+    return `
+    /* --- MODERN POLISH LAYER --- */
+    @keyframes st-card-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Algemene achtergrond en tekst */
+    html, body {
+      background-color: ${effectiveBg} !important;
+      color: ${effectiveText} !important;
+      transition: background-color 220ms ease, color 220ms ease;
+    }
+
+    .l-container, .l-flex-content, .content-wrapper, .content, main, .main-content {
+      background: transparent !important;
+      color: ${effectiveText} !important;
+    }
+
+    /* Eduarte Header & Toolbar */
+    header.header,
+    header.header .header-toolbar,
+    .header,
+    .header-toolbar,
+    .header-wrapper,
+    .header-top,
+    .app-header,
+    .page-header {
+      background: ${effectiveSurface} !important;
+      background-color: ${effectiveSurface} !important;
+      color: ${effectiveText} !important;
+      border-bottom: 1px solid color-mix(in srgb, ${effectiveBorder} 65%, transparent) !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,${isDark ? '0.25' : '0.06'}) !important;
+      transition: background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+    }
+
+    header.header .header-toolbar *,
+    .header *,
+    .header-toolbar *,
+    .header-top *,
+    .app-header * {
+      color: ${effectiveText} !important;
+    }
+
+    header.header .header-toolbar i,
+    header.header .header-toolbar svg,
+    .header .icon,
+    .header-toolbar .icon {
+      color: ${effectiveText} !important;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    header.header .header-toolbar i:hover,
+    header.header .header-toolbar svg:hover {
+      color: ${effectiveAccent} !important;
+      transform: scale(1.1);
+    }
+
+    /* Eduarte Student Sidebar */
+    nav.navigation,
+    nav.navigation.navigation--student,
+    .sidebar {
+      background-color: ${effectiveSurface} !important;
+      padding: .75rem !important;
+      border-right: 1px solid color-mix(in srgb, ${effectiveBorder} 60%, transparent) !important;
+      box-shadow: 4px 0 24px rgba(0,0,0,${isDark ? '0.2' : '0.04'}) !important;
+      transition: width 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main {
+      gap: .4rem;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a {
+      display: flex !important;
+      align-items: center !important;
+      gap: .75rem !important;
+      min-height: 2.85rem !important;
+      padding: .65rem .85rem !important;
+      border-radius: .85rem !important;
+      color: color-mix(in srgb, ${effectiveText} 85%, transparent) !important;
+      transition: background-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+      position: relative !important;
+    }
+
+    /* Fix icon/label overlap: original site absolutely positions icons over
+       text assuming a fixed padding, which breaks once we restyle the anchor. */
+    nav.navigation.navigation--student .navigation-items--main > li > a > * {
+      position: static !important;
+      transform: none !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__icon,
+    nav.navigation.navigation--student .navigation-items--main > li > a i,
+    nav.navigation.navigation--student .navigation-items--main > li > a .icon,
+    nav.navigation.navigation--student .navigation-items--main > li > a [class*="__icon"] {
+      width: 1.35rem !important;
+      height: 1.35rem !important;
+      min-width: 1.35rem !important;
+      max-width: 1.35rem !important;
+      flex: 0 0 1.35rem !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 1.15rem !important;
+      line-height: 1 !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__icon svg,
+    nav.navigation.navigation--student .navigation-items--main > li > a i svg,
+    nav.navigation.navigation--student .navigation-items--main > li > a svg {
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__label,
+    nav.navigation.navigation--student .navigation-items--main > li > a [class*="__label"],
+    nav.navigation.navigation--student .navigation-items--main > li > a span {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      line-height: 1.35rem !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a:hover {
+      background: color-mix(in srgb, ${effectiveAccent} 15%, transparent) !important;
+      color: ${effectiveText} !important;
+      transform: translateX(3px);
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li.is-selected > a {
+      background: linear-gradient(90deg, color-mix(in srgb, ${effectiveAccent} 22%, transparent), color-mix(in srgb, ${effectiveAccent} 8%, transparent)) !important;
+      color: ${effectiveText} !important;
+      font-weight: 600 !important;
+      box-shadow: inset 3px 0 0 ${effectiveAccent}, 0 4px 14px rgba(0,0,0,${isDark ? '0.2' : '0.05'});
+    }
+
+    /* Start / Dashboard Cards & Now-Cards */
+    li.now--soft,
+    li.now--tomorrow,
+    li[class*="now--"],
+    #iddf > li {
+      background-color: ${effectiveSurface} !important;
+      border: 1px solid color-mix(in srgb, ${effectiveBorder} 65%, transparent) !important;
+      border-radius: 18px !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,${isDark ? '0.18' : '0.05'});
+      border-left: 4px solid ${effectiveAccent} !important;
+      transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
+      animation: st-card-in 320ms ease both;
+      color: ${effectiveText} !important;
+    }
+
+    #iddf > li:nth-child(1), #iddf > li:nth-child(2) { animation-delay: 0ms; }
+    #iddf > li:nth-child(3) { animation-delay: 60ms; }
+    #iddf > li:nth-child(4) { animation-delay: 120ms; }
+    #iddf > li:nth-child(5) { animation-delay: 180ms; }
+
+    li.now--soft:hover,
+    li.now--tomorrow:hover,
+    li[class*="now--"]:hover,
+    #iddf > li:hover {
+      box-shadow: 0 8px 28px rgba(0,0,0,${isDark ? '0.28' : '0.10'});
+      transform: translateY(-2px);
+    }
+
+    .now--wrapper ul#iddf {
+      display: flex;
+      flex-direction: column;
+      gap: .65rem;
+    }
+
+    /* Kaarten, Panels, Studiewijzers & Overzichten */
+    .card,
+    .container-card,
+    .container-studiewijzer,
+    .agenda-filter,
+    .agenda--day,
+    .agenda--day li,
+    .result-overview,
+    .panel,
+    .box {
+      background-color: ${effectiveSurface} !important;
+      color: ${effectiveText} !important;
+      border: 1px solid color-mix(in srgb, ${effectiveBorder} 60%, transparent) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 6px 20px rgba(0,0,0,${isDark ? '0.18' : '0.04'});
+      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    }
+
+    .card:hover,
+    .container-studiewijzer:hover,
+    .result-overview:hover,
+    .container-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0,0,0,${isDark ? '0.28' : '0.08'});
+    }
+
+    /* Tabellen & Cijferlijsten */
+    .table, table, .result-overview--grades table {
+      background-color: ${effectiveSurface} !important;
+      color: ${effectiveText} !important;
+      border-collapse: separate !important;
+      border-spacing: 0 !important;
+      border-radius: 14px !important;
+      overflow: hidden !important;
+      border: 1px solid color-mix(in srgb, ${effectiveBorder} 60%, transparent) !important;
+    }
+
+    table thead th, .result-overview--grades thead th {
+      background-color: color-mix(in srgb, ${effectiveSurface} 90%, ${effectiveBg}) !important;
+      color: ${effectiveText} !important;
+      font-weight: 600 !important;
+      border-bottom: 2px solid ${effectiveBorder} !important;
+      padding: 10px 14px !important;
+    }
+
+    table tbody tr, .result-overview--grades tbody tr {
+      border-bottom: 1px solid color-mix(in srgb, ${effectiveBorder} 40%, transparent) !important;
+      transition: background-color 150ms ease !important;
+    }
+
+    table tbody tr:hover, .result-overview--grades tbody tr:hover {
+      background-color: color-mix(in srgb, ${effectiveAccent} 10%, transparent) !important;
+    }
+
+    table td, .result-overview--grades td {
+      color: ${effectiveText} !important;
+      padding: 10px 14px !important;
+    }
+
+    /* Knoppen & Interactieve elementen */
+    button, .button, [role="button"], input[type="submit"], input[type="button"] {
+      border-radius: 12px !important;
+      transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, filter 160ms ease;
+    }
+
+    button:hover, .button:hover, [role="button"]:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Formuliervelden */
+    input[type="text"], input[type="password"], input[type="number"], select, textarea {
+      background-color: ${isDark ? 'rgba(0,0,0,0.25)' : '#ffffff'} !important;
+      color: ${effectiveText} !important;
+      border: 1px solid ${effectiveBorder} !important;
+      border-radius: 10px !important;
+      padding: 8px 12px !important;
+      outline: 0 !important;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: ${effectiveAccent} !important;
+      box-shadow: 0 0 0 3px color-mix(in srgb, ${effectiveAccent} 25%, transparent) !important;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: color-mix(in srgb, ${effectiveBorder} 80%, transparent); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: ${effectiveAccent}; }
+
+    /* Cijfercalculator highlight effect */
+    .eduarte-tools-grade-source {
+      cursor: pointer !important;
+      transition: outline 160ms ease, background-color 160ms ease, transform 160ms ease;
+      border-radius: 6px !important;
+    }
+    .eduarte-tools-grade-source:hover {
+      outline: 2px solid ${effectiveAccent} !important;
+      background-color: color-mix(in srgb, ${effectiveAccent} 18%, transparent) !important;
+      transform: scale(1.05);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    `;
+  }
+
+  function buildWallpaperCSS(wallpaperUrl, blur = 12, overlay = 55, accent = "#2563eb") {
+    const alpha = (overlay / 100).toFixed(2);
+    return `
     html {
       background-color: #0a0e14 !important;
-      background-image: linear-gradient(rgba(10,14,20,.55), rgba(10,14,20,.55)),
-        url('${HUMAN_WALLPAPER_URL}') !important;
+      background-image: linear-gradient(rgba(10,14,20,${alpha}), rgba(10,14,20,${alpha})),
+        url('${wallpaperUrl}') !important;
       background-position: center center !important;
       background-size: cover !important;
       background-attachment: fixed !important;
       background-repeat: no-repeat !important;
     }
-    body, .l-container, .l-flex-content, .content-wrapper, .content {
+    body, .l-container, .l-flex-content, .content-wrapper, .content, main {
       background: transparent !important;
     }
-    nav.navigation.navigation--student {
-      background-color: rgba(21,23,27,.55) !important;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-right: none !important;
+    nav.navigation.navigation--student, .sidebar {
+      background-color: rgba(17,24,39,.65) !important;
+      backdrop-filter: blur(${blur}px) !important;
+      -webkit-backdrop-filter: blur(${blur}px) !important;
+      border-right: 1px solid rgba(255,255,255,.1) !important;
     }
-    header.header .header-toolbar {
-      background-color: rgba(8,19,44,.45) !important;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+    header.header, header.header .header-toolbar, .header, .header-toolbar, .header-wrapper, .app-header {
+      background-color: rgba(15,20,30,.65) !important;
+      backdrop-filter: blur(${blur}px) !important;
+      -webkit-backdrop-filter: blur(${blur}px) !important;
+      border-bottom: 1px solid rgba(255,255,255,.1) !important;
     }
-    li.now--soft, li.now--tomorrow, li[class*="now--"], .agenda-filter, .agenda--day li,
-    .popover, .card, .table, table, thead, .container-studiewijzer {
-      background-color: rgba(31,35,40,.55) !important;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+    header.header .header-toolbar *, .header * {
+      color: #f4f4f6 !important;
     }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 18px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.3); }
-    .navigation-items--main > li > a:hover,
-    header.header .header-toolbar i:hover {
-      box-shadow: 0 0 13px rgba(0,0,0,.5);
+    li.now--soft, li.now--tomorrow, li[class*="now--"], #iddf > li, .agenda-filter, .agenda--day li,
+    .popover, .card, .table, table, thead, .container-studiewijzer, .container-card {
+      background-color: rgba(31,41,55,.65) !important;
+      backdrop-filter: blur(${Math.max(6, Math.round(blur * 0.75))}px) !important;
+      -webkit-backdrop-filter: blur(${Math.max(6, Math.round(blur * 0.75))}px) !important;
+      border: 1px solid rgba(255,255,255,.12) !important;
     }
-  `;
+    `;
+  }
 
   function buildCSS(s) {
-    const useCustom = s.custom && s.custom.bg;
-    const effectiveDark = s.dark || s.human || useCustom;
-    const effectiveAccent = s.accent || (s.human && !useCustom ? HUMAN_ACCENT : "");
-    const baseVars = useCustom ? customVars(s.custom) : effectiveDark ? DARK_VARS : {};
+    const presetKey = s.preset || "dark";
+    const presetConfig = PRESETS[presetKey] || PRESETS.dark;
+
+    const useCustom = s.custom && s.custom.bg && s.customEnabled;
+    const isDark = useCustom ? !!s.dark : (s.preset ? presetConfig.dark : !!s.dark);
+
+    const effectiveBg = useCustom ? s.custom.bg : (s.preset ? presetConfig.bg : (isDark ? "#111827" : "#f8fafc"));
+    const effectiveSurface = useCustom ? s.custom.surface : (s.preset ? presetConfig.surface : (isDark ? "#1f2937" : "#ffffff"));
+    const effectiveText = useCustom ? s.custom.text : (s.preset ? presetConfig.text : (isDark ? "#f9fafb" : "#0f172a"));
+    const effectiveBorder = useCustom ? s.custom.border : (s.preset ? presetConfig.border : (isDark ? "#374151" : "#e2e8f0"));
+    const effectiveAccent = s.accent || (s.preset ? presetConfig.accent : (s.human ? HUMAN_ACCENT : "#2563eb"));
+
+    const themeColors = {
+      bg: effectiveBg,
+      surface: effectiveSurface,
+      text: effectiveText,
+      border: effectiveBorder,
+    };
+
+    const hasWallpaper = !!s.wallpaperUrl || s.human;
+    const baseVars = deriveThemeTokens(themeColors, isDark);
     const vars = {
       ...baseVars,
-      ...(s.modern || s.human ? RADIUS_VARS : {}),
+      ...(s.modern || hasWallpaper ? RADIUS_VARS : {}),
       ...accentVars(effectiveAccent),
     };
+
     const decls = Object.entries(vars)
       .map(([k, v]) => `${k}: ${v} !important;`)
       .join("\n  ");
+
     let css = decls ? `:root {\n  ${decls}\n}\n` : "";
-    if (effectiveDark) {
+
+    if (isDark) {
       css += `html { color-scheme: dark; }\n`;
-      // Plain (non-variable) colors so the page is dark immediately, even
-      // before Eduarte's own stylesheet has loaded and started reading the
-      // --color-* variables above. This is what kills the white flash.
-      const fallbackBg = useCustom ? s.custom.bg : "#15171b";
-      const fallbackText = useCustom ? s.custom.text : "#f4f4f6";
-      css += `html, body { background-color: ${fallbackBg} !important; color: ${fallbackText} !important; }\n`;
+    } else {
+      css += `html { color-scheme: light; }\n`;
     }
-    if (s.modern) css += MODERN_CSS;
-    if (s.human) css += HUMAN_CSS;
+
+    if (s.font && FONT_MAP[s.font]) {
+      css += `body, input, button, select, textarea, .navigation-item__label, h1, h2, h3, h4, p, span, td, th { font-family: ${FONT_MAP[s.font]} !important; }\n`;
+    }
+
+    if (s.modern !== false) {
+      css += getModernDesignCSS(effectiveBg, effectiveSurface, effectiveText, effectiveBorder, effectiveAccent, isDark);
+    }
+
+    if (hasWallpaper) {
+      const url = s.wallpaperUrl || HUMAN_WALLPAPER_URL;
+      css += buildWallpaperCSS(url, s.wallpaperBlur ?? 12, s.wallpaperOverlay ?? 55, effectiveAccent);
+    }
+
     return css;
   }
 
@@ -421,7 +590,7 @@
       el.id = STYLE_ID;
       head.appendChild(el);
     } else if (el.parentElement !== head) {
-      head.appendChild(el); // keep it last, so it wins cascade ties
+      head.appendChild(el);
     }
     return el;
   }
@@ -450,10 +619,15 @@
   function loadAndApply() {
     chrome.storage.local.get(
       [
+        "eduarteThemePreset",
         "eduarteDarkMode",
         "eduarteAccentColor",
         "eduarteModernStyle",
         "eduarteHumanTheme",
+        "eduarteWallpaperUrl",
+        "eduarteWallpaperBlur",
+        "eduarteWallpaperOverlay",
+        "eduarteFont",
         "eduarteCustomTheme",
         "eduarteCustomColors",
         "eduarteModernNav",
@@ -462,11 +636,17 @@
       ],
       (data) => {
         applyTheme({
-          dark: !!data.eduarteDarkMode,
+          preset: data.eduarteThemePreset || "dark",
+          dark: data.eduarteDarkMode !== false,
           accent: data.eduarteAccentColor || "",
-          modern: !!data.eduarteModernStyle && data.eduarteModernNav !== false,
+          modern: data.eduarteModernStyle !== false,
           human: !!data.eduarteHumanTheme,
-          custom: data.eduarteCustomTheme ? data.eduarteCustomColors || null : null,
+          wallpaperUrl: data.eduarteWallpaperUrl || "",
+          wallpaperBlur: data.eduarteWallpaperBlur,
+          wallpaperOverlay: data.eduarteWallpaperOverlay,
+          font: data.eduarteFont || "default",
+          customEnabled: !!data.eduarteCustomTheme,
+          custom: data.eduarteCustomColors || null,
         });
       }
     );
@@ -477,10 +657,15 @@
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
     if (
+      changes.eduarteThemePreset ||
       changes.eduarteDarkMode ||
       changes.eduarteAccentColor ||
       changes.eduarteModernStyle ||
       changes.eduarteHumanTheme ||
+      changes.eduarteWallpaperUrl ||
+      changes.eduarteWallpaperBlur ||
+      changes.eduarteWallpaperOverlay ||
+      changes.eduarteFont ||
       changes.eduarteCustomTheme ||
       changes.eduarteCustomColors ||
       changes.eduarteModernNav ||
