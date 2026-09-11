@@ -51,9 +51,45 @@
     { quote: "Moeilijke wegen leiden vaak naar prachtige bestemmingen.", author: "Motivatie" },
   ];
 
+  function getSpotifyEmbedUrl(url) {
+    const defaultEmbed = "https://open.spotify.com/embed/playlist/37i9dQZF1DX8Uebhn9wzrS?utm_source=generator&theme=0";
+    if (!url || typeof url !== "string" || !url.trim()) return defaultEmbed;
+    const trimmed = url.trim();
+    if (trimmed.includes("open.spotify.com/embed/")) {
+      return trimmed;
+    }
+    const match = trimmed.match(/open\.spotify\.com\/(playlist|track|album|artist|episode|show)\/([a-zA-Z0-9]+)/i);
+    if (match) {
+      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`;
+    }
+    return defaultEmbed;
+  }
+
+  function isDashboardPage() {
+    const path = (location.pathname || "").toLowerCase();
+    // Exclude sub-pages that are clearly not the start/dashboard
+    if (/^\/(resultaten|agenda|studiewijzers?|presentie|berichten|stages?|bpv|profiel|instellingen|documenten|login|absenties?|inschrijvingen|toetsen)/i.test(path)) {
+      return false;
+    }
+    const hasNowWrapper = !!(document.querySelector(".now--wrapper") || document.querySelector("#iddf") || document.querySelector("li.now--soft") || document.querySelector("li.now--tomorrow"));
+    const isHomePath = path === "/" || path === "" || path === "/vandaag" || path === "/start" || path === "/dashboard" || path.endsWith("/start") || path.endsWith("/home") || path.endsWith("/vandaag");
+    return isHomePath || hasNowWrapper;
+  }
+
   // --- STARTPAGINA DASHBOARD WIDGETS ---
   function initStartWidget() {
     const CONTAINER_ID = "eduarte-tools-widgets-container";
+
+    function cleanIfWrongPage() {
+      if (!isDashboardPage()) {
+        const el = document.getElementById(CONTAINER_ID);
+        if (el) el.remove();
+        return false;
+      }
+      return true;
+    }
+
+    if (!cleanIfWrongPage()) return;
     if (document.getElementById(CONTAINER_ID)) return;
 
     chrome.storage.local.get(
@@ -65,6 +101,8 @@
         "eduarteShortcutsEnabled",
         "eduarteNotesEnabled",
         "eduarteQuoteEnabled",
+        "eduarteSpotifyEnabled",
+        "eduarteSpotifyUrl",
         "eduarteUserNotes",
       ],
       (settings) => {
@@ -75,11 +113,18 @@
         const showShortcuts = settings.eduarteShortcutsEnabled !== false;
         const showNotes = settings.eduarteNotesEnabled !== false;
         const showQuote = settings.eduarteQuoteEnabled !== false;
+        const showSpotify = settings.eduarteSpotifyEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showQuote) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showQuote && !showSpotify) return;
 
         function tryMount() {
+          if (!isDashboardPage()) {
+            const el = document.getElementById(CONTAINER_ID);
+            if (el) el.remove();
+            return;
+          }
           if (document.getElementById(CONTAINER_ID)) return;
+
           const target = document.querySelector(".now--wrapper") ||
             document.querySelector("#iddf")?.parentElement ||
             document.querySelector(".l-flex-content main") ||
@@ -315,8 +360,8 @@
               </div>
             ` : ''}
 
-            <!-- Grid kaarten: Snelkoppelingen, Notities & Quotes -->
-            ${(showShortcuts || showNotes || showQuote) ? `
+            <!-- Grid kaarten: Snelkoppelingen, Notities, Quotes & Spotify -->
+            ${(showShortcuts || showNotes || showQuote || showSpotify) ? `
               <div class="et-grid">
                 ${showShortcuts ? `
                   <div class="et-card">
@@ -348,6 +393,15 @@
                     <h3 class="et-widget-title">💡 Dagelijkse Studie-Tip</h3>
                     <p class="et-quote-text" id="et-quote-content"></p>
                     <div class="et-quote-author" id="et-quote-by"></div>
+                  </div>
+                ` : ''}
+
+                ${showSpotify ? `
+                  <div class="et-card" style="grid-column: 1 / -1;">
+                    <h3 class="et-widget-title">🎧 Spotify Study Speler</h3>
+                    <div style="border-radius:12px;overflow:hidden;background:#000;min-height:80px;">
+                      <iframe style="border-radius:12px;display:block;" src="${getSpotifyEmbedUrl(settings.eduarteSpotifyUrl)}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    </div>
                   </div>
                 ` : ''}
               </div>
