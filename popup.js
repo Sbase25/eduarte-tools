@@ -3,7 +3,7 @@ const ids = [
   "customenabled", "customBg", "customSurface", "customText", "customBorder", "customCss",
   "enabled", "username", "password", "autosubmit", "modernnav", "animations",
   "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled",
-  "shortcutsEnabled", "notesEnabled", "quoteEnabled", "spotifyEnabled", "spotifyUrl", "animationSpeed",
+  "shortcutsEnabled", "notesEnabled", "quoteEnabled", "animationSpeed",
   "gradesEnabled", "gradeMin", "gradeMax", "passThreshold",
 ];
 const elements = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
@@ -99,8 +99,6 @@ function load() {
     elements.shortcutsEnabled.checked = data.eduarteShortcutsEnabled !== false;
     elements.notesEnabled.checked = data.eduarteNotesEnabled !== false;
     elements.quoteEnabled.checked = data.eduarteQuoteEnabled !== false;
-    elements.spotifyEnabled.checked = data.eduarteSpotifyEnabled !== false;
-    elements.spotifyUrl.value = data.eduarteSpotifyUrl || "";
     elements.animationSpeed.value = data.eduarteAnimationSpeed ?? 60;
 
     elements.gradesEnabled.checked = data.eduarteGradesEnabled !== false;
@@ -144,8 +142,6 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteShortcutsEnabled: elements.shortcutsEnabled.checked,
     eduarteNotesEnabled: elements.notesEnabled.checked,
     eduarteQuoteEnabled: elements.quoteEnabled.checked,
-    eduarteSpotifyEnabled: elements.spotifyEnabled.checked,
-    eduarteSpotifyUrl: elements.spotifyUrl.value.trim(),
     eduarteAnimationSpeed: Number(elements.animationSpeed.value),
     eduarteGradesEnabled: elements.gradesEnabled.checked,
     eduarteGradeMinimum: Number(elements.gradeMin.value),
