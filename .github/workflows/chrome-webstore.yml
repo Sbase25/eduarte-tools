@@ -2,8 +2,7 @@ name: Publish Chrome extension
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -17,40 +16,57 @@ jobs:
       - name: Repository ophalen
         uses: actions/checkout@v4
 
-      - name: Go instellen
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.23"
-
       - name: Manifest controleren
-        shell: bash
         run: |
-          set -euo pipefail
-          python3 -c 'import json, re; v=json.load(open("manifest.json"))["version"]; assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", v), v; print("Versie:", v)'
+          python3 -c 'import json, re; v=json.load(open("manifest.json"))["version"]; assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", v); print("Versie:", v)'
 
-      - name: Extensie klaarmaken
-        shell: bash
+      - name: Extensie inpakken
         run: |
           set -euo pipefail
-          rm -rf extension-package
-          mkdir -p extension-package
+          rm -rf extension-package extension.zip
+          mkdir extension-package
           cp manifest.json background.js content.js overlay.js popup.html popup.js theme.js extension-package/
           cp -R icons assets extension-package/
+          (cd extension-package && zip -q -r ../extension.zip .)
 
-      - name: cws installeren
-        shell: bash
-        run: |
-          set -euo pipefail
-          go install github.com/tanema/cws@main
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
-
-      - name: Publiceren naar Chrome Web Store
+      - name: OAuth-token ophalen
+        id: token
         env:
-          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
-          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
-          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
-          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
-        shell: bash
+          CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
         run: |
           set -euo pipefail
-          cws deploy extension-package
+          response="$(curl --fail-with-body -sS -X POST https://oauth2.googleapis.com/token \
+            --data-urlencode "client_id=$CLIENT_ID" \
+            --data-urlencode "client_secret=$CLIENT_SECRET" \
+            --data-urlencode "refresh_token=$REFRESH_TOKEN" \
+            --data-urlencode "grant_type=refresh_token")"
+          token="$(echo "$response" | jq -r '.access_token // empty')"
+          test -n "$token"
+          echo "::add-mask::$token"
+          echo "value=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Uploaden naar Chrome Web Store
+        env:
+          ACCESS_TOKEN: ${{ steps.token.outputs.value }}
+          EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "Content-Type: application/zip" \
+            --data-binary @extension.zip \
+            "https://chromewebstore.googleapis.com/upload/v2/publishers/$PUBLISHER_ID/items/$EXTENSION_ID:upload"
+
+      - name: Publiceren
+        env:
+          ACCESS_TOKEN: ${{ steps.token.outputs.value }}
+          EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            "https://chromewebstore.googleapis.com/v2/publishers/$PUBLISHER_ID/items/$EXTENSION_ID:publish"
