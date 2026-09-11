@@ -62,21 +62,14 @@ Bij een volgende wijziging is alleen `git add .`, `git commit -m "..."` en
 
 ### Chrome Web Store
 
-1. Maak een ontwikkelaarsaccount aan op
-   [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
-2. Kies **New item** en upload een ZIP met de bestanden uit deze map.
-3. Vul beschrijving, screenshots, pictogrammen, categorie en privacygegevens in.
-4. Geef bij **Single purpose** en datagebruik aan dat loginvoorkeuren lokaal in
-   `chrome.storage.local` worden opgeslagen.
-5. Sla op en stuur de extensie ter beoordeling in.
+De eerste publicatie en de winkelvermelding moeten eenmalig via het
+[Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+worden ingesteld. Vul daar de beschrijving, screenshots, categorie en
+privacygegevens in en sla de winkelvermelding op.
 
-Gebruik voor iedere nieuwe versie een hoger versienummer in `manifest.json` en
-upload opnieuw. Upload alleen de extensiebestanden; voeg geen `.git`-map toe.
-
-Voor automatisch uploaden na elke push naar `main` gebruikt deze repository de
-workflow `.github/workflows/chrome-webstore.yml` met het gratis hulpprogramma
-`cws`. Voeg in GitHub bij
-**Settings → Secrets and variables → Actions** deze secrets toe:
+Daarna publiceert GitHub Actions nieuwe versies automatisch via de officiële
+Chrome Web Store API. Voeg in GitHub bij **Settings → Secrets and variables →
+Actions** deze secrets toe:
 
 ```text
 CWS_EXTENSION_ID
@@ -86,8 +79,11 @@ CWS_CLIENT_SECRET
 CWS_REFRESH_TOKEN
 ```
 
-De workflow uploadt en publiceert alleen wanneer de versie in `manifest.json`
-wordt verhoogd. Google kan daarna nog een handmatige review uitvoeren voordat
+Verhoog voor iedere nieuwe release het versienummer in `manifest.json` en push
+naar `main`. De workflow in `.github/workflows/chrome-webstore.yml` maakt
+automatisch een schone ZIP en uploadt die via de API. `CWS_PUBLISHER_ID` is
+het publisher-ID uit het Chrome Web Store-dashboard en verschilt van de
+extension-ID. Google kan daarna nog een handmatige review uitvoeren voordat
 de nieuwe versie zichtbaar wordt.
 
 ## Waarom dit bestaat
