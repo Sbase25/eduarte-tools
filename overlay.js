@@ -92,6 +92,8 @@
         "eduarteUserNotes",
         "eduarteAssignmentsEnabled",
         "msClientId",
+        "eduarteScheduleEnabled",
+        "eduarteScheduleCache",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -104,8 +106,9 @@
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
         const showQuote = settings.eduarteQuoteEnabled !== false;
         const showAssignments = settings.eduarteAssignmentsEnabled !== false && !!settings.msClientId;
+        const showSchedule = settings.eduarteScheduleEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote && !showAssignments) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote && !showAssignments && !showSchedule) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -479,6 +482,51 @@
                 padding: 20px 8px;
               }
 
+              /* Rooster widget */
+              .et-schedule-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                max-height: 230px;
+                overflow-y: auto;
+              }
+              .et-schedule-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 9px 12px;
+                border-radius: 10px;
+                background: rgba(255,255,255,.05);
+                font-size: 12px;
+              }
+              .et-schedule-item.next {
+                background: color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 18%, transparent);
+                border: 1px solid color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 40%, transparent);
+              }
+              .et-schedule-time {
+                font-weight: 700;
+                color: var(--color-text-primary, #f9fafb);
+                min-width: 82px;
+              }
+              .et-schedule-subject {
+                flex: 1 1 auto;
+                color: var(--color-text-secondary, #e5e7eb);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+              .et-schedule-room {
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--color-text-tertiary, #9ca3af);
+                background: rgba(255,255,255,.08);
+                padding: 2px 8px;
+                border-radius: 99px;
+              }
+
               @keyframes st-card-in {
                 from { opacity: 0; transform: translateY(6px); }
                 to { opacity: 1; transform: translateY(0); }
@@ -511,9 +559,18 @@
               </div>
             ` : ''}
 
-            <!-- Grid kaarten: Snelkoppelingen, Notities, Pomodoro, Snelle Calculator, Teams-opdrachten & Quotes -->
-            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote || showAssignments) ? `
+            <!-- Grid kaarten: Rooster, Snelkoppelingen, Notities, Pomodoro, Snelle Calculator, Teams-opdrachten & Quotes -->
+            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote || showAssignments || showSchedule) ? `
               <div class="et-grid">
+                ${showSchedule ? `
+                  <div class="et-card">
+                    <h3 class="et-widget-title">🗓️ Rooster Vandaag</h3>
+                    <ul class="et-schedule-list" id="et-schedule-list">
+                      <li class="et-assignments-loading">Rooster laden…</li>
+                    </ul>
+                  </div>
+                ` : ''}
+
                 ${showAssignments ? `
                   <div class="et-card">
                     <h3 class="et-widget-title">📚 Teams-opdrachten</h3>
@@ -636,6 +693,38 @@
 
             container.querySelector(".et-weather-refresh")?.addEventListener("click", fetchWeatherData);
             fetchWeatherData();
+          }
+
+          // Rooster van vandaag tonen (uit cache, bijgewerkt door bezoek aan /agenda)
+          if (showSchedule) {
+            const listEl = container.querySelector("#et-schedule-list");
+            const cache = settings.eduarteScheduleCache;
+            const today = new Date();
+            const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+            const nowMinutes = today.getHours() * 60 + today.getMinutes();
+
+            if (!cache || cache.date !== todayKey || !cache.lessons?.length) {
+              if (listEl) {
+                listEl.innerHTML = '<li class="et-assignments-empty">Nog geen rooster bekend. Bezoek eerst <a href="/agenda" style="color:inherit;text-decoration:underline;">Agenda</a> om vandaag te laden.</li>';
+              }
+            } else {
+              const upcoming = cache.lessons.filter((l) => l.endMinutes == null || l.endMinutes >= nowMinutes);
+              const toShow = (upcoming.length ? upcoming : cache.lessons).slice(0, 5);
+              if (listEl) {
+                listEl.innerHTML = toShow
+                  .map((l) => {
+                    const isNext = upcoming.length && l === upcoming[0];
+                    return `
+                      <li class="et-schedule-item${isNext ? " next" : ""}">
+                        <span class="et-schedule-time">${l.timeLabel}</span>
+                        <span class="et-schedule-subject">${l.subject}</span>
+                        ${l.room ? `<span class="et-schedule-room">${l.room}</span>` : ""}
+                      </li>
+                    `;
+                  })
+                  .join("");
+              }
+            }
           }
 
           // Teams-opdrachten ophalen via Microsoft Graph
@@ -1037,4 +1126,94 @@
 
   initStartWidget();
   initGradesOverlay();
+  initScheduleScanner();
+
+  // --- ROOSTER SCANNER: leest de agendapagina uit en cachet vandaag's lessen ---
+  function initScheduleScanner() {
+    if (!/\/agenda(?:\/|$)/i.test(location.pathname)) return;
+
+    chrome.storage.local.get(["eduarteScheduleEnabled"], (settings) => {
+      if (settings.eduarteScheduleEnabled === false) return;
+      scanAndCache();
+      const obs = new MutationObserver(() => scanAndCache());
+      obs.observe(document.documentElement, { childList: true, subtree: true });
+      setTimeout(() => obs.disconnect(), 15000);
+    });
+
+    function parseTimeToMinutes(str) {
+      const m = str.match(/(\d{1,2}):(\d{2})/);
+      if (!m) return null;
+      return Number(m[1]) * 60 + Number(m[2]);
+    }
+
+    function scanAndCache() {
+      // Generieke, tolerante selectors omdat Eduarte-omgevingen onderling
+      // kunnen verschillen in opmaak. We zoeken blokken die een tijdspatroon
+      // (HH:MM) bevatten en behandelen die als les-/agenda-items.
+      const selectors = [
+        "[class*='agenda-item']",
+        "[class*='agenda__item']",
+        "[class*='schedule-item']",
+        "[class*='lesson']",
+        ".now--soft, .now--tomorrow",
+        "#iddf > li",
+        "li[class*='now--']",
+        ".container-card li",
+        ".container-card tr",
+      ];
+      const nodes = [...new Set(selectors.flatMap((sel) => [...document.querySelectorAll(sel)]))];
+
+      const timePattern = /\b([01]?\d|2[0-3]):[0-5]\d\b/;
+      const items = [];
+
+      nodes.forEach((node) => {
+        const text = (node.innerText || "").trim();
+        if (!text || !timePattern.test(text)) return;
+        if (text.length > 300) return; // Waarschijnlijk een te grote wrapper, geen los item
+
+        const times = [...text.matchAll(/\b([01]?\d|2[0-3]):[0-5]\d\b/g)].map((m) => m[0]);
+        if (!times.length) return;
+        const startMinutes = parseTimeToMinutes(times[0]);
+        const endMinutes = times[1] ? parseTimeToMinutes(times[1]) : null;
+
+        // Probeer een vaknaam te vinden: de eerste tekstregel zonder tijd/cijfers,
+        // of anders de langste "woordachtige" regel in het blok.
+        const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+        const subjectLine = lines.find((l) => !timePattern.test(l) && /[a-zA-Z]{3,}/.test(l)) || "Les";
+        const roomMatch = text.match(/(?:lokaal|ruimte|zaal)\s*[:\-]?\s*([a-z0-9.\-]+)/i);
+
+        items.push({
+          startMinutes,
+          endMinutes,
+          timeLabel: times[1] ? `${times[0]} - ${times[1]}` : times[0],
+          subject: subjectLine.slice(0, 60),
+          room: roomMatch ? roomMatch[1] : null,
+        });
+      });
+
+      // Dedupliceren op tijd + vak, en sorteren op starttijd
+      const seen = new Set();
+      const unique = items
+        .filter((it) => {
+          const key = `${it.startMinutes}-${it.subject}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .sort((a, b) => (a.startMinutes ?? 0) - (b.startMinutes ?? 0));
+
+      if (!unique.length) return;
+
+      const today = new Date();
+      const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+      chrome.storage.local.set({
+        eduarteScheduleCache: {
+          date: dateKey,
+          lessons: unique,
+          scannedAt: Date.now(),
+        },
+      });
+    }
+  }
 })();

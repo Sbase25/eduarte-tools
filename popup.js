@@ -5,7 +5,7 @@ const ids = [
   "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled",
   "shortcutsEnabled", "notesEnabled", "pomodoroEnabled", "quickCalcEnabled", "quoteEnabled", "animationSpeed",
   "gradesEnabled", "gradeMin", "gradeMax", "passThreshold",
-  "msClientId", "assignmentsEnabled",
+  "msClientId", "assignmentsEnabled", "scheduleEnabled",
 ];
 const elements = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const titles = { theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start", grades: "Cijfers", teams: "Teams", elo: "ELO", about: "Over" };
@@ -81,7 +81,7 @@ function load() {
     "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled",
     "eduarteShortcutsEnabled", "eduarteNotesEnabled", "eduarteQuoteEnabled", "eduarteAnimationSpeed",
     "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum", "eduartePassThreshold",
-    "msClientId", "msTeamsToken", "eduarteAssignmentsEnabled",
+    "msClientId", "msTeamsToken", "eduarteAssignmentsEnabled", "eduarteScheduleEnabled",
   ], (data) => {
     activePresetKey = data.eduarteThemePreset || "dark";
     const preset = presets[activePresetKey] || presets.dark;
@@ -122,6 +122,7 @@ function load() {
     elements.startEnabled.checked = data.eduarteStartEnabled !== false;
     elements.weatherEnabled.checked = data.eduarteWeatherEnabled !== false;
     elements.weatherCity.value = data.eduarteWeatherCity || "";
+    elements.scheduleEnabled.checked = data.eduarteScheduleEnabled !== false;
     elements.greetingEnabled.checked = data.eduarteGreetingEnabled !== false;
     elements.shortcutsEnabled.checked = data.eduarteShortcutsEnabled !== false;
     elements.notesEnabled.checked = data.eduarteNotesEnabled !== false;
@@ -172,6 +173,7 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteStartEnabled: elements.startEnabled.checked,
     eduarteWeatherEnabled: elements.weatherEnabled.checked,
     eduarteWeatherCity: elements.weatherCity.value.trim(),
+    eduarteScheduleEnabled: elements.scheduleEnabled.checked,
     eduarteGreetingEnabled: elements.greetingEnabled.checked,
     eduarteShortcutsEnabled: elements.shortcutsEnabled.checked,
     eduarteNotesEnabled: elements.notesEnabled.checked,
