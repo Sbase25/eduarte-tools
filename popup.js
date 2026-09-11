@@ -1,6 +1,6 @@
 const ids = [
   "darkmode", "modernstyle", "humantheme", "accent", "wallpaperUrl", "wallpaperBlur", "wallpaperOverlay", "font",
-  "customenabled", "customBg", "customSurface", "customText", "customBorder", "customCss",
+  "customenabled", "customBg", "customSurface", "customText", "customBorder",
   "enabled", "username", "password", "autosubmit", "modernnav", "animations",
   "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled",
   "shortcutsEnabled", "pomodoroEnabled", "quickCalcEnabled", "quoteEnabled", "animationSpeed",
@@ -128,7 +128,7 @@ elements.customenabled.addEventListener("change", () => {
 function load() {
   chrome.storage.local.get([
     "eduarteThemePreset", "eduarteDarkMode", "eduarteAccentColor", "eduarteModernStyle", "eduarteHumanTheme",
-    "eduarteWallpaperUrl", "eduarteWallpaperBlur", "eduarteWallpaperOverlay", "eduarteFont", "eduarteCustomCss",
+    "eduarteWallpaperUrl", "eduarteWallpaperBlur", "eduarteWallpaperOverlay", "eduarteFont",
     "eduarteCustomTheme", "eduarteCustomColors", "eduarteEnabled", "eduarteUsername", "eduartePassword",
     "eduarteAutosubmit", "eduarteModernNav", "eduarteAnimations", "eduarteFloatingCards",
     "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled",
@@ -148,7 +148,6 @@ function load() {
     elements.wallpaperBlur.value = data.eduarteWallpaperBlur ?? 12;
     elements.wallpaperOverlay.value = data.eduarteWallpaperOverlay ?? 55;
     elements.font.value = data.eduarteFont || "default";
-    elements.customCss.value = data.eduarteCustomCss || "";
     elements.customenabled.checked = !!data.eduarteCustomTheme;
     elements.customBg.value = colors.bg || preset.bg;
     elements.customSurface.value = colors.surface || preset.surface;
@@ -209,7 +208,6 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteWallpaperBlur: Number(elements.wallpaperBlur.value),
     eduarteWallpaperOverlay: Number(elements.wallpaperOverlay.value),
     eduarteFont: elements.font.value,
-    eduarteCustomCss: elements.customCss.value.trim(),
     eduarteCustomTheme: elements.customenabled.checked,
     eduarteCustomColors: {
       bg: elements.customBg.value,

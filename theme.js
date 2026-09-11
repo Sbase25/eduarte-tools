@@ -580,10 +580,6 @@
       css += buildWallpaperCSS(url, s.wallpaperBlur ?? 12, s.wallpaperOverlay ?? 55, effectiveAccent);
     }
 
-    if (s.customCss) {
-      css += `\n/* Custom User CSS */\n${s.customCss}\n`;
-    }
-
     return css;
   }
 
@@ -632,7 +628,6 @@
         "eduarteWallpaperBlur",
         "eduarteWallpaperOverlay",
         "eduarteFont",
-        "eduarteCustomCss",
         "eduarteCustomTheme",
         "eduarteCustomColors",
         "eduarteModernNav",
@@ -650,7 +645,6 @@
           wallpaperBlur: data.eduarteWallpaperBlur,
           wallpaperOverlay: data.eduarteWallpaperOverlay,
           font: data.eduarteFont || "default",
-          customCss: data.eduarteCustomCss || "",
           customEnabled: !!data.eduarteCustomTheme,
           custom: data.eduarteCustomColors || null,
         });
@@ -672,7 +666,6 @@
       changes.eduarteWallpaperBlur ||
       changes.eduarteWallpaperOverlay ||
       changes.eduarteFont ||
-      changes.eduarteCustomCss ||
       changes.eduarteCustomTheme ||
       changes.eduarteCustomColors ||
       changes.eduarteModernNav ||
