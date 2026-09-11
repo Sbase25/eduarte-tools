@@ -290,28 +290,42 @@
     nav.navigation.navigation--student .navigation-items--main > li > a > * {
       position: static !important;
       transform: none !important;
-      flex-shrink: 0 !important;
     }
 
+    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__icon,
     nav.navigation.navigation--student .navigation-items--main > li > a i,
-    nav.navigation.navigation--student .navigation-items--main > li > a svg,
     nav.navigation.navigation--student .navigation-items--main > li > a .icon,
     nav.navigation.navigation--student .navigation-items--main > li > a [class*="__icon"] {
-      width: 1.25rem !important;
-      height: 1.25rem !important;
-      min-width: 1.25rem !important;
+      width: 1.35rem !important;
+      height: 1.35rem !important;
+      min-width: 1.35rem !important;
+      max-width: 1.35rem !important;
+      flex: 0 0 1.35rem !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
       margin: 0 !important;
-      font-size: 1.1rem !important;
+      padding: 0 !important;
+      font-size: 1.15rem !important;
+      line-height: 1 !important;
     }
 
+    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__icon svg,
+    nav.navigation.navigation--student .navigation-items--main > li > a i svg,
+    nav.navigation.navigation--student .navigation-items--main > li > a svg {
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__label,
     nav.navigation.navigation--student .navigation-items--main > li > a [class*="__label"],
     nav.navigation.navigation--student .navigation-items--main > li > a span {
       flex: 1 1 auto !important;
+      min-width: 0 !important;
       margin: 0 !important;
       padding: 0 !important;
+      line-height: 1.35rem !important;
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
