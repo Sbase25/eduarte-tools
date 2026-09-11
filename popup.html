@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Eduarte Tools</title>
+<style>
+:root{--surface:#101419;--surface-2:#171d25;--surface-3:#202832;--line:#354252;--text:#f3f7ff;--muted:#aeb9c8;--primary:#91cdfc;--primary-strong:#4f46e5}
+*{box-sizing:border-box}html,body{width:530px;height:600px;margin:0;overflow:hidden}body{background:var(--surface);color:var(--text);font:14px "Segoe UI",system-ui,sans-serif;overflow-x:hidden}
+#app{display:grid;grid-template-columns:128px 1fr;height:100%;overflow:hidden}
+.rail{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;background:#18212d;border-right:1px solid var(--line)}
+.brand{width:78px;height:46px;display:grid;place-items:center;margin-bottom:8px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#9333ea);font-size:22px;box-shadow:0 8px 22px #2563eb55}
+.rail button{width:108px;min-height:66px;padding:8px 3px;border:0;border-radius:22px;color:var(--muted);background:transparent;cursor:pointer;font:15px inherit;white-space:nowrap;transition:.2s}
+.rail button span{display:grid;place-items:center;height:30px;margin-bottom:6px}.rail button svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.rail button:hover{color:var(--text);background:#ffffff0d;transform:translateY(-1px)}.rail button.active{color:#fff;background:linear-gradient(135deg,#30379b,#7040ed);box-shadow:0 8px 20px #4338ca66}
+.content{position:relative;min-width:0;overflow:auto;padding-bottom:72px}.topbar{position:sticky;top:0;z-index:2;padding:22px 22px 15px;background:linear-gradient(#101419 82%,transparent)}
+h1{margin:0;font-size:21px;letter-spacing:-.03em}.topbar-subtitle{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:400}
+.panel{display:none;padding:0 22px 22px;animation:appear .22s ease}.panel.active{display:block}@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.setting{padding:15px 0;border-bottom:1px solid var(--line)}.setting:last-child{border-bottom:0}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:14px}.title{font-size:15px}.subtitle{max-width:340px;margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+.switch{position:relative;width:52px;height:30px;flex:none}.switch input{opacity:0;width:0;height:0}.track{position:absolute;inset:0;border:1px solid #7090a9;border-radius:99px;background:#314252;cursor:pointer;transition:.2s}.track:after{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;border-radius:50%;background:#9ab6ca;transition:.2s}.switch input:checked+.track{border-color:transparent;background:var(--primary)}.switch input:checked+.track:after{transform:translateX(22px);background:#123d63}
+input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:12px;border:1px solid #526477;border-radius:9px;background:#151b22;color:var(--text);font:14px inherit;outline:0}input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px #91cdfc24}
+.color{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}input[type=color]{width:40px;height:28px;padding:0;border:1px solid var(--line);border-radius:8px;background:none}
+.range{width:100%;accent-color:var(--primary);margin-top:12px}.range-value{color:var(--primary);font-size:12px}
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.preset{height:72px;padding:8px;border:1px solid var(--line);border-radius:12px;color:var(--text);text-align:left;background:var(--surface-2);cursor:pointer}.preset:before{content:"";display:block;height:27px;margin-bottom:5px;border-radius:6px;background:var(--preset)}.preset.selected{border-color:var(--primary);box-shadow:0 0 0 2px #91cdfc44}
+.save-bar{position:fixed;right:0;bottom:0;width:calc(100% - 128px);padding:12px 22px;background:#101419ee;border-top:1px solid var(--line);backdrop-filter:blur(12px)}#save{width:100%;padding:12px;border:0;border-radius:10px;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed);font-weight:700;cursor:pointer;transition:.2s}#save:hover{filter:brightness(1.12);transform:translateY(-1px)}#save.saved{background:#16845b}
+.note{margin:0 0 8px;color:var(--muted);font-size:12px;line-height:1.5}.danger{color:#ff8e8e}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <nav class="rail">
+    <div class="brand">✦</div>
+    <button class="active" data-tab="theme"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4Z"/><path d="m13 7 4 4M14 4l1.5-1.5M19 9l1.5-1.5M4 20h4"/></svg></span>Thema</button>
+    <button data-tab="login"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="3"/><path d="m10.5 13.5 4-4H21v3h-2v2h-2v2h-3.5l-3-3Z"/></svg></span>Inloggen</button>
+    <button data-tab="sidebar"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M9 4v16M12 8h5M12 12h5M12 16h5"/></svg></span>Menubalk</button>
+    <button data-tab="start"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span>Start</button>
+    <button data-tab="grades"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="m9 13-1 8 4-2 4 2-1-8M12 6v6M9 9h6"/></svg></span>Cijfers</button>
+    <button data-tab="elo"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v16H7.5A3.5 3.5 0 0 0 4 21.5v-16Z"/><path d="M4 5.5v16M8 6h8M8 10h8M8 14h5"/></svg></span>ELO</button>
+    <button data-tab="about"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg></span>Over</button>
+  </nav>
+  <main class="content">
+    <header class="topbar"><h1 id="pageTitle">Thema</h1><div class="topbar-subtitle">Eduarte Tools · moderne instellingen</div></header>
+    <section class="panel active" id="panel-theme">
+      <p class="note">Pas de kleuren, achtergrond en vormgeving van Eduarte aan. De instellingen blijven lokaal opgeslagen.</p>
+      <div class="setting"><div class="title">Thema</div><div class="preset-grid">
+        <button class="preset selected" data-preset="dark" style="--preset:linear-gradient(135deg,#111827,#334155)">Donker</button>
+        <button class="preset" data-preset="blue" style="--preset:linear-gradient(135deg,#0f3b63,#60a5fa)">Blauw</button>
+        <button class="preset" data-preset="purple" style="--preset:linear-gradient(135deg,#24113f,#a855f7)">Paars</button>
+        <button class="preset" data-preset="light" style="--preset:linear-gradient(135deg,#f8fafc,#93c5fd)">Licht</button>
+      </div></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Donkere modus</div><div class="subtitle">Gebruik een donker kleurenpalet voor Eduarte.</div></div><label class="switch"><input id="darkmode" type="checkbox"><span class="track"></span></label></div></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Moderne stijl</div><div class="subtitle">Rondere kaarten, schaduwen en vloeiende animaties.</div></div><label class="switch"><input id="modernstyle" type="checkbox"><span class="track"></span></label></div></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Human-thema</div><div class="subtitle">Glas-effect met achtergrondafbeelding.</div></div><label class="switch"><input id="humantheme" type="checkbox"><span class="track"></span></label></div></div>
+      <div class="color"><span>Accentkleur</span><input id="accent" type="color" value="#2563eb"></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Eigen kleuren gebruiken</div><div class="subtitle">Gebruik de achtergrond- en kaartkleur hieronder.</div></div><label class="switch"><input id="customenabled" type="checkbox"><span class="track"></span></label></div></div>
+      <div class="color"><span>Achtergrond</span><input id="customBg" type="color" value="#15171b"></div>
+      <div class="color"><span>Kaarten</span><input id="customSurface" type="color" value="#1f2328"></div>
+      <div class="color"><span>Tekst</span><input id="customText" type="color" value="#f4f4f6"></div>
+      <div class="color"><span>Randen</span><input id="customBorder" type="color" value="#545e6b"></div>
+    </section>
+    <section class="panel" id="panel-login">
+      <div class="setting"><div class="setting-row"><div><div class="title">Automatisch inloggen</div><div class="subtitle">Werkt op alle ingestelde Eduarte- en Microsoft-loginpagina's.</div></div><label class="switch"><input id="enabled" type="checkbox"><span class="track"></span></label></div></div>
+      <div class="setting"><div class="title">Gebruikersnaam</div><div class="subtitle">Je gebruikersnaam wordt automatisch ingevuld.</div><input id="username" type="text" placeholder="naam@school.nl" autocomplete="off"></div>
+      <div class="setting"><div class="title">Wachtwoord</div><input id="password" type="password" placeholder="Wachtwoord" autocomplete="off"></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Automatisch verzenden</div><div class="subtitle">Klik na het invullen automatisch op inloggen.</div></div><label class="switch"><input id="autosubmit" type="checkbox"><span class="track"></span></label></div></div>
+    </section>
+    <section class="panel" id="panel-sidebar">
+      <div class="setting"><div class="setting-row"><div><div class="title">Moderne menubalk</div><div class="subtitle">Geef de Eduarte-zijbalk afgeronde knoppen en een accentindicator.</div></div><label class="switch"><input id="modernnav" type="checkbox"><span class="track"></span></label></div></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Animaties</div><div class="subtitle">Zachte overgangen bij kaarten, knoppen en navigatie.</div></div><label class="switch"><input id="animations" type="checkbox"><span class="track"></span></label></div></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Kaarten laten zweven</div><div class="subtitle">Voeg diepte en hover-effecten toe aan Eduarte-kaarten.</div></div><label class="switch"><input id="floatingcards" type="checkbox"><span class="track"></span></label></div></div>
+    </section>
+    <section class="panel" id="panel-start">
+      <div class="setting"><div class="setting-row"><div><div class="title">Moderne startpagina</div><div class="subtitle">Verbeter de startpagina met de nieuwe kaartstijl.</div></div><label class="switch"><input id="startEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+      <div class="setting"><div class="title">Kaartanimatie</div><input id="animationSpeed" class="range" type="range" min="0" max="100" value="60"><div class="range-value">Animatie-intensiteit</div></div>
+    </section>
+    <section class="panel" id="panel-grades">
+      <div class="setting"><div class="setting-row"><div><div class="title">Cijferoverzicht verbeteren</div><div class="subtitle">Toon de Study Tools-achtige calculator als overlay op /resultaten.</div></div><label class="switch"><input id="gradesEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+      <div class="setting"><div class="title">Ondergrens cijfers</div><input id="gradeMin" class="range" type="range" min="0" max="10" step=".1" value="1"><div class="range-value" id="gradeMinValue">1,0</div></div>
+      <div class="setting"><div class="title">Bovengrens cijfers</div><input id="gradeMax" class="range" type="range" min="1" max="10" step=".1" value="10"><div class="range-value" id="gradeMaxValue">10,0</div></div>
+      <div class="setting"><div class="title">Voldoendegrens</div><input id="passThreshold" class="range" type="range" min="1" max="10" step=".1" value="5.5"><div class="range-value" id="passThresholdValue">5,5</div></div>
+    </section>
+    <section class="panel" id="panel-elo"><p class="note">Instellingen voor de elektronische leeromgeving.</p><div class="setting"><div class="title">ELO-koppeling</div><div class="subtitle">Eduarte Tools gebruikt de bestaande Eduarte-pagina's en voegt geen externe accountkoppeling toe.</div></div></section>
+    <section class="panel" id="panel-about"><p class="note">Eduarte Tools is een moderne hulpmodule voor Eduarte-omgevingen, met een Study Tools-geïnspireerde bediening.</p><div class="setting"><div class="title">Ondersteunde omgevingen</div><div class="subtitle">Eduarte- en Educus-portalen met de standaard Eduarte- of Microsoft-login.</div></div><div class="setting"><div class="title">Privacy</div><div class="subtitle">Logininstellingen en voorkeuren worden alleen opgeslagen in chrome.storage.local.</div></div></section>
+    <div class="save-bar"><button id="save">Opslaan</button></div>
+  </main>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>
