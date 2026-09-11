@@ -34,6 +34,7 @@ input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:1
     <button data-tab="sidebar"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M9 4v16M12 8h5M12 12h5M12 16h5"/></svg></span>Menubalk</button>
     <button data-tab="start"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span>Start</button>
     <button data-tab="grades"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="m9 13-1 8 4-2 4 2-1-8M12 6v6M9 9h6"/></svg></span>Cijfers</button>
+    <button data-tab="teams"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 4v14"/></svg></span>Teams</button>
     <button data-tab="elo"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v16H7.5A3.5 3.5 0 0 0 4 21.5v-16Z"/><path d="M4 5.5v16M8 6h8M8 10h8M8 14h5"/></svg></span>ELO</button>
     <button data-tab="about"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg></span>Over</button>
   </nav>
@@ -117,6 +118,18 @@ input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:1
       <div class="setting"><div class="title">Ondergrens cijfers</div><input id="gradeMin" class="range" type="range" min="0" max="10" step=".1" value="1"><div class="range-value" id="gradeMinValue">1,0</div></div>
       <div class="setting"><div class="title">Bovengrens cijfers</div><input id="gradeMax" class="range" type="range" min="1" max="10" step=".1" value="10"><div class="range-value" id="gradeMaxValue">10,0</div></div>
       <div class="setting"><div class="title">Voldoendegrens</div><input id="passThreshold" class="range" type="range" min="1" max="10" step=".1" value="5.5"><div class="range-value" id="passThresholdValue">5,5</div></div>
+    </section>
+    <section class="panel" id="panel-teams">
+      <p class="note">Koppel je Microsoft-schoolaccount om je Teams-opdrachten (Education Assignments) direct op je Eduarte-dashboard te zien. Hiervoor is een eigen Azure App-registratie (Client ID) nodig — vraag dit na bij je schoolbeheerder of maak er zelf een aan via <strong>portal.azure.com → App registraties</strong>. Redirect URI: <code id="teamsRedirectUri">wordt geladen…</code></p>
+      <div class="setting"><div class="title">Azure App Client ID</div><div class="subtitle">De Application (client) ID van je Azure App-registratie met de EduAssignments.ReadBasic-machtiging.</div><input id="msClientId" type="text" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off"></div>
+      <div class="setting">
+        <div class="setting-row">
+          <div><div class="title">Verbindingsstatus</div><div class="subtitle" id="teamsStatus">Niet verbonden</div></div>
+          <button id="teamsConnect" style="padding:10px 16px;border:0;border-radius:9px;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed);font-weight:600;cursor:pointer;white-space:nowrap;">Verbinden</button>
+        </div>
+      </div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Opdrachten-widget tonen</div><div class="subtitle">Toon je aankomende Teams-opdrachten (met deadline) op het Eduarte-dashboard.</div></div><label class="switch"><input id="assignmentsEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+      <div class="setting"><button id="teamsDisconnect" style="padding:10px 16px;border:1px solid var(--line);border-radius:9px;color:var(--danger,#ff8e8e);background:transparent;cursor:pointer;">Ontkoppelen</button></div>
     </section>
     <section class="panel" id="panel-elo"><p class="note">Instellingen voor de elektronische leeromgeving.</p><div class="setting"><div class="title">ELO-koppeling</div><div class="subtitle">Eduarte Tools gebruikt de bestaande Eduarte-pagina's en voegt geen externe accountkoppeling toe.</div></div></section>
     <section class="panel" id="panel-about"><p class="note">Eduarte Tools is een moderne hulpmodule voor Eduarte-omgevingen, met een Study Tools-geïnspireerde bediening.</p><div class="setting"><div class="title">Ondersteunde omgevingen</div><div class="subtitle">Eduarte- en Educus-portalen met de standaard Eduarte- of Microsoft-login.</div></div><div class="setting"><div class="title">Privacy</div><div class="subtitle">Logininstellingen en voorkeuren worden alleen opgeslagen in chrome.storage.local.</div></div></section>

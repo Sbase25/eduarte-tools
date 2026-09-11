@@ -5,9 +5,10 @@ const ids = [
   "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled",
   "shortcutsEnabled", "notesEnabled", "pomodoroEnabled", "quickCalcEnabled", "quoteEnabled", "animationSpeed",
   "gradesEnabled", "gradeMin", "gradeMax", "passThreshold",
+  "msClientId", "assignmentsEnabled",
 ];
 const elements = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
-const titles = { theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start", grades: "Cijfers", elo: "ELO", about: "Over" };
+const titles = { theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start", grades: "Cijfers", teams: "Teams", elo: "ELO", about: "Over" };
 const presets = {
   dark: { dark: true, accent: "#3b82f6", bg: "#111827", surface: "#1f2937", text: "#f9fafb", border: "#374151" },
   blue: { dark: true, accent: "#38bdf8", bg: "#0b192c", surface: "#13253f", text: "#f0f9ff", border: "#1e3a5f" },
@@ -80,6 +81,7 @@ function load() {
     "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled",
     "eduarteShortcutsEnabled", "eduarteNotesEnabled", "eduarteQuoteEnabled", "eduarteAnimationSpeed",
     "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum", "eduartePassThreshold",
+    "msClientId", "msTeamsToken", "eduarteAssignmentsEnabled",
   ], (data) => {
     activePresetKey = data.eduarteThemePreset || "dark";
     const preset = presets[activePresetKey] || presets.dark;
@@ -133,6 +135,10 @@ function load() {
     elements.gradeMax.value = data.eduarteGradeMaximum ?? 10;
     elements.passThreshold.value = data.eduartePassThreshold ?? 5.5;
 
+    elements.msClientId.value = data.msClientId || "";
+    elements.assignmentsEnabled.checked = data.eduarteAssignmentsEnabled !== false;
+    updateTeamsStatus(!!data.msTeamsToken);
+
     ["gradeMin", "gradeMax", "passThreshold", "wallpaperBlur", "wallpaperOverlay"].forEach((id) => elements[id]?.dispatchEvent(new Event("input")));
   });
 }
@@ -177,11 +183,60 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteGradeMinimum: Number(elements.gradeMin.value),
     eduarteGradeMaximum: Number(elements.gradeMax.value),
     eduartePassThreshold: Number(elements.passThreshold.value),
+    msClientId: elements.msClientId.value.trim(),
+    eduarteAssignmentsEnabled: elements.assignmentsEnabled.checked,
   }, () => {
     const button = document.getElementById("save");
     button.textContent = "Opgeslagen ✓";
     button.classList.add("saved");
     setTimeout(() => { button.textContent = "Opslaan"; button.classList.remove("saved"); }, 1400);
+  });
+});
+
+// --- Microsoft Teams koppeling ---
+function updateTeamsStatus(connected) {
+  const statusEl = document.getElementById("teamsStatus");
+  const connectBtn = document.getElementById("teamsConnect");
+  if (!statusEl || !connectBtn) return;
+  if (connected) {
+    statusEl.textContent = "✓ Verbonden met Microsoft";
+    statusEl.style.color = "#10b981";
+    connectBtn.textContent = "Opnieuw verbinden";
+  } else {
+    statusEl.textContent = "Niet verbonden";
+    statusEl.style.color = "";
+    connectBtn.textContent = "Verbinden";
+  }
+}
+
+const redirectUriEl = document.getElementById("teamsRedirectUri");
+if (redirectUriEl && chrome.identity) {
+  redirectUriEl.textContent = chrome.identity.getRedirectURL("teams-auth");
+}
+
+document.getElementById("teamsConnect")?.addEventListener("click", () => {
+  const clientId = elements.msClientId.value.trim();
+  if (!clientId) {
+    alert("Vul eerst je Azure App Client ID in en klik op Opslaan.");
+    return;
+  }
+  chrome.storage.local.set({ msClientId: clientId }, () => {
+    const btn = document.getElementById("teamsConnect");
+    btn.textContent = "Verbinden…";
+    chrome.runtime.sendMessage({ type: "TEAMS_CONNECT" }, (response) => {
+      if (response?.success) {
+        updateTeamsStatus(true);
+      } else {
+        updateTeamsStatus(false);
+        alert("Verbinden mislukt: " + (response?.error || "Onbekende fout"));
+      }
+    });
+  });
+});
+
+document.getElementById("teamsDisconnect")?.addEventListener("click", () => {
+  chrome.runtime.sendMessage({ type: "TEAMS_DISCONNECT" }, () => {
+    updateTeamsStatus(false);
   });
 });
 

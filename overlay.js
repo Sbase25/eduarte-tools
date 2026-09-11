@@ -90,6 +90,8 @@
         "eduarteQuickCalcEnabled",
         "eduarteQuoteEnabled",
         "eduarteUserNotes",
+        "eduarteAssignmentsEnabled",
+        "msClientId",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -101,8 +103,9 @@
         const showPomodoro = settings.eduartePomodoroEnabled !== false;
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
         const showQuote = settings.eduarteQuoteEnabled !== false;
+        const showAssignments = settings.eduarteAssignmentsEnabled !== false && !!settings.msClientId;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote && !showAssignments) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -430,6 +433,52 @@
                 text-align: right;
               }
 
+              /* Teams-opdrachten widget */
+              .et-assignments-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                max-height: 230px;
+                overflow-y: auto;
+              }
+              .et-assignment-item a {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                padding: 10px 12px;
+                border-radius: 10px;
+                background: rgba(255,255,255,.05);
+                border-left: 3px solid var(--color-bg-fill-action, #3b82f6);
+                text-decoration: none;
+                transition: background 0.18s ease, transform 0.18s ease;
+              }
+              .et-assignment-item a:hover { background: rgba(255,255,255,.09); transform: translateX(2px); }
+              .et-assignment-item.urgent a { border-left-color: #ef4444; }
+              .et-assignment-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--color-text-primary, #f9fafb);
+              }
+              .et-assignment-class {
+                font-size: 11px;
+                color: var(--color-text-tertiary, #9ca3af);
+              }
+              .et-assignment-due {
+                font-size: 11px;
+                font-weight: 500;
+                color: var(--color-text-secondary, #e5e7eb);
+              }
+              .et-assignment-item.urgent .et-assignment-due { color: #ef4444; }
+              .et-assignments-empty, .et-assignments-loading {
+                font-size: 12px;
+                color: var(--color-text-tertiary, #9ca3af);
+                text-align: center;
+                padding: 20px 8px;
+              }
+
               @keyframes st-card-in {
                 from { opacity: 0; transform: translateY(6px); }
                 to { opacity: 1; transform: translateY(0); }
@@ -462,9 +511,18 @@
               </div>
             ` : ''}
 
-            <!-- Grid kaarten: Snelkoppelingen, Notities, Pomodoro, Snelle Calculator & Quotes -->
-            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote) ? `
+            <!-- Grid kaarten: Snelkoppelingen, Notities, Pomodoro, Snelle Calculator, Teams-opdrachten & Quotes -->
+            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote || showAssignments) ? `
               <div class="et-grid">
+                ${showAssignments ? `
+                  <div class="et-card">
+                    <h3 class="et-widget-title">📚 Teams-opdrachten</h3>
+                    <ul class="et-assignments-list" id="et-assignments-list">
+                      <li class="et-assignments-loading">Opdrachten laden…</li>
+                    </ul>
+                  </div>
+                ` : ''}
+
                 ${showShortcuts ? `
                   <div class="et-card">
                     <h3 class="et-widget-title">🚀 Snelkoppelingen</h3>
@@ -578,6 +636,57 @@
 
             container.querySelector(".et-weather-refresh")?.addEventListener("click", fetchWeatherData);
             fetchWeatherData();
+          }
+
+          // Teams-opdrachten ophalen via Microsoft Graph
+          if (showAssignments) {
+            const listEl = container.querySelector("#et-assignments-list");
+
+            function formatDueDate(iso) {
+              if (!iso) return "Geen deadline";
+              const due = new Date(iso);
+              const now = new Date();
+              const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+              const dateStr = due.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+              if (diffDays < 0) return `Verlopen (${dateStr})`;
+              if (diffDays === 0) return `Vandaag, ${dateStr}`;
+              if (diffDays === 1) return `Morgen, ${dateStr}`;
+              return `Over ${diffDays} dagen, ${dateStr}`;
+            }
+
+            function renderAssignments(assignments) {
+              if (!listEl) return;
+              if (!assignments || !assignments.length) {
+                listEl.innerHTML = '<li class="et-assignments-empty">Geen openstaande opdrachten 🎉</li>';
+                return;
+              }
+              listEl.innerHTML = assignments
+                .slice(0, 6)
+                .map((a) => {
+                  const due = new Date(a.dueDateTime);
+                  const isUrgent = a.dueDateTime && (due - new Date()) / (1000 * 60 * 60 * 24) <= 2;
+                  return `
+                    <li class="et-assignment-item${isUrgent ? " urgent" : ""}">
+                      <a href="${a.webUrl || "https://teams.microsoft.com"}" target="_blank" rel="noreferrer">
+                        <span class="et-assignment-title">${a.title}</span>
+                        <span class="et-assignment-class">${a.className}</span>
+                        <span class="et-assignment-due">${formatDueDate(a.dueDateTime)}</span>
+                      </a>
+                    </li>
+                  `;
+                })
+                .join("");
+            }
+
+            chrome.runtime.sendMessage({ type: "TEAMS_GET_ASSIGNMENTS" }, (res) => {
+              if (chrome.runtime.lastError || !res || !res.success) {
+                if (listEl) {
+                  listEl.innerHTML = `<li class="et-assignments-empty">${res?.error || "Kon opdrachten niet ophalen. Controleer je Microsoft-koppeling in instellingen."}</li>`;
+                }
+                return;
+              }
+              renderAssignments(res.assignments);
+            });
           }
 
           // Quote instellen op basis van de dag
