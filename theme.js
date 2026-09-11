@@ -282,6 +282,39 @@
       border-radius: .85rem !important;
       color: color-mix(in srgb, ${effectiveText} 85%, transparent) !important;
       transition: background-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+      position: relative !important;
+    }
+
+    /* Fix icon/label overlap: original site absolutely positions icons over
+       text assuming a fixed padding, which breaks once we restyle the anchor. */
+    nav.navigation.navigation--student .navigation-items--main > li > a > * {
+      position: static !important;
+      transform: none !important;
+      flex-shrink: 0 !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a i,
+    nav.navigation.navigation--student .navigation-items--main > li > a svg,
+    nav.navigation.navigation--student .navigation-items--main > li > a .icon,
+    nav.navigation.navigation--student .navigation-items--main > li > a [class*="__icon"] {
+      width: 1.25rem !important;
+      height: 1.25rem !important;
+      min-width: 1.25rem !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+      font-size: 1.1rem !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a [class*="__label"],
+    nav.navigation.navigation--student .navigation-items--main > li > a span {
+      flex: 1 1 auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
     }
 
     nav.navigation.navigation--student .navigation-items--main > li > a:hover {
