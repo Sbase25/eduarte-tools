@@ -54,48 +54,7 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 Gegevens worden alleen lokaal in je browser opgeslagen
 (`chrome.storage.local`) en nergens naartoe verzonden.
 
-## Publiceren
 
-### GitHub
-
-Maak eerst een repository aan en voer in deze projectmap uit:
-
-```bash
-git add .
-git commit -m "Prepare Eduarte Tools"
-git branch -M main
-git remote add origin https://github.com/<gebruikersnaam>/<repository>.git
-git push -u origin main
-```
-
-Bij een volgende wijziging is alleen `git add .`, `git commit -m "..."` en
-`git push` nodig.
-
-### Chrome Web Store
-
-De eerste publicatie en de winkelvermelding moeten eenmalig via het
-[Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-worden ingesteld. Vul daar de beschrijving, screenshots, categorie en
-privacygegevens in en sla de winkelvermelding op.
-
-Daarna publiceert GitHub Actions nieuwe versies automatisch via de officiële
-Chrome Web Store API. Voeg in GitHub bij **Settings → Secrets and variables →
-Actions** deze secrets toe:
-
-```text
-CWS_EXTENSION_ID
-CWS_PUBLISHER_ID
-CWS_CLIENT_ID
-CWS_CLIENT_SECRET
-CWS_REFRESH_TOKEN
-```
-
-Verhoog voor iedere nieuwe release het versienummer in `manifest.json` en push
-naar `main`. De workflow in `.github/workflows/chrome-webstore.yml` maakt
-automatisch een schone ZIP en uploadt die via de API. `CWS_PUBLISHER_ID` is
-het publisher-ID uit het Chrome Web Store-dashboard en verschilt van de
-extension-ID. Google kan daarna nog een handmatige review uitvoeren voordat
-de nieuwe versie zichtbaar wordt.
 
 ## Waarom dit bestaat
 
