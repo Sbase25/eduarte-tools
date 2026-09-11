@@ -43,22 +43,9 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 Gegevens worden alleen lokaal in je browser opgeslagen
 (`chrome.storage.local`) en nergens naartoe verzonden.
 
-## Publiceren
 
-### GitHub
 
-Maak eerst een repository aan en voer in deze projectmap uit:
 
-```bash
-git add .
-git commit -m "Prepare Eduarte Tools"
-git branch -M main
-git remote add origin https://github.com/<gebruikersnaam>/<repository>.git
-git push -u origin main
-```
-
-Bij een volgende wijziging is alleen `git add .`, `git commit -m "..."` en
-`git push` nodig.
 
 ### Chrome Web Store
 
