@@ -3,17 +3,6 @@ name: Publish Chrome extension
 on:
   push:
     branches: [main]
-    paths:
-      - "manifest.json"
-      - "background.js"
-      - "content.js"
-      - "overlay.js"
-      - "popup.html"
-      - "popup.js"
-      - "theme.js"
-      - "icons/**"
-      - "assets/**"
-      - ".github/workflows/chrome-webstore.yml"
   workflow_dispatch:
 
 permissions:
@@ -27,17 +16,19 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          node-version: 20
+          go-version: "1.23"
 
       - name: Validate manifest
         run: |
-          node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync("manifest.json","utf8")); if (!/^\d+\.\d+\.\d+$/.test(m.version)) throw new Error("Invalid manifest version"); console.log(m.version);'
+          python3 -c 'import json, re; version=json.load(open("manifest.json"))["version"]; assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version); print(version)'
 
       - name: Install cws
-        run: npm install --no-save cws
+        run: |
+          go install github.com/tanema/cws@main
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Publish to Chrome Web Store
         env:
@@ -45,4 +36,4 @@ jobs:
           CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
           CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
           CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
-        run: npx --no-install cws deploy .
+        run: cws deploy .
