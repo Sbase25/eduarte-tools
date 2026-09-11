@@ -27,12 +27,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Validate manifest
         run: |
           node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync("manifest.json","utf8")); if (!/^\d+\.\d+\.\d+$/.test(m.version)) throw new Error("Invalid manifest version"); console.log(m.version);'
 
       - name: Install cws
-        run: npm install --global cws
+        run: npm install --no-save cws
 
       - name: Publish to Chrome Web Store
         env:
@@ -40,4 +45,4 @@ jobs:
           CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
           CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
           CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
-        run: cws deploy .
+        run: npx --no-install cws deploy .
