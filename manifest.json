@@ -23,12 +23,17 @@
   "host_permissions": [
     "https://*.educus.nl/*",
     "https://*.eduarte.nl/*",
-    "https://login.microsoftonline.com/*"
+    "https://login.microsoftonline.com/*",
+    "https://api.open-meteo.com/*",
+    "https://geocoding-api.open-meteo.com/*"
   ],
   "web_accessible_resources": [
     {
       "resources": ["assets/wallpaper-human.jpg"],
-      "matches": ["https://*.educus.nl/*"]
+      "matches": [
+        "https://*.educus.nl/*",
+        "https://*.eduarte.nl/*"
+      ]
     }
   ],
   "content_scripts": [

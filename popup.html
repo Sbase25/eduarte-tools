@@ -41,21 +41,44 @@ input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:1
     <header class="topbar"><h1 id="pageTitle">Thema</h1><div class="topbar-subtitle">Eduarte Tools · moderne instellingen</div></header>
     <section class="panel active" id="panel-theme">
       <p class="note">Pas de kleuren, achtergrond en vormgeving van Eduarte aan. De instellingen blijven lokaal opgeslagen.</p>
-      <div class="setting"><div class="title">Thema</div><div class="preset-grid">
+      <div class="setting"><div class="title">Thema Voorkeuren</div><div class="preset-grid">
         <button class="preset selected" data-preset="dark" style="--preset:linear-gradient(135deg,#111827,#334155)">Donker</button>
         <button class="preset" data-preset="blue" style="--preset:linear-gradient(135deg,#0f3b63,#60a5fa)">Blauw</button>
         <button class="preset" data-preset="purple" style="--preset:linear-gradient(135deg,#24113f,#a855f7)">Paars</button>
+        <button class="preset" data-preset="emerald" style="--preset:linear-gradient(135deg,#064e3b,#10b981)">Smaragd</button>
+        <button class="preset" data-preset="sunset" style="--preset:linear-gradient(135deg,#431407,#f97316)">Sunset</button>
+        <button class="preset" data-preset="oled" style="--preset:linear-gradient(135deg,#000000,#27272a)">OLED Zwart</button>
+        <button class="preset" data-preset="nord" style="--preset:linear-gradient(135deg,#2e3440,#88c0d0)">Nord</button>
+        <button class="preset" data-preset="cyberpunk" style="--preset:linear-gradient(135deg,#090a16,#ec4899)">Cyberpunk</button>
         <button class="preset" data-preset="light" style="--preset:linear-gradient(135deg,#f8fafc,#93c5fd)">Licht</button>
       </div></div>
       <div class="setting"><div class="setting-row"><div><div class="title">Donkere modus</div><div class="subtitle">Gebruik een donker kleurenpalet voor Eduarte.</div></div><label class="switch"><input id="darkmode" type="checkbox"><span class="track"></span></label></div></div>
       <div class="setting"><div class="setting-row"><div><div class="title">Moderne stijl</div><div class="subtitle">Rondere kaarten, schaduwen en vloeiende animaties.</div></div><label class="switch"><input id="modernstyle" type="checkbox"><span class="track"></span></label></div></div>
-      <div class="setting"><div class="setting-row"><div><div class="title">Human-thema</div><div class="subtitle">Glas-effect met achtergrondafbeelding.</div></div><label class="switch"><input id="humantheme" type="checkbox"><span class="track"></span></label></div></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Human-thema</div><div class="subtitle">Origineel Study Tools glas-effect met achtergrond.</div></div><label class="switch"><input id="humantheme" type="checkbox"><span class="track"></span></label></div></div>
       <div class="color"><span>Accentkleur</span><input id="accent" type="color" value="#2563eb"></div>
+      
+      <div class="setting"><div class="title">Eigen achtergrondafbeelding (URL)</div><div class="subtitle">Voer een directe link in naar een afbeelding voor een glassmorphism achtergrond.</div><input id="wallpaperUrl" type="text" placeholder="https://example.com/wallpaper.jpg" autocomplete="off"></div>
+      <div class="setting"><div class="title">Achtergrond vervaging</div><input id="wallpaperBlur" class="range" type="range" min="0" max="25" value="12"><div class="range-value" id="wallpaperBlurValue">12 px</div></div>
+      <div class="setting"><div class="title">Donkere filterlaag</div><input id="wallpaperOverlay" class="range" type="range" min="10" max="90" value="55"><div class="range-value" id="wallpaperOverlayValue">55%</div></div>
+
+      <div class="setting"><div class="title">Lettertype (Typografie)</div><div class="subtitle">Kies een modern lettertype voor alle teksten in Eduarte.</div>
+        <select id="font">
+          <option value="default">Standaard (Systeem)</option>
+          <option value="inter">Inter (Modern & Strak)</option>
+          <option value="roboto">Roboto (Neutraal)</option>
+          <option value="poppins">Poppins (Rond & Fris)</option>
+          <option value="lexend">Lexend (Optimaal leesbaar)</option>
+          <option value="jetbrains">JetBrains Mono (Monospace)</option>
+        </select>
+      </div>
+
       <div class="setting"><div class="setting-row"><div><div class="title">Eigen kleuren gebruiken</div><div class="subtitle">Gebruik de achtergrond- en kaartkleur hieronder.</div></div><label class="switch"><input id="customenabled" type="checkbox"><span class="track"></span></label></div></div>
       <div class="color"><span>Achtergrond</span><input id="customBg" type="color" value="#15171b"></div>
       <div class="color"><span>Kaarten</span><input id="customSurface" type="color" value="#1f2328"></div>
       <div class="color"><span>Tekst</span><input id="customText" type="color" value="#f4f4f6"></div>
       <div class="color"><span>Randen</span><input id="customBorder" type="color" value="#545e6b"></div>
+
+      <div class="setting"><div class="title">Aangepaste CSS</div><div class="subtitle">Voeg je eigen CSS-regels toe voor specifieke stijlaanpassingen.</div><textarea id="customCss" rows="3" style="width:100%;margin-top:8px;padding:10px;border:1px solid #526477;border-radius:9px;background:#151b22;color:var(--text);font:12px monospace;outline:0;resize:vertical;" placeholder="/* Bijv. .card { opacity: 0.95; } */"></textarea></div>
     </section>
     <section class="panel" id="panel-login">
       <div class="setting"><div class="setting-row"><div><div class="title">Automatisch inloggen</div><div class="subtitle">Werkt op alle ingestelde Eduarte- en Microsoft-loginpagina's.</div></div><label class="switch"><input id="enabled" type="checkbox"><span class="track"></span></label></div></div>
@@ -69,7 +92,10 @@ input[type=text],input[type=password],select{width:100%;margin-top:8px;padding:1
       <div class="setting"><div class="setting-row"><div><div class="title">Kaarten laten zweven</div><div class="subtitle">Voeg diepte en hover-effecten toe aan Eduarte-kaarten.</div></div><label class="switch"><input id="floatingcards" type="checkbox"><span class="track"></span></label></div></div>
     </section>
     <section class="panel" id="panel-start">
-      <div class="setting"><div class="setting-row"><div><div class="title">Moderne startpagina</div><div class="subtitle">Verbeter de startpagina met de nieuwe kaartstijl.</div></div><label class="switch"><input id="startEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Moderne startpagina</div><div class="subtitle">Verbeter de startpagina met de nieuwe kaartstijl en widgets.</div></div><label class="switch"><input id="startEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Weer-widget</div><div class="subtitle">Toont het actuele weerbericht en temperatuur op het dashboard.</div></div><label class="switch"><input id="weatherEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
+      <div class="setting"><div class="title">Locatie / Plaatsnaam voor weer</div><div class="subtitle">Voer je woonplaats of schoolstad in (bijv. Utrecht, Rotterdam, Eindhoven).</div><input id="weatherCity" type="text" placeholder="Utrecht" autocomplete="off"></div>
+      <div class="setting"><div class="setting-row"><div><div class="title">Persoonlijke begroeting</div><div class="subtitle">Toon een tijdgebonden begroeting en datum bovenaan.</div></div><label class="switch"><input id="greetingEnabled" type="checkbox" checked><span class="track"></span></label></div></div>
       <div class="setting"><div class="title">Kaartanimatie</div><input id="animationSpeed" class="range" type="range" min="0" max="100" value="60"><div class="range-value">Animatie-intensiteit</div></div>
     </section>
     <section class="panel" id="panel-grades">

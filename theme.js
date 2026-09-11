@@ -386,14 +386,66 @@
     }
   `;
 
+  function buildWallpaperCSS(wallpaperUrl, blur = 12, overlay = 55) {
+    const alpha = (overlay / 100).toFixed(2);
+    return `
+    html {
+      background-color: #0a0e14 !important;
+      background-image: linear-gradient(rgba(10,14,20,${alpha}), rgba(10,14,20,${alpha})),
+        url('${wallpaperUrl}') !important;
+      background-position: center center !important;
+      background-size: cover !important;
+      background-attachment: fixed !important;
+      background-repeat: no-repeat !important;
+    }
+    body, .l-container, .l-flex-content, .content-wrapper, .content {
+      background: transparent !important;
+    }
+    nav.navigation.navigation--student {
+      background-color: rgba(21,23,27,.6) !important;
+      backdrop-filter: blur(${blur}px);
+      -webkit-backdrop-filter: blur(${blur}px);
+      border-right: none !important;
+    }
+    header.header .header-toolbar {
+      background-color: rgba(8,19,44,.5) !important;
+      backdrop-filter: blur(${blur}px);
+      -webkit-backdrop-filter: blur(${blur}px);
+    }
+    li.now--soft, li.now--tomorrow, li[class*="now--"], .agenda-filter, .agenda--day li,
+    .popover, .card, .table, table, thead, .container-studiewijzer, .container-card, .eduarte-tools-weather-card {
+      background-color: rgba(31,35,40,.6) !important;
+      backdrop-filter: blur(${Math.max(6, Math.round(blur * 0.75))}px);
+      -webkit-backdrop-filter: blur(${Math.max(6, Math.round(blur * 0.75))}px);
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 18px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.35); }
+    .navigation-items--main > li > a:hover,
+    header.header .header-toolbar i:hover {
+      box-shadow: 0 0 13px rgba(0,0,0,.5);
+    }
+    `;
+  }
+
+  const FONT_MAP = {
+    inter: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    roboto: "'Roboto', 'Segoe UI', Arial, sans-serif",
+    poppins: "'Poppins', 'Segoe UI', sans-serif",
+    lexend: "'Lexend', 'Segoe UI', sans-serif",
+    jetbrains: "'JetBrains Mono', Consolas, Monaco, monospace",
+  };
+
   function buildCSS(s) {
     const useCustom = s.custom && s.custom.bg;
-    const effectiveDark = s.dark || s.human || useCustom;
+    const hasWallpaper = !!s.wallpaperUrl || s.human;
+    const effectiveDark = s.dark || hasWallpaper || useCustom;
     const effectiveAccent = s.accent || (s.human && !useCustom ? HUMAN_ACCENT : "");
     const baseVars = useCustom ? customVars(s.custom) : effectiveDark ? DARK_VARS : {};
     const vars = {
       ...baseVars,
-      ...(s.modern || s.human ? RADIUS_VARS : {}),
+      ...(s.modern || hasWallpaper ? RADIUS_VARS : {}),
       ...accentVars(effectiveAccent),
     };
     const decls = Object.entries(vars)
@@ -402,15 +454,21 @@
     let css = decls ? `:root {\n  ${decls}\n}\n` : "";
     if (effectiveDark) {
       css += `html { color-scheme: dark; }\n`;
-      // Plain (non-variable) colors so the page is dark immediately, even
-      // before Eduarte's own stylesheet has loaded and started reading the
-      // --color-* variables above. This is what kills the white flash.
       const fallbackBg = useCustom ? s.custom.bg : "#15171b";
       const fallbackText = useCustom ? s.custom.text : "#f4f4f6";
       css += `html, body { background-color: ${fallbackBg} !important; color: ${fallbackText} !important; }\n`;
     }
+    if (s.font && FONT_MAP[s.font]) {
+      css += `body, input, button, select, textarea, .navigation-item__label, h1, h2, h3, h4, p, span, td, th { font-family: ${FONT_MAP[s.font]} !important; }\n`;
+    }
     if (s.modern) css += MODERN_CSS;
-    if (s.human) css += HUMAN_CSS;
+    if (hasWallpaper) {
+      const url = s.wallpaperUrl || HUMAN_WALLPAPER_URL;
+      css += buildWallpaperCSS(url, s.wallpaperBlur ?? 12, s.wallpaperOverlay ?? 55);
+    }
+    if (s.customCss) {
+      css += `\n/* Custom User CSS */\n${s.customCss}\n`;
+    }
     return css;
   }
 
@@ -454,6 +512,11 @@
         "eduarteAccentColor",
         "eduarteModernStyle",
         "eduarteHumanTheme",
+        "eduarteWallpaperUrl",
+        "eduarteWallpaperBlur",
+        "eduarteWallpaperOverlay",
+        "eduarteFont",
+        "eduarteCustomCss",
         "eduarteCustomTheme",
         "eduarteCustomColors",
         "eduarteModernNav",
@@ -466,6 +529,11 @@
           accent: data.eduarteAccentColor || "",
           modern: !!data.eduarteModernStyle && data.eduarteModernNav !== false,
           human: !!data.eduarteHumanTheme,
+          wallpaperUrl: data.eduarteWallpaperUrl || "",
+          wallpaperBlur: data.eduarteWallpaperBlur,
+          wallpaperOverlay: data.eduarteWallpaperOverlay,
+          font: data.eduarteFont || "default",
+          customCss: data.eduarteCustomCss || "",
           custom: data.eduarteCustomTheme ? data.eduarteCustomColors || null : null,
         });
       }
@@ -481,6 +549,11 @@
       changes.eduarteAccentColor ||
       changes.eduarteModernStyle ||
       changes.eduarteHumanTheme ||
+      changes.eduarteWallpaperUrl ||
+      changes.eduarteWallpaperBlur ||
+      changes.eduarteWallpaperOverlay ||
+      changes.eduarteFont ||
+      changes.eduarteCustomCss ||
       changes.eduarteCustomTheme ||
       changes.eduarteCustomColors ||
       changes.eduarteModernNav ||

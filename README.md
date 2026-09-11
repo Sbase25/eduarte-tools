@@ -18,16 +18,18 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   verzenden (geen klik nodig).
 - **Cijfercalculator** — berekent het gewogen gemiddelde, de mediaan en welk
   cijfer je met een bepaalde weging nodig hebt voor je doelgemiddelde.
-- **Donkere modus** — herschrijft Eduarte's eigen CSS-tokens
-  (`--color-bg`, `--color-text-primary`, ...) in plaats van een grove
-  kleuromkering, dus het blijft er native uitzien.
-- **Accentkleur** — kies je eigen kleur voor knoppen en links.
-- **Moderne stijl** — rondere hoeken, zachte schaduwen, subtiele
-  hover-/laadanimaties, gebouwd op Eduarte's eigen `--border-radius-*`
-  schaal zodat het overal tegelijk werkt (kaarten, tabellen, tabs).
-- **"Human"-thema** — een donker glaseffect met een vervagende
-  achtergrondfoto, geïnspireerd op het gelijknamige thema van Study Tools
-  voor Magister (door Nick Verbruggen).
+- **Start Dashboard Weer- & Begroeting Widget** — live temperatuur, weersicoon,
+  neerslagkans en tijdgebonden begroeting direct op je Eduarte startpagina.
+- **Uitgebreide Thema Presets** — kies direct uit Donker, Blauw, Paars, Smaragd,
+  Sunset, OLED Zwart, Nord, Cyberpunk of Licht.
+- **Eigen achtergrond & Glassmorphism** — stel je eigen wallpaper URL in met
+  aanpasbare achtergrondvervaging (blur) en overlay-intensiteit.
+- **Typografie / Lettertypen** — kies uit strakke fonts zoals Inter, Roboto, Poppins,
+  Lexend of JetBrains Mono.
+- **Donkere modus & Accentkleuren** — herschrijft Eduarte's eigen CSS-tokens
+  (`--color-bg`, `--color-text-primary`, ...) met dynamische accenten en custom CSS ondersteuning.
+- **"Human"-thema** — het iconische donkere glaseffect met achtergrondfoto,
+  geïnspireerd op Study Tools voor Magister (door Nick Verbruggen).
 - **Eigen thema** — kies 4 basiskleuren (achtergrond, oppervlak, tekst,
   randen); de rest wordt automatisch afgeleid.
 
