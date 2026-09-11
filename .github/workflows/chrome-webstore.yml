@@ -1,0 +1,87 @@
+name: Publish Chrome extension
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "manifest.json"
+      - "background.js"
+      - "content.js"
+      - "overlay.js"
+      - "popup.html"
+      - "popup.js"
+      - "theme.js"
+      - "icons/**"
+      - "assets/**"
+      - ".github/workflows/chrome-webstore.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate manifest and version
+        id: manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync("manifest.json","utf8")); if (!/^\d+\.\d+\.\d+$/.test(m.version)) throw new Error("manifest version must be x.y.z"); console.log(`version=${m.version}`);' >> "$GITHUB_OUTPUT"
+
+      - name: Create extension ZIP
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          zip -r "dist/eduarte-tools-${{ steps.manifest.outputs.version }}.zip" \
+            manifest.json background.js content.js overlay.js popup.html popup.js theme.js icons assets
+
+      - name: Get Google access token
+        id: token
+        env:
+          CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail-with-body -sS -X POST https://oauth2.googleapis.com/token \
+            -d client_id="$CLIENT_ID" \
+            -d client_secret="$CLIENT_SECRET" \
+            -d refresh_token="$REFRESH_TOKEN" \
+            -d grant_type=refresh_token)"
+          token="$(jq -r '.access_token // empty' <<< "$response")"
+          test -n "$token"
+          echo "::add-mask::$token"
+          echo "value=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to Chrome Web Store
+        env:
+          ACCESS_TOKEN: ${{ steps.token.outputs.value }}
+          EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body -sS -X PUT \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -H "Content-Type: application/zip" \
+            --upload-file "dist/eduarte-tools-${{ steps.manifest.outputs.version }}.zip" \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/$EXTENSION_ID"
+
+      - name: Publish to Chrome Web Store
+        env:
+          ACCESS_TOKEN: ${{ steps.token.outputs.value }}
+          EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -H "Content-Type: application/json" \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/$EXTENSION_ID/publish"
