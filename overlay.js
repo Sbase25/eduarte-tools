@@ -85,11 +85,9 @@
         "eduarteGreetingEnabled",
         "eduarteWeatherCity",
         "eduarteShortcutsEnabled",
-        "eduarteNotesEnabled",
         "eduartePomodoroEnabled",
         "eduarteQuickCalcEnabled",
         "eduarteQuoteEnabled",
-        "eduarteUserNotes",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -97,12 +95,11 @@
         const showWeather = settings.eduarteWeatherEnabled !== false;
         const showGreeting = settings.eduarteGreetingEnabled !== false;
         const showShortcuts = settings.eduarteShortcutsEnabled !== false;
-        const showNotes = settings.eduarteNotesEnabled !== false;
         const showPomodoro = settings.eduartePomodoroEnabled !== false;
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
         const showQuote = settings.eduarteQuoteEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showNotes && !showPomodoro && !showQuickCalc && !showQuote) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc && !showQuote) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -239,87 +236,6 @@
                 border-color: var(--color-bg-fill-action, #3b82f6);
                 transform: translateY(-2px);
                 box-shadow: 0 4px 14px rgba(0,0,0,.15);
-              }
-
-              /* Notes / To-Do styling */
-              .et-notes-form {
-                display: flex;
-                gap: 8px;
-                margin-bottom: 12px;
-              }
-              .et-notes-input {
-                flex: 1;
-                padding: 9px 14px;
-                border: 1px solid var(--color-border-primary, #374151);
-                border-radius: 10px;
-                background: rgba(0,0,0,.2);
-                color: var(--color-text-primary, #f9fafb);
-                font-size: 12px;
-                outline: 0;
-              }
-              .et-notes-input:focus {
-                border-color: var(--color-bg-fill-action, #3b82f6);
-              }
-              .et-notes-add {
-                padding: 9px 15px;
-                border: 0;
-                border-radius: 10px;
-                background: var(--color-bg-fill-action, #3b82f6);
-                color: #fff;
-                cursor: pointer;
-                font-size: 12px;
-                font-weight: 600;
-                transition: filter 0.15s ease, transform 0.15s ease;
-              }
-              .et-notes-add:hover {
-                filter: brightness(1.12);
-                transform: translateY(-1px);
-              }
-              .et-notes-items {
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                max-height: 190px;
-                overflow-y: auto;
-              }
-              .et-notes-item {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 8px 12px;
-                background: rgba(255,255,255,.04);
-                border: 1px solid rgba(255,255,255,.06);
-                border-radius: 8px;
-                font-size: 12px;
-                transition: background-color 0.15s ease;
-              }
-              .et-notes-item:hover {
-                background: rgba(255,255,255,.07);
-              }
-              .et-notes-text {
-                flex: 1;
-                cursor: pointer;
-                transition: opacity 0.2s, text-decoration 0.2s;
-              }
-              .et-notes-text.done {
-                text-decoration: line-through;
-                opacity: 0.45;
-              }
-              .et-notes-del {
-                border: 0;
-                background: transparent;
-                color: var(--color-text-tertiary, #9ca3af);
-                cursor: pointer;
-                font-size: 14px;
-                padding: 2px 6px;
-                border-radius: 4px;
-                transition: color 0.15s;
-              }
-              .et-notes-del:hover {
-                color: #ef4444;
               }
 
               /* Pomodoro styling */
@@ -462,8 +378,8 @@
               </div>
             ` : ''}
 
-            <!-- Grid kaarten: Snelkoppelingen, Notities, Pomodoro, Snelle Calculator & Quotes -->
-            ${(showShortcuts || showNotes || showPomodoro || showQuickCalc || showQuote) ? `
+            <!-- Grid kaarten: Snelkoppelingen, Pomodoro, Snelle Calculator & Quotes -->
+            ${(showShortcuts || showPomodoro || showQuickCalc || showQuote) ? `
               <div class="et-grid">
                 ${showShortcuts ? `
                   <div class="et-card">
@@ -508,17 +424,6 @@
                       <span style="font-size:12px;color:var(--color-text-secondary,#e5e7eb);">Nodig voor streefcijfer:</span>
                       <b id="et-calc-needed">8,5</b>
                     </div>
-                  </div>
-                ` : ''}
-
-                ${showNotes ? `
-                  <div class="et-card">
-                    <h3 class="et-widget-title">📝 Snelnotities & Taken</h3>
-                    <form class="et-notes-form">
-                      <input type="text" class="et-notes-input" placeholder="+ Voeg een taak of herinnering toe..." />
-                      <button type="submit" class="et-notes-add">Toevoegen</button>
-                    </form>
-                    <ul class="et-notes-items"></ul>
                   </div>
                 ` : ''}
 
@@ -697,58 +602,6 @@
               inp?.addEventListener("input", calcNeeded);
             });
             calcNeeded();
-          }
-
-          // Notes / To-Do functionaliteit
-          if (showNotes) {
-            const notesList = container.querySelector(".et-notes-items");
-            const notesForm = container.querySelector(".et-notes-form");
-            const notesInput = container.querySelector(".et-notes-input");
-
-            let notes = Array.isArray(settings.eduarteUserNotes) ? settings.eduarteUserNotes : [
-              { id: 1, text: "Welkom bij Eduarte Tools! ✨", done: false }
-            ];
-
-            function renderNotes() {
-              notesList.innerHTML = "";
-              if (!notes.length) {
-                notesList.innerHTML = `<li style="font-size:11px;color:var(--color-text-tertiary,#94a3b8);padding:4px 0;">Geen taken op dit moment.</li>`;
-                return;
-              }
-              notes.forEach((item) => {
-                const li = document.createElement("li");
-                li.className = "et-notes-item";
-                li.innerHTML = `
-                  <span class="et-notes-text ${item.done ? 'done' : ''}">${item.text}</span>
-                  <button class="et-notes-del" title="Verwijderen">×</button>
-                `;
-                li.querySelector(".et-notes-text").addEventListener("click", () => {
-                  item.done = !item.done;
-                  saveAndRender();
-                });
-                li.querySelector(".et-notes-del").addEventListener("click", () => {
-                  notes = notes.filter((n) => n.id !== item.id);
-                  saveAndRender();
-                });
-                notesList.appendChild(li);
-              });
-            }
-
-            function saveAndRender() {
-              chrome.storage.local.set({ eduarteUserNotes: notes });
-              renderNotes();
-            }
-
-            notesForm?.addEventListener("submit", (e) => {
-              e.preventDefault();
-              const text = notesInput.value.trim();
-              if (!text) return;
-              notes.unshift({ id: Date.now(), text, done: false });
-              notesInput.value = "";
-              saveAndRender();
-            });
-
-            renderNotes();
           }
         }
 

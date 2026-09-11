@@ -40,8 +40,7 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 - **Aanpasbare Sneltoetsen** — spring met een zelf ingestelde toetscombinatie
   (bijv. Ctrl+A → Agenda, Ctrl+R → Resultaten) direct naar een Eduarte-pagina.
 - **Aan/uit-zetbare Widgets** — Pomodoro Focus Timer, Snelle Cijfercalculator,
-  Snelnotities/Taken, Snelkoppelingen en Dagelijkse Studie-Tip, elk apart
-  in- of uit te schakelen.
+  Snelkoppelingen en Dagelijkse Studie-Tip, elk apart in- of uit te schakelen.
 
 ## Installatie
 

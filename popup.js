@@ -3,7 +3,7 @@ const ids = [
   "customenabled", "customBg", "customSurface", "customText", "customBorder", "customCss",
   "enabled", "username", "password", "autosubmit", "modernnav", "animations",
   "floatingcards", "startEnabled", "weatherEnabled", "weatherCity", "greetingEnabled",
-  "shortcutsEnabled", "notesEnabled", "pomodoroEnabled", "quickCalcEnabled", "quoteEnabled", "animationSpeed",
+  "shortcutsEnabled", "pomodoroEnabled", "quickCalcEnabled", "quoteEnabled", "animationSpeed",
   "gradesEnabled", "gradeMin", "gradeMax", "passThreshold",
   "shortcutKeysEnabled",
 ];
@@ -177,7 +177,6 @@ function load() {
     elements.weatherCity.value = data.eduarteWeatherCity || "";
     elements.greetingEnabled.checked = data.eduarteGreetingEnabled !== false;
     elements.shortcutsEnabled.checked = data.eduarteShortcutsEnabled !== false;
-    elements.notesEnabled.checked = data.eduarteNotesEnabled !== false;
     elements.pomodoroEnabled.checked = data.eduartePomodoroEnabled !== false;
     elements.quickCalcEnabled.checked = data.eduarteQuickCalcEnabled !== false;
     elements.quoteEnabled.checked = data.eduarteQuoteEnabled !== false;
@@ -230,7 +229,6 @@ document.getElementById("save").addEventListener("click", () => {
     eduarteWeatherCity: elements.weatherCity.value.trim(),
     eduarteGreetingEnabled: elements.greetingEnabled.checked,
     eduarteShortcutsEnabled: elements.shortcutsEnabled.checked,
-    eduarteNotesEnabled: elements.notesEnabled.checked,
     eduartePomodoroEnabled: elements.pomodoroEnabled.checked,
     eduarteQuickCalcEnabled: elements.quickCalcEnabled.checked,
     eduarteQuoteEnabled: elements.quoteEnabled.checked,
