@@ -29,7 +29,8 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   randen); de rest wordt automatisch afgeleid.
 
 ## Installatie
-
+Now on Google Web store!! 
+https://chromewebstore.google.com/detail/eduarte-tools/mmjkngjpdflanccahmndkofkpgnkbcnm
 1. Download of clone deze repository.
 2. Open `chrome://extensions` in Chrome of Edge.
 3. Zet **Ontwikkelaarsmodus** aan (rechtsboven).
