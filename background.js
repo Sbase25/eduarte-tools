@@ -25,6 +25,27 @@ chrome.contextMenus.onClicked.addListener((info) => {
   }
 });
 
+// Meldingen-badge op het extensie-icoon: badge.js scant Eduarte's eigen
+// ongelezen-tellers en stuurt het totaal hierheen door.
+const badgeCountsByTab = new Map();
+
+function updateBadgeForTab(tabId, count) {
+  badgeCountsByTab.set(tabId, count);
+  const text = count > 0 ? String(Math.min(count, 99)) : "";
+  chrome.action.setBadgeText({ text, tabId });
+  chrome.action.setBadgeBackgroundColor({ color: "#f97316", tabId });
+}
+
+chrome.runtime.onMessage.addListener((request, sender) => {
+  if (request.type === "EDUARTE_BADGE_COUNT" && sender.tab && sender.tab.id != null) {
+    updateBadgeForTab(sender.tab.id, request.count || 0);
+  }
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  badgeCountsByTab.delete(tabId);
+});
+
 // Weer-data ophalen via Open-Meteo (zonder API-sleutel)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "FETCH_WEATHER") {

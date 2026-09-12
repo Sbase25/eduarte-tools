@@ -41,6 +41,9 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   (bijv. Ctrl+A → Agenda, Ctrl+R → Resultaten) direct naar een Eduarte-pagina.
 - **Aan/uit-zetbare Widgets** — Pomodoro Focus Timer, Snelle Cijfercalculator,
   Snelkoppelingen en Dagelijkse Studie-Tip, elk apart in- of uit te schakelen.
+- **Meldingen-badge op extensie-icoon** — toont het aantal ongelezen items dat
+  Eduarte zelf al toont (bijv. bij Berichten) als cijfer op het extensie-icoon.
+  Best-effort: de detectie is generiek en kan per schoolomgeving verschillen.
 
 ## Installatie
 
