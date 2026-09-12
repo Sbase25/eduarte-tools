@@ -37,7 +37,6 @@ const tabs = [
 
 <style scoped>
 #navigation-rail {
-  grid-area: rail;
   width: 80px;
   height: 100%;
   box-sizing: border-box;
