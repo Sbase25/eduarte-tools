@@ -8,8 +8,7 @@ on:
       - "background.js"
       - "content.js"
       - "overlay.js"
-      - "popup.html"
-      - "popup.js"
+      - "popup-dist/**"
       - "theme.js"
       - "icons/**"
       - "assets/**"
@@ -38,8 +37,8 @@ jobs:
           set -euo pipefail
           rm -rf extension-package extension.zip
           mkdir -p extension-package
-          cp manifest.json background.js content.js overlay.js popup.html popup.js theme.js extension-package/
-          cp -R icons assets extension-package/
+          cp manifest.json background.js content.js overlay.js theme.js extension-package/
+          cp -R icons assets popup-dist extension-package/
           (cd extension-package && zip -q -r ../extension.zip .)
 
       - name: Get Google access token

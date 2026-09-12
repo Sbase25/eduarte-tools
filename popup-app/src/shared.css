@@ -1,0 +1,109 @@
+/* Gedeelde Material 3 Expressive stijl-elementen: knoppen, invoervelden,
+   thema-presetkaarten en algemene layout — analoog aan Study Tools App.vue. */
+
+.section-label {
+  margin: 18px 0 4px;
+  font: var(--typescale-label-medium);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--color-on-surface-variant);
+}
+.section-label:first-child { margin-top: 2px; }
+
+.note {
+  margin: 0 0 10px;
+  color: var(--color-on-surface-variant);
+  font: var(--typescale-body-medium);
+  line-height: 1.5;
+}
+
+input[type=text], input[type=password], select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-outline);
+  border-radius: 14px;
+  background: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+  font: var(--typescale-body-medium);
+  outline: 0;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+input[type=text]:focus, input[type=password]:focus, select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 65% / .25);
+}
+
+.range { width: 100%; accent-color: var(--color-primary); margin-top: 10px; }
+.range-value { color: var(--color-primary); font: var(--typescale-label-medium); margin-top: 2px; }
+
+.preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.preset {
+  position: relative;
+  height: 64px;
+  padding: 6px;
+  border: 1.5px solid var(--color-outline-variant);
+  border-radius: 18px;
+  color: var(--color-on-surface);
+  text-align: center;
+  font: var(--typescale-label-large);
+  background: var(--color-surface-container);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 200ms cubic-bezier(.2,0,0,1), border-color 200ms ease, background-color 200ms ease;
+}
+.preset:before {
+  content: "";
+  display: block;
+  height: 24px;
+  margin-bottom: 5px;
+  border-radius: 9px;
+  background: var(--preset-gradient);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.2), 0 2px 6px rgba(0,0,0,.3);
+}
+.preset:hover { transform: translateY(-2px) scale(1.02); border-color: var(--color-outline); }
+.preset:active { transform: scale(.96); }
+.preset.selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 65% / .35), 0 4px 14px rgba(0,0,0,.3);
+  background: var(--color-surface-container-high);
+  animation: presetPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes presetPop { 0% { transform: scale(.9); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: 22px;
+  border: 0;
+  border-radius: 20px;
+  font: var(--typescale-label-large);
+  cursor: pointer;
+  transition: transform 180ms cubic-bezier(.34,1.56,.64,1), filter 180ms ease, box-shadow 200ms ease;
+}
+.btn:active { transform: scale(.95); }
+.btn.filled {
+  color: var(--color-on-primary);
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  box-shadow: 0 4px 14px hsl(var(--palette-primary-hue) 70% 55% / .35);
+}
+.btn.filled:hover { filter: brightness(1.1); box-shadow: 0 6px 18px hsl(var(--palette-primary-hue) 70% 55% / .45); }
+.btn.filled.saved { background: #16845b; }
+.btn.tonal { color: var(--color-on-surface); background: var(--color-surface-container-high); }
+.btn.tonal:hover { background: var(--color-surface-container-highest); }
+.btn.full { width: 100%; justify-content: center; }
+
+.shortcut-input { cursor: pointer; font-weight: 600; text-align: center; letter-spacing: .02em; border-radius: 99px !important; }
+.shortcut-input.recording { border-color: var(--color-primary) !important; background: var(--color-surface-container-high); }
+
+.color-row { display: flex; align-items: center; justify-content: space-between; padding-block: 9px; border-bottom: 1px solid var(--color-surface-container-high); }
+.color-row:last-child { border-bottom: 0; }
+input[type=color] { width: 36px; height: 26px; padding: 0; border: 1px solid var(--color-outline-variant); border-radius: 8px; background: none; }
+
+.danger { color: #ff8e8e; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
