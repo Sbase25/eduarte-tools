@@ -3,25 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <title>Eduarte Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
-:root{--surface:#101419;--surface-2:#171d25;--surface-3:#202832;--line:#354252;--text:#f3f7ff;--muted:#aeb9c8;--primary:#91cdfc;--primary-strong:#4f46e5}
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+:root{--surface:#101419;--surface-2:#171d25;--surface-3:#202832;--line:#354252;--text:#f3f7ff;--muted:#aeb9c8;--primary:#91cdfc;--primary-strong:#4f46e5;--mg-orange:hsl(30,100%,51%)}
 *{box-sizing:border-box}html,body{width:460px;height:520px;margin:0;overflow:hidden}body{background:var(--surface);color:var(--text);font:13px "Noto Sans","Segoe UI",system-ui,sans-serif;overflow-x:hidden}
-#app{display:grid;grid-template-columns:104px 1fr;grid-template-rows:minmax(0,1fr);height:100%;overflow:hidden}
-.rail{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 7px;background:#18212d;border-right:1px solid var(--line);overflow-y:auto;min-height:0}
-.brand{width:62px;height:36px;display:grid;place-items:center;margin-bottom:6px;border-radius:18px;background:linear-gradient(135deg,#2563eb,#9333ea);font-size:18px;box-shadow:0 6px 16px #2563eb55}
-.rail button{width:88px;min-height:56px;padding:6px 2px 8px;border:0;border-radius:20px;color:var(--muted);background:transparent;cursor:pointer;font:12px inherit;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:4px;transition:color .2s ease}
+#app{display:grid;grid-template-columns:84px 1fr;grid-template-rows:minmax(0,1fr);height:100%;overflow:hidden}
+.rail{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:#18212d;border-right:1px solid var(--line);overflow-y:auto;min-height:0}
+.brand{width:52px;height:32px;display:grid;place-items:center;margin-bottom:6px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#9333ea);font-size:18px;box-shadow:0 6px 16px #2563eb55}
+.msi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;user-select:none}
+.rail button.active .msi{font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
+.rail button{width:76px;min-height:56px;padding:6px 2px 8px;border:0;border-radius:20px;color:var(--muted);background:transparent;cursor:pointer;font:11.5px inherit;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:4px;transition:color .2s ease}
 .rail button span{position:relative;display:grid;place-items:center;width:32px;height:32px;margin-bottom:0;border-radius:16px;background:transparent;overflow:hidden;transition:width .3s cubic-bezier(.2,0,0,1),background-color .3s cubic-bezier(.2,0,0,1)}
 .rail button span:before{content:"";position:absolute;inset:0;border-radius:inherit;background:currentColor;opacity:0;transition:opacity .18s ease}
-.rail button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s ease;position:relative;z-index:1}
+.rail button .msi{position:relative;z-index:1;transition:color .2s ease}
 .rail button:hover{color:var(--text)}.rail button:hover span:before{opacity:.08}
 .rail button:focus-visible span:before{opacity:.12}
 .rail button:active span{transform:scale(.9)}
 .rail button.active{color:var(--text)}
 .rail button.active span{width:56px;background:linear-gradient(135deg,#30379b,#7040ed);box-shadow:0 4px 10px #4338ca55;animation:tabPop .32s cubic-bezier(.34,1.56,.64,1)}
-.rail button.active svg{stroke:#fff}
+.rail button.active .msi{color:#fff}
 @keyframes tabPop{0%{transform:scale(.78)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
 .content{position:relative;min-width:0;min-height:0;overflow-y:auto;padding-bottom:60px}.topbar{position:sticky;top:0;z-index:2;padding:16px 16px 10px;background:linear-gradient(#101419 82%,transparent)}
-h1{margin:0;font-size:17px;letter-spacing:-.03em}.topbar-subtitle{display:block;margin-top:3px;color:var(--muted);font-size:11px;font-weight:400}
+h1{margin:0;font-size:17px;letter-spacing:-.03em}h1:after{content:'.';color:var(--mg-orange)}.topbar-subtitle{display:block;margin-top:3px;color:var(--muted);font-size:11px;font-weight:400}
 .panel{display:none;padding:0 16px 16px;animation:appear .26s cubic-bezier(.22,1,.36,1)}.panel.active{display:block}@keyframes appear{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
 .setting{padding:10px 0;border-bottom:1px solid var(--line)}.setting:last-child{border-bottom:0}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.title{font-size:13px}.subtitle{max-width:290px;margin:3px 0 0;color:var(--muted);font-size:11px;line-height:1.35}
 .switch{position:relative;width:50px;height:30px;flex:none}.switch input{opacity:0;width:0;height:0}
@@ -43,7 +47,7 @@ input[type=text],input[type=password],select{width:100%;margin-top:6px;padding:9
 .preset.selected{border-color:var(--primary);box-shadow:0 0 0 2px #91cdfc55, 0 4px 14px rgba(0,0,0,.3);background:#25303f;animation:tabPop .3s cubic-bezier(.34,1.56,.64,1)}
 .btn-tonal{padding:10px 18px;border:0;border-radius:99px;color:var(--text);background:var(--surface-3);font-weight:600;font-size:13px;cursor:pointer;transition:transform .18s cubic-bezier(.34,1.56,.64,1),background-color .18s ease}
 .btn-tonal:hover{background:#293341}.btn-tonal:active{transform:scale(.95)}
-.save-bar{position:fixed;right:0;bottom:0;width:calc(100% - 104px);padding:9px 16px;background:#101419ee;border-top:1px solid var(--line);backdrop-filter:blur(12px)}
+.save-bar{position:fixed;right:0;bottom:0;width:calc(100% - 84px);padding:9px 16px;background:#101419ee;border-top:1px solid var(--line);backdrop-filter:blur(12px)}
 #save{position:relative;width:100%;padding:12px;border:0;border-radius:99px;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed);font-weight:700;cursor:pointer;overflow:hidden;transition:transform .18s cubic-bezier(.34,1.56,.64,1),filter .18s ease,background .3s ease,box-shadow .2s ease;box-shadow:0 4px 14px #4338ca44}
 #save:before{content:"";position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .18s ease}
 #save:hover:before{opacity:.1}#save:hover{transform:translateY(-1px);box-shadow:0 6px 18px #4338ca55}
@@ -55,15 +59,15 @@ input[type=text],input[type=password],select{width:100%;margin-top:6px;padding:9
 <body>
 <div id="app">
   <nav class="rail">
-    <div class="brand"><img src="icons/icon48.png" alt="Eduarte Tools" width="30" height="30"></div>
-    <button class="active" data-tab="theme"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4Z"/><path d="m13 7 4 4M14 4l1.5-1.5M19 9l1.5-1.5M4 20h4"/></svg></span>Thema</button>
-    <button data-tab="login"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="3"/><path d="m10.5 13.5 4-4H21v3h-2v2h-2v2h-3.5l-3-3Z"/></svg></span>Inloggen</button>
-    <button data-tab="sidebar"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M9 4v16M12 8h5M12 12h5M12 16h5"/></svg></span>Menubalk</button>
-    <button data-tab="start"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span>Start</button>
-    <button data-tab="grades"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="m9 13-1 8 4-2 4 2-1-8M12 6v6M9 9h6"/></svg></span>Cijfers</button>
-    <button data-tab="shortcuts"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg></span>Sneltoetsen</button>
-    <button data-tab="elo"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v16H7.5A3.5 3.5 0 0 0 4 21.5v-16Z"/><path d="M4 5.5v16M8 6h8M8 10h8M8 14h5"/></svg></span>ELO</button>
-    <button data-tab="about"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg></span>Over</button>
+    <div class="brand"><img src="icons/icon48.png" alt="Eduarte Tools" width="26" height="26"></div>
+    <button class="active" data-tab="theme"><span><span class="msi">format_paint</span></span>Thema</button>
+    <button data-tab="login"><span><span class="msi">key</span></span>Inloggen</button>
+    <button data-tab="sidebar"><span><span class="msi">thumbnail_bar</span></span>Menubalk</button>
+    <button data-tab="start"><span><span class="msi">home</span></span>Start</button>
+    <button data-tab="grades"><span><span class="msi">workspace_premium</span></span>Cijfers</button>
+    <button data-tab="shortcuts"><span><span class="msi">keyboard</span></span>Sneltoetsen</button>
+    <button data-tab="elo"><span><span class="msi">local_library</span></span>ELO</button>
+    <button data-tab="about"><span><span class="msi">info</span></span>Over</button>
   </nav>
   <main class="content">
     <header class="topbar"><h1 id="pageTitle">Thema</h1><div class="topbar-subtitle">Eduarte Tools · moderne instellingen</div></header>
