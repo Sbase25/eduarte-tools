@@ -27,6 +27,18 @@
 .content{position:relative;min-width:0;min-height:0;overflow-y:auto;padding-bottom:60px}.topbar{position:sticky;top:0;z-index:2;padding:16px 16px 10px;background:linear-gradient(#101419 82%,transparent)}
 h1{margin:0;font-size:17px;letter-spacing:-.03em}h1:after{content:'.';color:var(--mg-orange)}.topbar-subtitle{display:block;margin-top:3px;color:var(--muted);font-size:11px;font-weight:400}
 .panel{display:none;padding:0 16px 16px;animation:appear .26s cubic-bezier(.22,1,.36,1)}.panel.active{display:block}@keyframes appear{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.section-label{margin:18px 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.section-label:first-child{margin-top:2px}
+.segmented{display:flex;border-radius:99px;background:var(--surface-2);border:1.5px solid var(--line);padding:3px;gap:2px;margin-top:8px}
+.segmented button{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:0;border-radius:99px;padding:7px 8px;background:transparent;color:var(--muted);font:12px inherit;font-weight:600;cursor:pointer;transition:background-color .2s cubic-bezier(.2,0,0,1),color .2s ease,transform .18s cubic-bezier(.34,1.56,.64,1)}
+.segmented button .msi{font-size:16px}
+.segmented button:active{transform:scale(.94)}
+.segmented button.selected{background:linear-gradient(135deg,#30379b,#7040ed);color:#fff;box-shadow:0 3px 8px #4338ca55}
+.swatches{display:flex;flex-wrap:wrap;gap:9px;margin-top:9px}
+.swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:grid;place-items:center;padding:0;background-clip:content-box;transition:transform .18s cubic-bezier(.34,1.56,.64,1),border-color .18s ease}
+.swatch .msi{font-size:16px;color:#fff;opacity:0;transition:opacity .15s ease}
+.swatch:hover{transform:scale(1.1)}.swatch:active{transform:scale(.92)}
+.swatch.selected{border-color:var(--text)}.swatch.selected .msi{opacity:1}
+.swatch.custom{background:var(--surface-3)!important;color:var(--muted);border:2px dashed var(--line)}.swatch.custom .msi{opacity:1;color:var(--muted)}
 .setting{padding:10px 0;border-bottom:1px solid var(--line)}.setting:last-child{border-bottom:0}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.title{font-size:13px}.subtitle{max-width:290px;margin:3px 0 0;color:var(--muted);font-size:11px;line-height:1.35}
 .switch{position:relative;width:50px;height:30px;flex:none}.switch input{opacity:0;width:0;height:0}
 .track{position:absolute;inset:0;border:2px solid #7090a9;border-radius:99px;background:#2a3542;cursor:pointer;transition:background-color .2s ease,border-color .2s ease}
@@ -73,7 +85,8 @@ input[type=text],input[type=password],select{width:100%;margin-top:6px;padding:9
     <header class="topbar"><h1 id="pageTitle">Thema</h1><div class="topbar-subtitle">Eduarte Tools · moderne instellingen</div></header>
     <section class="panel active" id="panel-theme">
       <p class="note">Pas de kleuren, achtergrond en vormgeving van Eduarte aan. De instellingen blijven lokaal opgeslagen.</p>
-      <div class="setting"><div class="title">Thema Voorkeuren</div><div class="preset-grid">
+      <div class="section-label">Thema Voorkeuren</div>
+      <div class="setting"><div class="preset-grid">
         <button class="preset selected" data-preset="dark" style="--preset:linear-gradient(135deg,#111827,#334155)">Donker</button>
         <button class="preset" data-preset="blue" style="--preset:linear-gradient(135deg,#0f3b63,#60a5fa)">Blauw</button>
         <button class="preset" data-preset="purple" style="--preset:linear-gradient(135deg,#24113f,#a855f7)">Paars</button>
@@ -84,16 +97,30 @@ input[type=text],input[type=password],select{width:100%;margin-top:6px;padding:9
         <button class="preset" data-preset="cyberpunk" style="--preset:linear-gradient(135deg,#090a16,#ec4899)">Cyberpunk</button>
         <button class="preset" data-preset="light" style="--preset:linear-gradient(135deg,#f8fafc,#93c5fd)">Licht</button>
       </div></div>
+      <div class="section-label">Uiterlijk</div>
       <div class="setting"><div class="setting-row"><div><div class="title">Donkere modus</div><div class="subtitle">Gebruik een donker kleurenpalet voor Eduarte.</div></div><label class="switch"><input id="darkmode" type="checkbox"><span class="track"></span></label></div></div>
       <div class="setting"><div class="setting-row"><div><div class="title">Moderne stijl</div><div class="subtitle">Rondere kaarten, schaduwen en vloeiende animaties.</div></div><label class="switch"><input id="modernstyle" type="checkbox"><span class="track"></span></label></div></div>
       <div class="setting"><div class="setting-row"><div><div class="title">Human-thema</div><div class="subtitle">Origineel Study Tools glas-effect met achtergrond.</div></div><label class="switch"><input id="humantheme" type="checkbox"><span class="track"></span></label></div></div>
-      <div class="color"><span>Accentkleur</span><input id="accent" type="color" value="#2563eb"></div>
-      
+
+      <div class="section-label">Accentkleur</div>
+      <div class="swatches" id="accentSwatches">
+        <button type="button" class="swatch selected" data-color="#2563eb" style="background:#2563eb"><span class="msi">check</span></button>
+        <button type="button" class="swatch" data-color="#10b981" style="background:#10b981"><span class="msi">check</span></button>
+        <button type="button" class="swatch" data-color="#f97316" style="background:#f97316"><span class="msi">check</span></button>
+        <button type="button" class="swatch" data-color="#ec4899" style="background:#ec4899"><span class="msi">check</span></button>
+        <button type="button" class="swatch" data-color="#a855f7" style="background:#a855f7"><span class="msi">check</span></button>
+        <button type="button" class="swatch" data-color="#38bdf8" style="background:#38bdf8"><span class="msi">check</span></button>
+        <button type="button" class="swatch" data-color="#f43f5e" style="background:#f43f5e"><span class="msi">check</span></button>
+        <label class="swatch custom" title="Eigen kleur kiezen"><span class="msi">palette</span><input id="accent" type="color" value="#2563eb" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+      </div>
+
+      <div class="section-label">Achtergrond</div>
       <div class="setting"><div class="title">Eigen achtergrondafbeelding (URL)</div><div class="subtitle">Voer een directe link in naar een afbeelding voor een glassmorphism achtergrond.</div><input id="wallpaperUrl" type="text" placeholder="https://example.com/wallpaper.jpg" autocomplete="off"></div>
       <div class="setting"><div class="title">Achtergrond vervaging</div><input id="wallpaperBlur" class="range" type="range" min="0" max="25" value="12"><div class="range-value" id="wallpaperBlurValue">12 px</div></div>
       <div class="setting"><div class="title">Donkere filterlaag</div><input id="wallpaperOverlay" class="range" type="range" min="10" max="90" value="55"><div class="range-value" id="wallpaperOverlayValue">55%</div></div>
 
-      <div class="setting"><div class="title">Lettertype (Typografie)</div><div class="subtitle">Kies een modern lettertype voor alle teksten in Eduarte.</div>
+      <div class="section-label">Lettertype (Typografie)</div>
+      <div class="setting"><div class="subtitle">Kies een modern lettertype voor alle teksten in Eduarte.</div>
         <select id="font">
           <option value="default">Standaard (Systeem)</option>
           <option value="inter">Inter (Modern & Strak)</option>

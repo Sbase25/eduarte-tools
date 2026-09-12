@@ -98,6 +98,21 @@ updateRange("passThreshold", "passThresholdValue");
 updateRange("wallpaperBlur", "wallpaperBlurValue", " px");
 updateRange("wallpaperOverlay", "wallpaperOverlayValue", "%");
 
+function syncAccentSwatches() {
+  const val = (elements.accent.value || "").toLowerCase();
+  document.querySelectorAll(".swatch[data-color]").forEach((sw) => {
+    sw.classList.toggle("selected", sw.dataset.color.toLowerCase() === val);
+  });
+}
+
+document.querySelectorAll(".swatch[data-color]").forEach((sw) => {
+  sw.addEventListener("click", () => {
+    elements.accent.value = sw.dataset.color;
+    syncAccentSwatches();
+  });
+});
+elements.accent.addEventListener("input", syncAccentSwatches);
+
 document.querySelectorAll(".preset").forEach((button) => {
   button.addEventListener("click", () => {
     const presetKey = button.dataset.preset;
@@ -106,6 +121,7 @@ document.querySelectorAll(".preset").forEach((button) => {
     activePresetKey = presetKey;
     elements.darkmode.checked = preset.dark;
     elements.accent.value = preset.accent;
+    syncAccentSwatches();
     elements.customBg.value = preset.bg;
     elements.customSurface.value = preset.surface;
     elements.customText.value = preset.text;
@@ -142,6 +158,7 @@ function load() {
     
     elements.darkmode.checked = data.eduarteDarkMode !== undefined ? !!data.eduarteDarkMode : preset.dark;
     elements.accent.value = data.eduarteAccentColor || preset.accent;
+    syncAccentSwatches();
     elements.modernstyle.checked = data.eduarteModernStyle !== false;
     elements.humantheme.checked = !!data.eduarteHumanTheme;
     elements.wallpaperUrl.value = data.eduarteWallpaperUrl || "";
