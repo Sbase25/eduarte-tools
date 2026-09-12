@@ -43,7 +43,7 @@
         "https://*.eduarte.nl/*",
         "https://login.microsoftonline.com/*"
       ],
-      "js": ["content.js", "overlay.js", "badge.js"],
+      "js": ["content.js", "overlay.js", "badge-logic.js", "badge.js"],
       "run_at": "document_idle",
       "all_frames": false
     },

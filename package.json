@@ -1,0 +1,14 @@
+{
+  "name": "eduarte-tools",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Root test tooling for Eduarte Tools (Chrome extension content scripts).",
+  "type": "commonjs",
+  "scripts": {
+    "test": "vitest run test/**/*.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1",
+    "vitest": "^2.1.9"
+  }
+}
