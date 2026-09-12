@@ -56,6 +56,26 @@ Gegevens worden alleen lokaal in je browser opgeslagen
 
 
 
+## Ontwikkelen aan de popup
+
+De instellingenpopup is een echte **Vue 3 + Material 3 Expressive**-app,
+net als Study Tools voor Magister. De broncode staat in `popup-app/` en
+wordt gebouwd naar de kant-en-klare, gecommitte map `popup-dist/` — de
+extensie laadt altijd `popup-dist/index.html`, dus je hoeft niets te
+bouwen om de extensie zelf te gebruiken.
+
+Wil je aan de popup zelf werken?
+
+```bash
+cd popup-app
+npm install
+npm run dev      # lokale preview met hot reload
+npm run build    # bouwt naar ../popup-dist
+```
+
+Vergeet niet om na wijzigingen `npm run build` te draaien en de output in
+`popup-dist/` mee te committen.
+
 ## Waarom dit bestaat
 
 Eduarte's studentenportaal draait op een server-gerenderde Java/Wicket-app

@@ -1,0 +1,78 @@
+:root {
+    --palette-primary-hue: 231;
+    --palette-primary-saturation: 76%;
+    --palette-primary-luminance: 63%;
+    --palette-primary: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) var(--palette-primary-luminance));
+
+    --palette-secondary-hue: calc(var(--palette-primary-hue) + 40);
+    --palette-secondary-saturation: 60%;
+
+    --palette-neutral-hue: var(--palette-primary-hue);
+    --palette-neutral-saturation: 18%;
+
+    --color-primary: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 65%);
+    --color-primary-container: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 30%);
+    --color-on-primary: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 12%);
+    --color-on-primary-container: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 92%);
+    --color-secondary: hsl(var(--palette-secondary-hue) var(--palette-secondary-saturation) 70%);
+    --color-secondary-container: hsl(var(--palette-secondary-hue) var(--palette-secondary-saturation) 28%);
+    --color-on-secondary-container: hsl(var(--palette-secondary-hue) var(--palette-secondary-saturation) 92%);
+    --color-surface: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 9%);
+    --color-surface-container-lowest: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 6%);
+    --color-surface-container-low: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 12%);
+    --color-surface-container: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 15%);
+    --color-surface-container-high: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 20%);
+    --color-surface-container-highest: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 25%);
+    --color-surface-variant: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 30%);
+    --color-on-surface: hsl(var(--palette-neutral-hue) 12% 95%);
+    --color-on-surface-variant: hsl(var(--palette-neutral-hue) 12% 75%);
+    --color-outline: hsl(var(--palette-neutral-hue) 15% 55%);
+    --color-outline-variant: hsl(var(--palette-neutral-hue) 15% 30%);
+    --color-shadow: #000;
+    --color-scrim: #000;
+
+    --typescale-headline-small: 500 22px/30px 'Noto Sans', sans-serif;
+    --typescale-title-large: 600 20px/26px 'Noto Sans', sans-serif;
+    --typescale-title-small: 600 14px/20px 'Noto Sans', sans-serif;
+    --typescale-label-large: 600 13px/18px 'Noto Sans', sans-serif;
+    --typescale-label-medium: 600 11px/14px 'Noto Sans', sans-serif;
+    --typescale-body-large: 400 14px/21px 'Noto Sans', sans-serif;
+    --typescale-body-medium: 400 13px/19px 'Noto Sans', sans-serif;
+    --typescale-body-small: 400 11px/15px 'Noto Sans', sans-serif;
+
+    --mg-orange: hsl(30, 100%, 51%);
+
+    color-scheme: only dark;
+}
+
+:root[data-theme=light] {
+    --color-primary: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 45%);
+    --color-primary-container: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 90%);
+    --color-on-primary: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 100%);
+    --color-on-primary-container: hsl(var(--palette-primary-hue) var(--palette-primary-saturation) 12%);
+    --color-secondary: hsl(var(--palette-secondary-hue) var(--palette-secondary-saturation) 40%);
+    --color-secondary-container: hsl(var(--palette-secondary-hue) var(--palette-secondary-saturation) 90%);
+    --color-on-secondary-container: hsl(var(--palette-secondary-hue) var(--palette-secondary-saturation) 12%);
+    --color-surface: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 98%);
+    --color-surface-container-lowest: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 100%);
+    --color-surface-container-low: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 96%);
+    --color-surface-container: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 93%);
+    --color-surface-container-high: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 88%);
+    --color-surface-container-highest: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 83%);
+    --color-surface-variant: hsl(var(--palette-neutral-hue) var(--palette-neutral-saturation) 90%);
+    --color-on-surface: hsl(var(--palette-neutral-hue) 12% 10%);
+    --color-on-surface-variant: hsl(var(--palette-neutral-hue) 12% 30%);
+    --color-outline: hsl(var(--palette-neutral-hue) 15% 45%);
+    --color-outline-variant: hsl(var(--palette-neutral-hue) 15% 80%);
+
+    color-scheme: only light;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 460px; height: 560px; overflow: hidden; }
+body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: 'Noto Sans', sans-serif;
+}
+#app { width: 100%; height: 100%; }
