@@ -13,7 +13,7 @@ const KEYS = [
   "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled",
   "eduarteShortcutsEnabled", "eduartePomodoroEnabled", "eduarteQuickCalcEnabled", "eduarteQuoteEnabled",
   "eduarteAnimationSpeed", "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum",
-  "eduartePassThreshold", "eduarteShortcutKeysEnabled", "eduarteShortcuts",
+  "eduartePassThreshold", "eduarteShortcutKeysEnabled", "eduarteShortcuts", "eduarteBadgeEnabled",
 ];
 
 const DEFAULTS = {
@@ -53,6 +53,7 @@ const DEFAULTS = {
     "/agenda": { key: "a", ctrl: true, alt: false, shift: false },
     "/resultaten": { key: "r", ctrl: true, alt: false, shift: false },
   },
+  eduarteBadgeEnabled: true,
 };
 
 const hasChrome = typeof chrome !== "undefined" && chrome.storage && chrome.storage.local;
