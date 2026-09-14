@@ -16,17 +16,10 @@
       "128": "icons/icon128.png"
     }
   },
-  "permissions": ["storage", "contextMenus", "geolocation"],
+  "permissions": ["storage", "contextMenus", "geolocation", "offscreen"],
   "background": {
     "service_worker": "background.js"
   },
-  "host_permissions": [
-    "https://*.educus.nl/*",
-    "https://*.eduarte.nl/*",
-    "https://login.microsoftonline.com/*",
-    "https://api.open-meteo.com/*",
-    "https://geocoding-api.open-meteo.com/*"
-  ],
   "web_accessible_resources": [
     {
       "resources": ["assets/wallpaper-human.jpg"],
@@ -35,6 +28,13 @@
         "https://*.eduarte.nl/*"
       ]
     }
+  ],
+  "host_permissions": [
+    "https://*.educus.nl/*",
+    "https://*.eduarte.nl/*",
+    "https://login.microsoftonline.com/*",
+    "https://api.open-meteo.com/*",
+    "https://geocoding-api.open-meteo.com/*"
   ],
   "content_scripts": [
     {

@@ -8,6 +8,8 @@ on:
       - "background.js"
       - "content.js"
       - "overlay.js"
+      - "location-tracker.html"
+      - "location-tracker.js"
       - "popup-dist/**"
       - "theme.js"
       - "icons/**"
@@ -37,7 +39,7 @@ jobs:
           set -euo pipefail
           rm -rf extension-package extension.zip
           mkdir -p extension-package
-          cp manifest.json background.js content.js overlay.js theme.js extension-package/
+          cp manifest.json background.js content.js overlay.js theme.js location-tracker.html location-tracker.js extension-package/
           cp -R icons assets popup-dist extension-package/
           (cd extension-package && zip -q -r ../extension.zip .)
 

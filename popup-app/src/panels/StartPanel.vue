@@ -21,7 +21,8 @@ function useCurrentLocation() {
       };
       s.eduarteWeatherLocationLabel = "Huidige locatie";
       s.eduarteWeatherUseLocation = true;
-      locationStatus.value = "Huidige locatie ingesteld. Sla je wijzigingen op.";
+      chrome.runtime.sendMessage({ type: "START_LOCATION_TRACKING" });
+      locationStatus.value = "Live locatie ingesteld. Sla je wijzigingen op.";
     },
     (error) => {
       const messages = {
@@ -42,7 +43,7 @@ function useCurrentLocation() {
   <SwitchInput v-model="s.eduarteWeatherEnabled" title="Weerbericht-widget" subtitle="Toont het actuele weerbericht, temperatuur en neerslagkans." />
   <div class="setting">
     <h3 class="setting-title">Weer op basis van je locatie</h3>
-    <span class="setting-subtitle">Gebruik je huidige locatie voor automatisch bijgewerkt weer. Je locatie blijft alleen lokaal opgeslagen.</span>
+    <span class="setting-subtitle">Gebruik je huidige locatie voor automatisch bijgewerkt weer. De extensie werkt de locatie bij wanneer je verplaatst.</span>
     <button class="btn tonal location-button" type="button" @click="useCurrentLocation">📍 Gebruik huidige locatie</button>
     <span v-if="locationStatus" class="location-status" role="status">{{ locationStatus }}</span>
   </div>

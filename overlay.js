@@ -496,6 +496,11 @@
             container.querySelector(".et-weather-refresh")?.addEventListener("click", fetchWeatherData);
             fetchWeatherData();
             window.setInterval(fetchWeatherData, 15 * 60 * 1000);
+            chrome.storage.onChanged.addListener((changes, areaName) => {
+              if (areaName === "local" && changes.eduarteWeatherCoordinates && container.isConnected) {
+                fetchWeatherData();
+              }
+            });
           }
 
           // Quote instellen op basis van de dag

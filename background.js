@@ -4,6 +4,7 @@
 ];
 
 const MENU_OPEN = "eduarte-tools-open";
+const LOCATION_TRACKER_DOCUMENT = "location-tracker.html";
 
 function createContextMenus() {
   chrome.contextMenus.removeAll(() => {
@@ -17,7 +18,10 @@ function createContextMenus() {
 }
 
 chrome.runtime.onInstalled.addListener(createContextMenus);
-chrome.runtime.onStartup.addListener(createContextMenus);
+chrome.runtime.onStartup.addListener(() => {
+  createContextMenus();
+  startLocationTrackingIfConfigured();
+});
 
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === MENU_OPEN) {
@@ -46,9 +50,46 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   badgeCountsByTab.delete(tabId);
 });
 
+async function ensureLocationTracker() {
+  const hasDocument = await chrome.offscreen.hasDocument();
+  if (!hasDocument) {
+    await chrome.offscreen.createDocument({
+      url: LOCATION_TRACKER_DOCUMENT,
+      reasons: ["GEOLOCATION"],
+      justification: "Update the dashboard weather when the user changes location.",
+    });
+  }
+}
+
+function startLocationTrackingIfConfigured() {
+  chrome.storage.local.get(["eduarteWeatherUseLocation", "eduarteWeatherCoordinates"], (settings) => {
+    if (settings.eduarteWeatherUseLocation !== false && settings.eduarteWeatherCoordinates) {
+      ensureLocationTracker().catch((error) => console.error("Location tracking could not start.", error));
+    }
+  });
+}
+
 // Weer-data ophalen via Open-Meteo (zonder API-sleutel). Coördinaten hebben
 // voorrang wanneer de gebruiker locatiegebruik heeft toegestaan.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "START_LOCATION_TRACKING") {
+    ensureLocationTracker()
+      .then(() => sendResponse({ success: true }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+
+  if (request.type === "LOCATION_UPDATED") {
+    const { latitude, longitude } = request.coordinates || {};
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+      chrome.storage.local.set({
+        eduarteWeatherCoordinates: { latitude, longitude },
+        eduarteWeatherLocationLabel: "Huidige locatie",
+      });
+    }
+    return;
+  }
+
   if (request.type === "FETCH_WEATHER") {
     const coordinates = request.coordinates;
     const city = request.city || "Utrecht";
