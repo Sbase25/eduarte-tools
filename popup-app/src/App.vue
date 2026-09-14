@@ -10,6 +10,7 @@ import StartPanel from "./panels/StartPanel.vue";
 import GradesPanel from "./panels/GradesPanel.vue";
 import ShortcutsPanel from "./panels/ShortcutsPanel.vue";
 import EloPanel from "./panels/EloPanel.vue";
+import IdeasPanel from "./panels/IdeasPanel.vue";
 import AboutPanel from "./panels/AboutPanel.vue";
 
 const { state, load, save } = createStore();
@@ -18,12 +19,12 @@ const saved = ref(false);
 
 const titles = {
   theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start",
-  grades: "Cijfers", shortcuts: "Sneltoetsen", elo: "ELO", about: "Over",
+  grades: "Cijfers", shortcuts: "Sneltoetsen", elo: "ELO", ideas: "Ideeën", about: "Over",
 };
 
 const panels = {
   theme: ThemePanel, login: LoginPanel, sidebar: SidebarPanel, start: StartPanel,
-  grades: GradesPanel, shortcuts: ShortcutsPanel, elo: EloPanel, about: AboutPanel,
+  grades: GradesPanel, shortcuts: ShortcutsPanel, elo: EloPanel, ideas: IdeasPanel, about: AboutPanel,
 };
 
 onMounted(load);

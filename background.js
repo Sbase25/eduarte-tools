@@ -46,32 +46,43 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   badgeCountsByTab.delete(tabId);
 });
 
-// Weer-data ophalen via Open-Meteo (zonder API-sleutel)
+// Weer-data ophalen via Open-Meteo (zonder API-sleutel). Coördinaten hebben
+// voorrang wanneer de gebruiker locatiegebruik heeft toegestaan.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "FETCH_WEATHER") {
+    const coordinates = request.coordinates;
     const city = request.city || "Utrecht";
-    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=nl&format=json`)
-      .then((res) => res.json())
-      .then((geo) => {
-        if (!geo.results || !geo.results.length) {
-          throw new Error("Plaats niet gevonden");
-        }
-        const { latitude, longitude, name, admin1 } = geo.results[0];
-        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=precipitation_probability&timezone=auto`)
-          .then((res) => res.json())
-          .then((weather) => {
-            const hour = new Date().getHours();
-            sendResponse({
-              success: true,
-              city: name + (admin1 ? ` (${admin1})` : ""),
-              temp: weather.current_weather.temperature,
-              weathercode: weather.current_weather.weathercode,
-              windspeed: weather.current_weather.windspeed,
-              is_day: weather.current_weather.is_day,
-              precipitation: weather.hourly?.precipitation_probability?.[hour] ?? 0,
-            });
-          });
+    const location = coordinates && Number.isFinite(coordinates.latitude) && Number.isFinite(coordinates.longitude)
+      ? Promise.resolve({
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        name: request.locationLabel || "Huidige locatie",
       })
+      : fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=nl&format=json`)
+        .then((res) => res.json())
+        .then((geo) => {
+          if (!geo.results || !geo.results.length) {
+            throw new Error("Plaats niet gevonden");
+          }
+          const { latitude, longitude, name, admin1 } = geo.results[0];
+          return { latitude, longitude, name: name + (admin1 ? ` (${admin1})` : "") };
+        });
+
+    location
+      .then(({ latitude, longitude, name }) => fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=precipitation_probability&timezone=auto`
+      ).then((res) => res.json()).then((weather) => {
+        const hour = new Date().getHours();
+        sendResponse({
+          success: true,
+          city: name,
+          temp: weather.current_weather.temperature,
+          weathercode: weather.current_weather.weathercode,
+          windspeed: weather.current_weather.windspeed,
+          is_day: weather.current_weather.is_day,
+          precipitation: weather.hourly?.precipitation_probability?.[hour] ?? 0,
+        });
+      }))
       .catch((err) => {
         sendResponse({ success: false, error: err.message });
       });

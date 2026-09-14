@@ -20,6 +20,9 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   cijfer je met een bepaalde weging nodig hebt voor je doelgemiddelde.
 - **Start Dashboard Weer- & Begroeting Widget** — live temperatuur, weersicoon,
   neerslagkans en tijdgebonden begroeting direct op je Eduarte startpagina.
+  Kies eenmaal **Gebruik huidige locatie** in de extensie; het weer wordt daarna
+  automatisch voor die locatie geladen en elke 15 minuten vernieuwd. Een
+  plaatsnaam blijft beschikbaar als alternatief.
 - **Uitgebreide Thema Presets** — kies direct uit Donker, Blauw, Paars, Smaragd,
   Sunset, OLED Zwart, Nord, Cyberpunk of Licht.
 - **Eigen achtergrond & Glassmorphism** — stel je eigen wallpaper URL in met
@@ -56,6 +59,10 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 
 Gegevens worden alleen lokaal in je browser opgeslagen
 (`chrome.storage.local`) en nergens naartoe verzonden.
+
+Voor het weer kan de extensie, na jouw toestemming, je huidige locatie
+gebruiken. Alleen de coördinaten worden lokaal bewaard en uitsluitend naar
+Open-Meteo gestuurd om het weerbericht op te halen.
 
 
 

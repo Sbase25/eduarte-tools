@@ -18,6 +18,7 @@ const tabs = [
   { id: "grades", name: "Cijfers", icon: "workspace_premium" },
   { id: "shortcuts", name: "Sneltoetsen", icon: "keyboard" },
   { id: "elo", name: "ELO", icon: "local_library" },
+  { id: "ideas", name: "Ideeën", icon: "lightbulb" },
   { id: "about", name: "Over", icon: "info" },
 ];
 </script>
