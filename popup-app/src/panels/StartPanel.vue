@@ -19,10 +19,9 @@ function useCurrentLocation() {
         latitude: coords.latitude,
         longitude: coords.longitude,
       };
-      s.eduarteWeatherLocationLabel = "Huidige locatie";
       s.eduarteWeatherUseLocation = true;
       chrome.runtime.sendMessage({ type: "START_LOCATION_TRACKING" });
-      locationStatus.value = "Live locatie ingesteld. Sla je wijzigingen op.";
+      locationStatus.value = "Live locatie ingesteld. De gedetecteerde plaatsnaam verschijnt zo meteen op je dashboard.";
     },
     (error) => {
       const messages = {

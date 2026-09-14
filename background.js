@@ -69,6 +69,18 @@ function startLocationTrackingIfConfigured() {
   });
 }
 
+async function getLocationLabel(latitude, longitude) {
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+    { headers: { "Accept-Language": "nl" } }
+  );
+  if (!response.ok) {
+    throw new Error("Plaatsnaam kon niet worden opgehaald");
+  }
+  const { address } = await response.json();
+  return address.city || address.town || address.village || address.municipality || address.county || "Huidige locatie";
+}
+
 // Weer-data ophalen via Open-Meteo (zonder API-sleutel). Coördinaten hebben
 // voorrang wanneer de gebruiker locatiegebruik heeft toegestaan.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -82,10 +94,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "LOCATION_UPDATED") {
     const { latitude, longitude } = request.coordinates || {};
     if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-      chrome.storage.local.set({
-        eduarteWeatherCoordinates: { latitude, longitude },
-        eduarteWeatherLocationLabel: "Huidige locatie",
-      });
+      getLocationLabel(latitude, longitude)
+        .catch((error) => {
+          console.warn("Detected location could not be named.", error);
+          return "Huidige locatie";
+        })
+        .then((locationLabel) => chrome.storage.local.set({
+          eduarteWeatherCoordinates: { latitude, longitude },
+          eduarteWeatherLocationLabel: locationLabel,
+        }));
     }
     return;
   }

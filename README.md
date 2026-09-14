@@ -62,8 +62,8 @@ Gegevens worden alleen lokaal in je browser opgeslagen
 (`chrome.storage.local`) en nergens naartoe verzonden.
 
 Voor het weer kan de extensie, na jouw toestemming, je huidige locatie
-gebruiken. Alleen de coördinaten worden lokaal bewaard en uitsluitend naar
-Open-Meteo gestuurd om het weerbericht op te halen.
+gebruiken. De coördinaten worden lokaal bewaard en alleen naar Open-Meteo
+(weer) en OpenStreetMap Nominatim (plaatsnaam) gestuurd.
 
 
 
