@@ -389,6 +389,7 @@
                       <a href="https://outlook.office.com/mail" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>✉️</span> Outlook</a>
                       <a href="https://onedrive.live.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>☁️</span> OneDrive</a>
                       <a href="https://www.office.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📄</span> Office 365</a>
+                      <a href="https://mbowebshop.nl/Gebruikers/Licenties/" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📄</span> MboWebshop 📚</a>
                       <a href="/resultaten" class="et-shortcut-btn"><span>📊</span> Cijfers</a>
                       <a href="/agenda" class="et-shortcut-btn"><span>📅</span> Agenda</a>
                     </div>
