@@ -91,5 +91,9 @@ export function createStore() {
     });
   }
 
+  watch(state, () => {
+    if (loaded.value) save();
+  }, { deep: true });
+
   return { state, loaded, load, save };
 }
