@@ -16,11 +16,6 @@ import AboutPanel from "./panels/AboutPanel.vue";
 const { state, load } = createStore();
 const tab = ref("theme");
 
-const titles = {
-  theme: "Thema", login: "Inloggen", sidebar: "Menubalk", start: "Start",
-  grades: "Cijfers", shortcuts: "Sneltoetsen", elo: "ELO", ideas: "Ideeën", about: "Over",
-};
-
 const panels = {
   theme: ThemePanel, login: LoginPanel, sidebar: SidebarPanel, start: StartPanel,
   grades: GradesPanel, shortcuts: ShortcutsPanel, elo: EloPanel, ideas: IdeasPanel, about: AboutPanel,
@@ -33,7 +28,7 @@ onMounted(load);
   <div id="app-layout">
     <NavigationRail v-model="tab" />
     <main id="content">
-      <TopAppBar :title="titles[tab]" subtitle="Eduarte Tools · moderne instellingen" />
+      <TopAppBar title="Eduarte Tools" />
       <transition name="panel" mode="out-in">
         <section class="panel" :key="tab">
           <component :is="panels[tab]" :state="state" />

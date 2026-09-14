@@ -25,7 +25,6 @@ const tabs = [
 
 <template>
   <nav id="navigation-rail">
-    <div class="brand"><img src="/icons/icon48.png" alt="Eduarte Tools" width="26" height="26"></div>
     <button v-for="tab in tabs" :key="tab.id" class="navigation-item" @click="value = tab.id" :data-active="tab.id === value">
       <div class="navigation-item-icon-wrapper" :data-active="tab.id === value">
         <Icon :filled="tab.id === value">{{ tab.icon }}</Icon>
@@ -44,21 +43,11 @@ const tabs = [
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding-block: 12px;
-  border-right: 1px solid var(--color-surface-container-high);
-  background-color: var(--color-surface-container-lowest);
-  overflow-y: auto;
-}
-.brand {
-  width: 48px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 6px;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #2563eb, #9333ea);
-  box-shadow: 0 4px 12px #2563eb55;
+  justify-content: center;
+  gap: 4px;
+  border-right: 1px solid transparent;
+  background-color: var(--color-surface);
+  overflow: hidden;
 }
 .navigation-item {
   position: relative;
@@ -67,7 +56,7 @@ const tabs = [
   align-items: center;
   gap: 4px;
   width: 100%;
-  min-height: 52px;
+  min-height: 54px;
   padding-block: 0;
   color: var(--color-on-surface-variant);
   font: var(--typescale-label-medium);

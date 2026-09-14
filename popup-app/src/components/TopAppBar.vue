@@ -16,20 +16,17 @@ defineProps({ title: String, subtitle: String });
   position: sticky;
   top: 0;
   z-index: 5;
-  padding: 16px 18px 10px;
-  background: linear-gradient(var(--color-surface) 78%, transparent);
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding-inline: 16px;
+  background: var(--color-surface);
 }
 #app-heading {
   margin: 0;
   font: var(--typescale-title-large);
   color: var(--color-on-surface);
-  letter-spacing: -.02em;
 }
 #app-heading:after { content: '.'; color: var(--mg-orange); }
-#app-subheading {
-  display: block;
-  margin-top: 2px;
-  color: var(--color-on-surface-variant);
-  font: var(--typescale-body-small);
-}
+#app-subheading { display: none; }
 </style>
