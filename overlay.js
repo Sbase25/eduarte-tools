@@ -84,6 +84,9 @@
         "eduarteWeatherEnabled",
         "eduarteGreetingEnabled",
         "eduarteWeatherCity",
+        "eduarteWeatherUseLocation",
+        "eduarteWeatherCoordinates",
+        "eduarteWeatherLocationLabel",
         "eduarteShortcutsEnabled",
         "eduartePomodoroEnabled",
         "eduarteQuickCalcEnabled",
@@ -369,7 +372,7 @@
                       <div class="et-weather-desc">Weerbericht laden...</div>
                     </div>
                     <div class="et-weather-chips">
-                      <span class="et-chip et-chip-city">📍 ${settings.eduarteWeatherCity || "Utrecht"}</span>
+                      <span class="et-chip et-chip-city">📍 ${settings.eduarteWeatherUseLocation !== false && settings.eduarteWeatherCoordinates ? (settings.eduarteWeatherLocationLabel || "Huidige locatie") : (settings.eduarteWeatherCity || "Utrecht")}</span>
                       <span class="et-chip et-chip-rain" style="display:none;">💧 <span class="et-rain-val">0</span>%</span>
                     </div>
                     <button class="et-weather-refresh" title="Ververs weerbericht">🔄</button>
@@ -447,7 +450,10 @@
 
           // Weer data ophalen
           if (showWeather) {
+            const useLocation = settings.eduarteWeatherUseLocation !== false;
             const city = settings.eduarteWeatherCity || "Utrecht";
+            const coordinates = useLocation ? settings.eduarteWeatherCoordinates : null;
+            const locationLabel = settings.eduarteWeatherLocationLabel;
             const iconEl = container.querySelector(".et-weather-icon");
             const tempEl = container.querySelector(".et-temp-val");
             const descEl = container.querySelector(".et-weather-desc");
@@ -460,7 +466,12 @@
               iconEl.textContent = "⏳";
               descEl.textContent = "Weer laden...";
 
-              chrome.runtime.sendMessage({ type: "FETCH_WEATHER", city }, (res) => {
+              chrome.runtime.sendMessage({
+                type: "FETCH_WEATHER",
+                city,
+                coordinates,
+                locationLabel,
+              }, (res) => {
                 if (chrome.runtime.lastError || !res || !res.success) {
                   iconEl.textContent = "⛅";
                   tempEl.textContent = "—";
@@ -484,6 +495,12 @@
 
             container.querySelector(".et-weather-refresh")?.addEventListener("click", fetchWeatherData);
             fetchWeatherData();
+            window.setInterval(fetchWeatherData, 15 * 60 * 1000);
+            chrome.storage.onChanged.addListener((changes, areaName) => {
+              if (areaName === "local" && changes.eduarteWeatherCoordinates && container.isConnected) {
+                fetchWeatherData();
+              }
+            });
           }
 
           // Quote instellen op basis van de dag

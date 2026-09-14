@@ -10,7 +10,8 @@ const KEYS = [
   "eduarteWallpaperUrl", "eduarteWallpaperBlur", "eduarteWallpaperOverlay", "eduarteFont",
   "eduarteCustomTheme", "eduarteCustomColors", "eduarteEnabled", "eduarteUsername", "eduartePassword",
   "eduarteAutosubmit", "eduarteModernNav", "eduarteAnimations", "eduarteFloatingCards",
-  "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherCity", "eduarteGreetingEnabled",
+  "eduarteStartEnabled", "eduarteWeatherEnabled", "eduarteWeatherUseLocation", "eduarteWeatherCoordinates",
+  "eduarteWeatherLocationLabel", "eduarteWeatherCity", "eduarteGreetingEnabled",
   "eduarteShortcutsEnabled", "eduartePomodoroEnabled", "eduarteQuickCalcEnabled", "eduarteQuoteEnabled",
   "eduarteAnimationSpeed", "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum",
   "eduartePassThreshold", "eduarteShortcutKeysEnabled", "eduarteShortcuts", "eduarteBadgeEnabled",
@@ -37,6 +38,9 @@ const DEFAULTS = {
   eduarteFloatingCards: true,
   eduarteStartEnabled: true,
   eduarteWeatherEnabled: true,
+  eduarteWeatherUseLocation: true,
+  eduarteWeatherCoordinates: null,
+  eduarteWeatherLocationLabel: "",
   eduarteWeatherCity: "",
   eduarteGreetingEnabled: true,
   eduarteShortcutsEnabled: true,
@@ -86,6 +90,10 @@ export function createStore() {
       chrome.storage.local.set(payload, resolve);
     });
   }
+
+  watch(state, () => {
+    if (loaded.value) save();
+  }, { deep: true });
 
   return { state, loaded, load, save };
 }

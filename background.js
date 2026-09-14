@@ -4,6 +4,7 @@
 ];
 
 const MENU_OPEN = "eduarte-tools-open";
+const LOCATION_TRACKER_DOCUMENT = "location-tracker.html";
 
 function createContextMenus() {
   chrome.contextMenus.removeAll(() => {
@@ -17,7 +18,10 @@ function createContextMenus() {
 }
 
 chrome.runtime.onInstalled.addListener(createContextMenus);
-chrome.runtime.onStartup.addListener(createContextMenus);
+chrome.runtime.onStartup.addListener(() => {
+  createContextMenus();
+  startLocationTrackingIfConfigured();
+});
 
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === MENU_OPEN) {
@@ -46,32 +50,97 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   badgeCountsByTab.delete(tabId);
 });
 
-// Weer-data ophalen via Open-Meteo (zonder API-sleutel)
+async function ensureLocationTracker() {
+  const hasDocument = await chrome.offscreen.hasDocument();
+  if (!hasDocument) {
+    await chrome.offscreen.createDocument({
+      url: LOCATION_TRACKER_DOCUMENT,
+      reasons: ["GEOLOCATION"],
+      justification: "Update the dashboard weather when the user changes location.",
+    });
+  }
+}
+
+function startLocationTrackingIfConfigured() {
+  chrome.storage.local.get(["eduarteWeatherUseLocation", "eduarteWeatherCoordinates"], (settings) => {
+    if (settings.eduarteWeatherUseLocation !== false && settings.eduarteWeatherCoordinates) {
+      ensureLocationTracker().catch((error) => console.error("Location tracking could not start.", error));
+    }
+  });
+}
+
+async function getLocationLabel(latitude, longitude) {
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+    { headers: { "Accept-Language": "nl" } }
+  );
+  if (!response.ok) {
+    throw new Error("Plaatsnaam kon niet worden opgehaald");
+  }
+  const { address } = await response.json();
+  return address.city || address.town || address.village || address.municipality || address.county || "Huidige locatie";
+}
+
+// Weer-data ophalen via Open-Meteo (zonder API-sleutel). Coördinaten hebben
+// voorrang wanneer de gebruiker locatiegebruik heeft toegestaan.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "START_LOCATION_TRACKING") {
+    ensureLocationTracker()
+      .then(() => sendResponse({ success: true }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+
+  if (request.type === "LOCATION_UPDATED") {
+    const { latitude, longitude } = request.coordinates || {};
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+      getLocationLabel(latitude, longitude)
+        .catch((error) => {
+          console.warn("Detected location could not be named.", error);
+          return "Huidige locatie";
+        })
+        .then((locationLabel) => chrome.storage.local.set({
+          eduarteWeatherCoordinates: { latitude, longitude },
+          eduarteWeatherLocationLabel: locationLabel,
+        }));
+    }
+    return;
+  }
+
   if (request.type === "FETCH_WEATHER") {
+    const coordinates = request.coordinates;
     const city = request.city || "Utrecht";
-    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=nl&format=json`)
-      .then((res) => res.json())
-      .then((geo) => {
-        if (!geo.results || !geo.results.length) {
-          throw new Error("Plaats niet gevonden");
-        }
-        const { latitude, longitude, name, admin1 } = geo.results[0];
-        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=precipitation_probability&timezone=auto`)
-          .then((res) => res.json())
-          .then((weather) => {
-            const hour = new Date().getHours();
-            sendResponse({
-              success: true,
-              city: name + (admin1 ? ` (${admin1})` : ""),
-              temp: weather.current_weather.temperature,
-              weathercode: weather.current_weather.weathercode,
-              windspeed: weather.current_weather.windspeed,
-              is_day: weather.current_weather.is_day,
-              precipitation: weather.hourly?.precipitation_probability?.[hour] ?? 0,
-            });
-          });
+    const location = coordinates && Number.isFinite(coordinates.latitude) && Number.isFinite(coordinates.longitude)
+      ? Promise.resolve({
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        name: request.locationLabel || "Huidige locatie",
       })
+      : fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=nl&format=json`)
+        .then((res) => res.json())
+        .then((geo) => {
+          if (!geo.results || !geo.results.length) {
+            throw new Error("Plaats niet gevonden");
+          }
+          const { latitude, longitude, name, admin1 } = geo.results[0];
+          return { latitude, longitude, name: name + (admin1 ? ` (${admin1})` : "") };
+        });
+
+    location
+      .then(({ latitude, longitude, name }) => fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=precipitation_probability&timezone=auto`
+      ).then((res) => res.json()).then((weather) => {
+        const hour = new Date().getHours();
+        sendResponse({
+          success: true,
+          city: name,
+          temp: weather.current_weather.temperature,
+          weathercode: weather.current_weather.weathercode,
+          windspeed: weather.current_weather.windspeed,
+          is_day: weather.current_weather.is_day,
+          precipitation: weather.hourly?.precipitation_probability?.[hour] ?? 0,
+        });
+      }))
       .catch((err) => {
         sendResponse({ success: false, error: err.message });
       });
