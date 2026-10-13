@@ -263,78 +263,22 @@
     nav.navigation.navigation--student,
     .sidebar {
       background-color: ${effectiveSurface} !important;
-      padding: .75rem !important;
       border-right: 1px solid color-mix(in srgb, ${effectiveBorder} 60%, transparent) !important;
       box-shadow: 4px 0 24px rgba(0,0,0,${isDark ? '0.2' : '0.04'}) !important;
       transition: width 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
     }
 
-    nav.navigation.navigation--student .navigation-items--main {
-      gap: .4rem;
-    }
-
+    /* Alleen kleur/vorm op de menu-items; de layout (icoon- en label-positie,
+       en welk icoon zichtbaar is) laten we aan Eduarte zelf over. */
     nav.navigation.navigation--student .navigation-items--main > li > a {
-      display: flex !important;
-      align-items: center !important;
-      gap: .75rem !important;
-      min-height: 2.85rem !important;
-      padding: .65rem .85rem !important;
       border-radius: .85rem !important;
       color: color-mix(in srgb, ${effectiveText} 85%, transparent) !important;
-      transition: background-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
-      position: relative !important;
-    }
-
-    /* Fix icon/label overlap: original site absolutely positions icons over
-       text assuming a fixed padding, which breaks once we restyle the anchor. */
-    nav.navigation.navigation--student .navigation-items--main > li > a > * {
-      position: static !important;
-      transform: none !important;
-    }
-
-    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__icon,
-    nav.navigation.navigation--student .navigation-items--main > li > a i,
-    nav.navigation.navigation--student .navigation-items--main > li > a .icon,
-    nav.navigation.navigation--student .navigation-items--main > li > a [class*="__icon"] {
-      width: 1.35rem !important;
-      height: 1.35rem !important;
-      min-width: 1.35rem !important;
-      max-width: 1.35rem !important;
-      flex: 0 0 1.35rem !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      font-size: 1.15rem !important;
-      line-height: 1 !important;
-    }
-
-    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__icon svg,
-    nav.navigation.navigation--student .navigation-items--main > li > a i svg,
-    nav.navigation.navigation--student .navigation-items--main > li > a svg {
-      width: 100% !important;
-      height: 100% !important;
-      display: block !important;
-    }
-
-    nav.navigation.navigation--student .navigation-items--main > li > a .navigation-item__label,
-    nav.navigation.navigation--student .navigation-items--main > li > a [class*="__label"],
-    nav.navigation.navigation--student .navigation-items--main > li > a span {
-      flex: 1 1 auto !important;
-      min-width: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      line-height: 1.35rem !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
+      transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
     }
 
     nav.navigation.navigation--student .navigation-items--main > li > a:hover {
       background: color-mix(in srgb, ${effectiveAccent} 15%, transparent) !important;
       color: ${effectiveText} !important;
-      transform: translateX(3px);
     }
 
     nav.navigation.navigation--student .navigation-items--main > li.is-selected > a {
