@@ -18,8 +18,10 @@ defineProps({ title: String, subtitle: String });
   z-index: 5;
   display: flex;
   align-items: center;
-  height: 64px;
-  padding-inline: 16px;
+  min-height: 68px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--color-outline-variant);
+  border-radius: 0 0 20px 20px;
   background: var(--color-surface);
 }
 #app-heading {
@@ -27,6 +29,6 @@ defineProps({ title: String, subtitle: String });
   font: var(--typescale-title-large);
   color: var(--color-on-surface);
 }
-#app-heading:after { content: '.'; color: var(--mg-orange); }
+#app-heading:after { content: '.'; color: var(--color-tertiary); }
 #app-subheading { display: none; }
 </style>

@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from "vue";
 import SwitchInput from "../components/SwitchInput.vue";
+import MaterialTextField from "../components/MaterialTextField.vue";
+import MaterialSlider from "../components/MaterialSlider.vue";
 
 const props = defineProps(["state"]);
 const s = props.state;
@@ -43,13 +45,12 @@ function useCurrentLocation() {
   <div class="setting">
     <h3 class="setting-title">Weer op basis van je locatie</h3>
     <span class="setting-subtitle">Gebruik je huidige locatie voor automatisch bijgewerkt weer. De extensie werkt de locatie bij wanneer je verplaatst.</span>
-    <button class="btn tonal location-button" type="button" @click="useCurrentLocation">📍 Gebruik huidige locatie</button>
+    <md-filled-tonal-button class="location-button" type="button" @click="useCurrentLocation">Gebruik huidige locatie</md-filled-tonal-button>
     <span v-if="locationStatus" class="location-status" role="status">{{ locationStatus }}</span>
   </div>
   <div class="setting">
-    <h3 class="setting-title">Plaatsnaam als alternatief</h3>
+    <MaterialTextField v-model="s.eduarteWeatherCity" label="Plaatsnaam als alternatief" placeholder="Utrecht" autocomplete="off" />
     <span class="setting-subtitle">Gebruik dit alleen wanneer je geen locatietoegang wilt geven (bijv. Utrecht).</span>
-    <input type="text" v-model="s.eduarteWeatherCity" placeholder="Utrecht" autocomplete="off">
   </div>
   <SwitchInput v-model="s.eduarteGreetingEnabled" title="Persoonlijke Begroeting & Datum" subtitle="Toon een groet (bijv. Goedemorgen) en de datum bovenaan." />
   <SwitchInput v-model="s.eduarteShortcutsEnabled" title="Snelkoppelingen (Quick Links)" subtitle="Knoppen naar Teams, Outlook Webmail, OneDrive, Office 365 en Cijfers." />
@@ -58,7 +59,7 @@ function useCurrentLocation() {
   <SwitchInput v-model="s.eduarteQuoteEnabled" title="Dagelijkse Studie Quote & Tips" subtitle="Inspirerende quotes en handige studietips die dagelijks wisselen." />
   <div class="setting">
     <h3 class="setting-title">Kaartanimatie Intensiteit</h3>
-    <input class="range" type="range" min="0" max="100" v-model.number="s.eduarteAnimationSpeed">
+    <MaterialSlider v-model="s.eduarteAnimationSpeed" min="0" max="100" label="Animatie-snelheid" />
     <div class="range-value">Animatie-snelheid</div>
   </div>
 </template>

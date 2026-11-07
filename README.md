@@ -16,8 +16,25 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 - **Automatisch inloggen** op Eduarte/ADFS- en Microsoft-inlogpagina's van
   verschillende Eduarte- en Educus-omgevingen, met optioneel automatisch
   verzenden (geen klik nodig).
-- **Cijfercalculator** — berekent het gewogen gemiddelde, de mediaan en welk
-  cijfer je met een bepaalde weging nodig hebt voor je doelgemiddelde.
+- **Cijfertools** — calculator met geselecteerde Eduarte-cijfers, gewogen
+  gemiddelde en voorspelling, statistieken met cijferverdeling, een sorteerbare
+  lijst en lokale JSON-back-up/import. De ingebouwde `EduarteApi`-adapter leest
+  cijfers uit de resultatenpagina zelf; dit is een lokale client-API, geen
+  publieke Eduarte-server-API en verstuurt geen cijfers.
+- **Volledig scherm pack-opening** — open vanaf een Eduarte-pagina een pack met
+  maximaal drie willekeurig gekozen echte cijfers uit de zichtbare
+  resultatenpagina. De cijfers worden tijdelijk lokaal doorgegeven aan de
+  extensiepagina, niet naar een server gestuurd en niet bewaard. De
+  3D-packanimatie is met toestemming aangepast van Magister Ultimate Team
+  v6.10.2.3.
+- **Material 3 Expressive-contextmenu** — rechtsklik op een lege plek op een
+  Eduarte-pagina om Eduarte Tools of de pack-opening direct te openen. In
+  invoervelden, op links en bij geselecteerde tekst blijft het browsermenu
+  beschikbaar.
+- De interface gebruikt Google's officiële
+  [Material Web Components](https://material-web.dev/) voor Material 3-
+  bedieningselementen, gecombineerd met Material 3 Expressive-kleur-, vorm- en
+  bewegingstokens.
 - **Start Dashboard Weer- & Begroeting Widget** — live temperatuur, weersicoon,
   neerslagkans en tijdgebonden begroeting direct op je Eduarte startpagina.
   Kies eenmaal **Gebruik huidige locatie** in de extensie; het weer wordt daarna
@@ -41,6 +58,8 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   dashboard.
 - **CSV-export cijfers** — exporteer je ingevoerde cijfers en wegingen vanuit
   de Cijfercalculator als CSV-bestand (Excel-compatibel) met één klik.
+- De gewogen-gemiddelde- en voorspellingberekening is aangepast van Study Tools;
+  de licentievermelding staat in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
 - **Aanpasbare Sneltoetsen** — spring met een zelf ingestelde toetscombinatie
   (bijv. Ctrl+A → Agenda, Ctrl+R → Resultaten) direct naar een Eduarte-pagina.
 - **Aan/uit-zetbare Widgets** — Pomodoro Focus Timer, Snelle Cijfercalculator,

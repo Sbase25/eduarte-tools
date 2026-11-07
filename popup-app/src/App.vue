@@ -43,13 +43,15 @@ onMounted(load);
   grid-template-columns: 80px 1fr;
   height: 100%;
   overflow: hidden;
+  background: var(--color-surface);
 }
 #content {
   position: relative;
   min-width: 0;
   overflow-y: auto;
+  scrollbar-color: var(--color-outline-variant) transparent;
 }
-.panel { padding: 0 16px 16px; }
+.panel { padding: 8px 16px 20px; }
 .panel-enter-active, .panel-leave-active { transition: opacity 220ms ease, transform 220ms cubic-bezier(.22,1,.36,1); }
 .panel-enter-from { opacity: 0; transform: translateY(8px) scale(.985); }
 .panel-leave-to { opacity: 0; }

@@ -11,9 +11,3 @@ defineProps({ title: String, subtitle: String });
     <slot />
   </div>
 </template>
-
-<style scoped>
-.setting { padding-block: 12px; }
-.setting-title { margin: 0; font: var(--typescale-body-large); color: var(--color-on-surface); }
-.setting-subtitle { display: block; margin-top: 2px; margin-bottom: 8px; color: var(--color-on-surface-variant); font: var(--typescale-body-medium); }
-</style>

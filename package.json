@@ -5,7 +5,7 @@
   "description": "Root test tooling for Eduarte Tools (Chrome extension content scripts).",
   "type": "commonjs",
   "scripts": {
-    "test": "vitest run test/**/*.test.mjs"
+    "test": "vitest run"
   },
   "devDependencies": {
     "jsdom": "^25.0.1",

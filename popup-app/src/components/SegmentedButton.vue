@@ -13,7 +13,7 @@ const value = computed({
 
 <template>
   <div class="segmented-button">
-    <button v-for="opt in options" :key="opt.value" class="segment" :data-state="opt.value === value" @click="value = opt.value">
+    <button v-for="opt in options" :key="opt.value" class="segment" type="button" :data-state="opt.value === value" :aria-pressed="opt.value === value" @click="value = opt.value">
       <Icon v-if="opt.icon" :filled="opt.value === value">{{ opt.icon }}</Icon>
       <span v-if="opt.title">{{ opt.title }}</span>
     </button>
@@ -23,11 +23,11 @@ const value = computed({
 <style scoped>
 .segmented-button {
   display: flex;
-  border: 1.5px solid var(--color-outline);
-  border-radius: 20px;
-  padding: 3px;
-  gap: 2px;
-  background: var(--color-surface-container-low);
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 20px 20px 8px 20px;
+  background: var(--color-surface-container);
 }
 .segment {
   flex: 1 1 0;
@@ -35,20 +35,20 @@ const value = computed({
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px;
+  min-height: 38px;
   padding-inline: 10px;
   border: 0;
-  border-radius: 17px;
+  border-radius: 16px 16px 6px 16px;
   background: transparent;
   color: var(--color-on-surface-variant);
   font: var(--typescale-label-large);
   cursor: pointer;
-  transition: background-color 220ms cubic-bezier(.2,0,0,1), color 200ms ease, transform 160ms cubic-bezier(.34,1.56,.64,1);
+  transition: background-color 180ms ease, color 180ms ease, transform 160ms cubic-bezier(.2,.8,.2,1);
 }
 .segment .icon { font-size: 17px; }
 .segment:active { transform: scale(.93); }
 .segment[data-state=true] {
-  background: var(--color-secondary-container);
-  color: var(--color-on-secondary-container);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
 }
 </style>

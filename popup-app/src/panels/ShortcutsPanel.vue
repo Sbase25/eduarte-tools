@@ -70,5 +70,5 @@ function resetShortcuts() {
     <input class="shortcut-input" type="text" readonly :value="labelFor(p.page)" placeholder="Klik en druk een toets..."
       @focus="onFocus" @blur="onBlur($event, p.page)" @keydown="onKeydown($event, p.page)">
   </div>
-  <div class="setting"><button class="btn tonal" @click="resetShortcuts">Standaardwaarden herstellen</button></div>
+  <div class="setting"><md-filled-tonal-button @click="resetShortcuts">Standaardwaarden herstellen</md-filled-tonal-button></div>
 </template>

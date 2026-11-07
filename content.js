@@ -2,20 +2,38 @@
 //
 // Detects WHAT KIND of login page it is looking at from the page's HTML
 // (ADFS, Microsoft account picker / email / password / "stay signed in",
-// or a generic username+password form) instead of relying on the domain,
-// then fills it in and optionally submits it. Microsoft's login is a
-// single-page app that swaps screens without navigating, so everything is
-// polled for a while and each *step* is only submitted a limited number of
-// times (prevents loops on a wrong password).
+// or a generic username+password form) instead of relying only on the domain.
+// Microsoft account pickers and single-page login steps are watched briefly
+// so they can be handled without repeated or stale submissions.
 
 (function () {
   const STORE = ["eduarteUsername", "eduartePassword", "eduarteEnabled", "eduarteAutosubmit"];
+  const LOGOUT_KEY = "eduarteForceLogoutTimestamp";
   const POLL_MS = 400;
   const MAX_WATCH_MS = 60000;
   const MAX_ATTEMPTS_PER_STEP = 2;
+  const MANUAL_LOGOUT_PAUSE_MS = 30000;
 
   const host = location.hostname;
   const onEduarte = /(^|\.)(educus|eduarte)\.nl$/.test(host);
+
+  if (onEduarte) {
+    document.addEventListener("click", (event) => {
+      const control = event.target instanceof Element
+        ? event.target.closest("a, button, [role='button']")
+        : null;
+      if (!control) return;
+      const description = [
+        control.textContent,
+        control.getAttribute("aria-label"),
+        control.getAttribute("title"),
+        control.getAttribute("href"),
+      ].filter(Boolean).join(" ");
+      if (/\b(log\s*out|sign\s*out|uitlog(?:gen)?|afmeld(?:en)?)\b/i.test(description)) {
+        chrome.storage.local.set({ [LOGOUT_KEY]: Date.now() });
+      }
+    }, true);
+  }
 
   // ---------- helpers ----------
   const visible = (el) => !!el && !el.disabled && (el.offsetParent !== null || getComputedStyle(el).position === "fixed");
@@ -87,15 +105,18 @@
     const found = detect();
     if (!found) return;
 
-    // On Eduarte/Educus itself, only act on a real password login form.
-    if (onEduarte && !found.pw) return;
+    // On Eduarte/Educus itself, allow its actual login form or an explicit
+    // account-picker tile matching the saved username, not unrelated inputs.
+    if (onEduarte && !found.pw && found.type !== "picker") return;
 
     const auto = !!data.eduarteAutosubmit;
 
     switch (found.type) {
       case "picker": {
-        const wanted = String(data.eduarteUsername).toLowerCase();
-        const tile = found.tiles.find((t) => (t.getAttribute("data-test-id") || "").toLowerCase() === wanted);
+        const wanted = String(data.eduarteUsername).trim().toLowerCase();
+        const tile = found.tiles.find((t) =>
+          (t.getAttribute("data-test-id") || "").trim().toLowerCase() === wanted
+        );
         if (tile && auto && attempt("picker")) setTimeout(() => tile.click(), 250);
         break;
       }
@@ -125,15 +146,34 @@
   }
 
   // ---------- main ----------
-  chrome.storage.local.get(STORE, (data) => {
+  chrome.storage.local.get([...STORE, LOGOUT_KEY], (data) => {
     if (!data || !data.eduarteEnabled || !data.eduarteUsername) return;
+
+    const logoutAt = Number(data[LOGOUT_KEY]);
+    const logoutAge = Date.now() - logoutAt;
+    if (Number.isFinite(logoutAt) && logoutAge >= 0 && logoutAge < MANUAL_LOGOUT_PAUSE_MS) return;
+    if (logoutAt) chrome.storage.local.remove(LOGOUT_KEY);
 
     const started = Date.now();
     const tick = () => {
       if (Date.now() - started > MAX_WATCH_MS) return clearInterval(timer);
-      try { run(data); } catch (e) { /* page mid-render; try again next tick */ }
+      try {
+        run(data);
+      } catch (error) {
+        console.warn("Eduarte Tools could not process the current login step.", error);
+      }
     };
     const timer = setInterval(tick, POLL_MS);
+    const observer = new MutationObserver(tick);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    window.addEventListener("popstate", tick);
+    window.addEventListener("hashchange", tick);
     tick();
+    setTimeout(() => {
+      clearInterval(timer);
+      observer.disconnect();
+      window.removeEventListener("popstate", tick);
+      window.removeEventListener("hashchange", tick);
+    }, MAX_WATCH_MS);
   });
 })();
