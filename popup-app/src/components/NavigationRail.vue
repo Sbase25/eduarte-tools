@@ -12,8 +12,12 @@ const value = computed({
 
 function selectTab(tab) {
   if (tab.id === "packs") {
-    if (typeof chrome !== "undefined" && chrome.tabs?.create) {
-      chrome.tabs.create({ url: chrome.runtime.getURL("popup-dist/packs.html") });
+    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+      chrome.runtime.sendMessage({ type: "OPEN_EDUARTE_TOOLS_PAGE", page: "packs" }, (response) => {
+        const error = chrome.runtime.lastError;
+        if (error) console.error("Eduarte Tools kon de pack opening niet openen.", error.message);
+        else if (!response?.success) console.error("Eduarte Tools kon de pack opening niet openen.", response?.error);
+      });
     } else {
       window.open(new URL("/packs.html", window.location.href).href, "_blank", "noopener");
     }

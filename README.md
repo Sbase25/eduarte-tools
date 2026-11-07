@@ -21,11 +21,12 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   lijst en lokale JSON-back-up/import. De ingebouwde `EduarteApi`-adapter leest
   cijfers uit de resultatenpagina zelf; dit is een lokale client-API, geen
   publieke Eduarte-server-API en verstuurt geen cijfers.
-- **Volledig scherm pack-opening demo** — open vanuit de Packs-knop een aparte
-  extensiepagina met een game-achtige pack-opening en drie willekeurige
-  voorbeeldkaarten. De 3D-packanimatie is met toestemming aangepast van
-  Magister Ultimate Team v6.10.2.3. De demo heeft geen database, gebruikt geen
-  echte cijfers en bewaart geen kaarten.
+- **Volledig scherm pack-opening** — open vanaf een Eduarte-pagina een pack met
+  maximaal drie willekeurig gekozen echte cijfers uit de zichtbare
+  resultatenpagina. De cijfers worden tijdelijk lokaal doorgegeven aan de
+  extensiepagina, niet naar een server gestuurd en niet bewaard. De
+  3D-packanimatie is met toestemming aangepast van Magister Ultimate Team
+  v6.10.2.3.
 - **Material 3 Expressive-contextmenu** — rechtsklik op een lege plek op een
   Eduarte-pagina om Eduarte Tools of de pack-opening direct te openen. In
   invoervelden, op links en bij geselecteerde tekst blijft het browsermenu

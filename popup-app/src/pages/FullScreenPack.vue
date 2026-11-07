@@ -1,39 +1,45 @@
 <script setup>
-import { onBeforeUnmount, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import Icon from "../components/Icon.vue";
-
-const exampleCards = [
-  { subject: "Wiskunde", rating: 92, role: "ANALIST", icon: "functions", color: "gold" },
-  { subject: "Biologie", rating: 88, role: "ONTDEKKER", icon: "biotech", color: "green" },
-  { subject: "Engels", rating: 82, role: "TALENT", icon: "translate", color: "blue" },
-  { subject: "Nederlands", rating: 76, role: "SPEELMAKER", icon: "menu_book", color: "violet" },
-  { subject: "Geschiedenis", rating: 71, role: "STRATEEG", icon: "history_edu", color: "orange" },
-  { subject: "Natuurkunde", rating: 97, role: "GENIE", icon: "science", color: "cyan" },
-];
+import { drawGradeCards } from "../pack-cards.js";
 
 const isOpening = ref(false);
 const isOpen = ref(false);
+const gradePool = ref([]);
 const revealedCards = ref([]);
 const sceneTransform = ref("");
+const gradesReady = ref(false);
+const gradeLoadError = ref("");
 let revealTimer;
 
-function drawExampleCards() {
-  const shuffled = [...exampleCards];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+async function loadGradeTransfer() {
+  const transferKey = new URLSearchParams(window.location.search).get("transfer");
+  if (!transferKey) {
+    gradesReady.value = true;
+    return;
   }
-  return shuffled.slice(0, 3);
+
+  window.history.replaceState(null, "", window.location.pathname);
+  if (typeof chrome === "undefined" || !chrome.storage?.session) {
+    gradeLoadError.value = "De Eduarte-cijfers konden niet veilig worden opgehaald.";
+    gradesReady.value = true;
+    return;
+  }
+
+  const stored = await chrome.storage.session.get(transferKey);
+  await chrome.storage.session.remove(transferKey);
+  gradePool.value = Array.isArray(stored[transferKey]) ? stored[transferKey] : [];
+  gradesReady.value = true;
 }
 
 function openPack() {
-  if (isOpening.value) return;
+  if (isOpening.value || !gradesReady.value) return;
   clearTimeout(revealTimer);
   isOpening.value = true;
   isOpen.value = false;
   revealedCards.value = [];
   revealTimer = setTimeout(() => {
-    revealedCards.value = drawExampleCards();
+    revealedCards.value = drawGradeCards(gradePool.value);
     isOpening.value = false;
     isOpen.value = true;
     sceneTransform.value = "";
@@ -42,10 +48,14 @@ function openPack() {
 
 function skipOpening() {
   clearTimeout(revealTimer);
-  revealedCards.value = drawExampleCards();
+  revealedCards.value = drawGradeCards(gradePool.value);
   isOpening.value = false;
   isOpen.value = true;
   sceneTransform.value = "";
+}
+
+function formatGrade(value) {
+  return value.toLocaleString("nl-NL", { maximumFractionDigits: 2 });
 }
 
 function tiltPack(event) {
@@ -68,6 +78,14 @@ function openSettings() {
   }
 }
 
+onMounted(() => {
+  loadGradeTransfer().catch((error) => {
+    console.error("Eduarte Tools could not load the local grade transfer.", error);
+    gradeLoadError.value = "De Eduarte-cijfers konden niet worden opgehaald. Open Packs opnieuw vanaf Eduarte.";
+    gradesReady.value = true;
+  });
+});
+
 onBeforeUnmount(() => clearTimeout(revealTimer));
 </script>
 
@@ -79,7 +97,7 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
         <span>Eduarte <b>Tools</b></span>
       </div>
       <div class="top-actions">
-        <span class="demo-label"><i></i> DEMO</span>
+        <span class="source-label"><i></i> LOKALE EDUARTE-CIJFERS</span>
         <md-icon-button class="settings-button" aria-label="Extensie-instellingen" title="Extensie-instellingen" @click="openSettings">
           <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94a7.5 7.5 0 0 0 .05-1.88l2.03-1.58-2-3.46-2.42.98a7.3 7.3 0 0 0-1.63-.94L14.8 3h-4l-.37 3.06a7.3 7.3 0 0 0-1.63.94l-2.42-.98-2 3.46 2.03 1.58a7.5 7.5 0 0 0 0 1.88l-2.03 1.58 2 3.46 2.42-.98c.5.4 1.05.72 1.63.94L10.8 21h4l.37-3.06c.58-.22 1.13-.54 1.63-.94l2.42.98 2-3.46-2.08-1.58ZM12.8 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" /></svg>
         </md-icon-button>
@@ -89,8 +107,8 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
     <div class="content">
       <section class="intro">
         <p class="eyebrow">EDUARTE TOOLS <span>·</span> PACK OPENING</p>
-        <h1>{{ isOpen ? "Jouw kaarten." : "Open het pack." }}</h1>
-        <p>{{ isOpen ? "Drie voorbeeldkaarten uit de School Pack." : "Klik op het pack om de verpakking open te scheuren." }}</p>
+        <h1>{{ isOpen ? "Jouw cijfers." : "Open het pack." }}</h1>
+        <p>{{ isOpen ? `${revealedCards.length} Eduarte-cijfers uit jouw pack.` : "Klik op het pack om je Eduarte-cijfers te onthullen." }}</p>
       </section>
 
       <section class="pack-area" :class="{ 'is-opening': isOpening, 'is-open': isOpen }">
@@ -101,7 +119,8 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
               class="pack3d-box"
               :class="{ ripping: isOpening }"
               type="button"
-              :disabled="isOpening"
+              :disabled="isOpening || !gradesReady"
+              :aria-busy="isOpening"
               aria-label="Open het Eduarte School Pack"
               @click="openPack"
             >
@@ -133,28 +152,32 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
             </button>
           </div>
           <div class="pack3d-prompt" aria-live="polite">
-            <span class="prompt-glow">{{ isOpening ? "PACK WORDT GEOPEND..." : "KLIK OP HET PACK OM TE OPENEN" }}</span>
+            <span class="prompt-glow">{{ !gradesReady ? "EDUARTE-CIJFERS LADEN..." : isOpening ? "PACK WORDT GEOPEND..." : "KLIK OP HET PACK OM TE OPENEN" }}</span>
           </div>
           <md-text-button v-if="isOpening" class="skip-button" type="button" @click="skipOpening">Overslaan</md-text-button>
         </div>
 
-        <div v-else class="reveal" aria-live="polite">
+        <div v-else-if="revealedCards.length" class="reveal" aria-live="polite">
           <article
             v-for="(card, index) in revealedCards"
-            :key="card.subject"
+            :key="card.id"
             class="player-card"
-            :class="`tone-${card.color}`"
             :style="{ '--delay': `${index * 140}ms` }"
           >
             <div class="card-frame"><span></span></div>
-            <div class="card-top"><strong>{{ card.rating }}</strong><span>{{ card.role }}</span></div>
-            <div class="card-art"><span class="art-glow"></span><Icon>{{ card.icon }}</Icon></div>
+            <div class="card-top"><strong>{{ formatGrade(card.result) }}</strong><span>CIJFER</span></div>
+            <div class="card-art"><span class="art-glow"></span><Icon>school</Icon></div>
             <div class="card-info">
-              <span>VAKKAART</span>
+              <span>EDUARTE-RESULTAAT</span>
               <h2>{{ card.subject }}</h2>
-              <div class="card-rating"><span>DEMO-RATING</span><strong>{{ card.rating }}</strong></div>
+              <div class="card-rating"><span>WEGING</span><strong>{{ card.weight ? `${formatGrade(card.weight)}×` : "—" }}</strong></div>
             </div>
           </article>
+        </div>
+        <div v-else-if="isOpen" class="empty-state" aria-live="polite">
+          <Icon>school</Icon>
+          <h2>{{ gradeLoadError ? "Cijfers niet geladen." : "Geen cijfers gevonden." }}</h2>
+          <p>{{ gradeLoadError || "Open Packs vanaf een Eduarte-resultatenpagina om je cijfers lokaal mee te nemen." }}</p>
         </div>
       </section>
 
@@ -162,7 +185,7 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
         <md-filled-button v-if="isOpen" class="open-button" type="button" @click="isOpen = false; revealedCards = []">
           Nog een pack openen
         </md-filled-button>
-        <p class="disclaimer"><Icon>info</Icon> Dit is eerst alleen de pack-animatie met fictieve demo-kaarten. Geen Eduarte-cijfers worden gelezen of bewaard.</p>
+        <p class="disclaimer"><Icon>info</Icon> Cijfers worden alleen lokaal uit de geopende Eduarte-pagina gelezen en niet bewaard.</p>
       </div>
     </div>
   </main>
@@ -176,8 +199,8 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
 .brand-icon { display: grid; width: 31px; height: 31px; place-items: center; border: 1px solid #ffffff20; border-radius: 9px; color: #d7c3ff; background: #8d5be91b; }
 .brand-icon :deep(.icon) { font-size: 18px; }
 .top-actions { display: flex; align-items: center; gap: 15px; }
-.demo-label { display: flex; align-items: center; gap: 6px; color: #b7b6c1; font: 700 9px system-ui, sans-serif; letter-spacing: .13em; }
-.demo-label i { width: 6px; height: 6px; border-radius: 50%; background: #76cfa5; }
+.source-label { display: flex; align-items: center; gap: 6px; color: #b7b6c1; font: 700 9px system-ui, sans-serif; letter-spacing: .13em; }
+.source-label i { width: 6px; height: 6px; border-radius: 50%; background: #76cfa5; }
 .settings-button { --md-icon-button-icon-color: #d9d2e3; --md-icon-button-icon-size: 20px; --md-icon-button-state-layer-shape: 16px 16px 6px 16px; }
 .settings-button svg { width: 20px; height: 20px; fill: currentColor; }
 .content { width: min(1050px, calc(100% - 40px)); margin: 0 auto; padding: 46px 0 32px; }
@@ -227,9 +250,12 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
 .prompt-glow { color: #e8d18c; font-size: 10px; font-weight: 850; letter-spacing: .16em; text-shadow: 0 0 16px #e8cd7470; animation: promptPulse 1.8s ease-in-out infinite; }
 .skip-button { position: absolute; z-index: 4; right: 18px; bottom: 17px; --md-text-button-label-text-color: var(--color-on-surface); --md-text-button-label-text-font: var(--md-ref-typeface-plain); }
 .reveal { display: grid; width: min(690px, calc(100% - 32px)); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 2.5vw, 24px); }
+.empty-state { width: min(460px, calc(100% - 40px)); padding: 28px; border: 1px solid #ffffff20; border-radius: 24px 24px 8px 24px; color: #c8c2d0; background: #ffffff08; text-align: center; }
+.empty-state :deep(.icon) { color: #d7c3ff; font-size: 34px; }
+.empty-state h2 { margin: 12px 0 6px; color: #f3f0f7; font: 700 18px system-ui, sans-serif; }
+.empty-state p { margin: 0; font: 400 13px/1.6 system-ui, sans-serif; }
 .player-card { --accent: #c5a867; position: relative; display: flex; min-width: 0; min-height: 290px; flex-direction: column; padding: 13px 12px 12px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent) 45%, #ffffff50); border-radius: 24px 24px 8px 24px; color: #f7f5ef; background: radial-gradient(ellipse at 50% 38%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 54%), linear-gradient(150deg, color-mix(in srgb, var(--accent) 16%, #272832), #1b1c23 75%); box-shadow: 0 12px 27px #0006, inset 0 1px #ffffff27; opacity: 0; animation: revealCard .58s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: var(--delay); }
 .card-frame { position: absolute; inset: 5px; border: 1px solid #ffffff18; border-radius: 10px; pointer-events: none; }
-.tone-gold { --accent: #e2c47d; }.tone-green { --accent: #75c4a2; }.tone-blue { --accent: #78aaca; }.tone-violet { --accent: #ad91d4; }.tone-orange { --accent: #cf9a72; }.tone-cyan { --accent: #74bebd; }
 .card-top { z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
 .card-top strong { color: var(--accent); font: 850 27px/.9 system-ui, sans-serif; }
 .card-top span { max-width: 95px; padding-top: 3px; color: #c5c2cb; font: 750 7px system-ui, sans-serif; letter-spacing: .06em; text-align: right; }

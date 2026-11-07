@@ -8,7 +8,7 @@ const position = ref({ x: 0, y: 0 });
 
 const actions = [
   { label: "Eduarte Tools openen", description: "Instellingen en functies", page: "settings", icon: "settings" },
-  { label: "Pack opening", description: "Open de full-screen packdemo", page: "packs", icon: "redeem" },
+  { label: "Pack opening", description: "Onthul cijfers van Eduarte", page: "packs", icon: "redeem" },
 ];
 
 function isBrowserContext(target) {

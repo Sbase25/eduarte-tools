@@ -3,25 +3,6 @@ const LOCATION_TRACKER_DOCUMENT = "location-tracker.html";
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (!request || request.type !== "OPEN_EDUARTE_TOOLS_PAGE") return;
 
-  let senderUrl;
-  try {
-    senderUrl = new URL(sender.url);
-  } catch {
-    sendResponse({ success: false, error: "Ongeldige Eduarte-pagina." });
-    return;
-  }
-
-  const hostname = senderUrl.hostname;
-  const isEduarteHost = senderUrl.protocol === "https:"
-    && (hostname === "eduarte.nl"
-      || hostname.endsWith(".eduarte.nl")
-      || hostname === "educus.nl"
-      || hostname.endsWith(".educus.nl"));
-  if (!sender.tab || !isEduarteHost) {
-    sendResponse({ success: false, error: "Deze actie is alleen beschikbaar op Eduarte-pagina's." });
-    return;
-  }
-
   const extensionPage = request.page === "packs"
     ? "popup-dist/packs.html"
     : request.page === "settings"
@@ -32,12 +13,61 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return;
   }
 
-  chrome.tabs.create({ url: chrome.runtime.getURL(extensionPage), active: true }, (tab) => {
-    if (chrome.runtime.lastError) {
-      sendResponse({ success: false, error: chrome.runtime.lastError.message });
-      return;
+  const isEduarteTab = (tab) => {
+    try {
+      const url = new URL(tab.url);
+      return url.protocol === "https:"
+        && (/(^|\.)eduarte\.nl$/.test(url.hostname) || /(^|\.)educus\.nl$/.test(url.hostname));
+    } catch {
+      return false;
     }
+  };
+  const isExtensionPage = sender.url?.startsWith(`chrome-extension://${chrome.runtime.id}/`);
+  if (!sender.tab && !isExtensionPage) {
+    sendResponse({ success: false, error: "Deze actie is alleen beschikbaar vanuit Eduarte Tools." });
+    return;
+  }
+  if (sender.tab && !isEduarteTab(sender.tab)) {
+    sendResponse({ success: false, error: "Deze actie is alleen beschikbaar op Eduarte-pagina's." });
+    return;
+  }
+
+  const openPage = async () => {
+    let grades = [];
+    if (request.page === "packs") {
+      let sourceTab = sender.tab;
+      if (!sourceTab) {
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (isEduarteTab(activeTab)) sourceTab = activeTab;
+      }
+
+      if (sourceTab?.id != null) {
+        grades = await new Promise((resolve) => {
+          chrome.tabs.sendMessage(sourceTab.id, { type: "GET_EDUARTE_GRADES" }, (response) => {
+            if (chrome.runtime.lastError) {
+              resolve([]);
+              return;
+            }
+            resolve(Array.isArray(response?.grades) ? response.grades : []);
+          });
+        });
+      }
+    }
+
+    const url = new URL(chrome.runtime.getURL(extensionPage));
+    if (request.page === "packs") {
+      const transferKey = `eduartePackGrades:${crypto.randomUUID()}`;
+      await chrome.storage.session.set({ [transferKey]: grades });
+      url.searchParams.set("transfer", transferKey);
+    }
+
+    const tab = await chrome.tabs.create({ url: url.href, active: true });
     sendResponse({ success: true, tabId: tab.id });
+  };
+
+  openPage().catch((error) => {
+    console.error("Eduarte Tools could not open the requested page.", error);
+    sendResponse({ success: false, error: error.message || "De pagina kon niet worden geopend." });
   });
   return true;
 });

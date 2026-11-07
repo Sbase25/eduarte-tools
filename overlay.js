@@ -1,5 +1,14 @@
 (function () {
   if (location.hostname === "login.microsoftonline.com") return;
+  if (globalThis.EduarteApi && chrome.runtime?.onMessage) {
+    chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+      if (request?.type !== "GET_EDUARTE_GRADES") return;
+      const grades = globalThis.EduarteApi.getGrades(document).map(
+        ({ id, result, weight, hasWeight, title }) => ({ id, result, weight, hasWeight, title })
+      );
+      sendResponse({ grades });
+    });
+  }
 
   const WEATHER_CODES = {
     0: { text: "Zonnig / Helder", icon: "☀️", iconNight: "🌙" },
