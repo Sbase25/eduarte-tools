@@ -1,32 +1,49 @@
-﻿const EDUARTE_PAGES = [
-  "https://*.educus.nl/*",
-  "https://*.eduarte.nl/*",
-];
-
-const MENU_OPEN = "eduarte-tools-open";
 const LOCATION_TRACKER_DOCUMENT = "location-tracker.html";
 
-function createContextMenus() {
-  chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({
-      id: MENU_OPEN,
-      title: "Eduarte Tools openen",
-      contexts: ["page"],
-      documentUrlPatterns: EDUARTE_PAGES,
-    });
-  });
-}
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (!request || request.type !== "OPEN_EDUARTE_TOOLS_PAGE") return;
 
-chrome.runtime.onInstalled.addListener(createContextMenus);
-chrome.runtime.onStartup.addListener(() => {
-  createContextMenus();
-  startLocationTrackingIfConfigured();
+  let senderUrl;
+  try {
+    senderUrl = new URL(sender.url);
+  } catch {
+    sendResponse({ success: false, error: "Ongeldige Eduarte-pagina." });
+    return;
+  }
+
+  const hostname = senderUrl.hostname;
+  const isEduarteHost = senderUrl.protocol === "https:"
+    && (hostname === "eduarte.nl"
+      || hostname.endsWith(".eduarte.nl")
+      || hostname === "educus.nl"
+      || hostname.endsWith(".educus.nl"));
+  if (!sender.tab || !isEduarteHost) {
+    sendResponse({ success: false, error: "Deze actie is alleen beschikbaar op Eduarte-pagina's." });
+    return;
+  }
+
+  const extensionPage = request.page === "packs"
+    ? "popup-dist/packs.html"
+    : request.page === "settings"
+      ? "popup-dist/index.html"
+      : null;
+  if (!extensionPage) {
+    sendResponse({ success: false, error: "Onbekende Eduarte Tools-pagina." });
+    return;
+  }
+
+  chrome.tabs.create({ url: chrome.runtime.getURL(extensionPage), active: true }, (tab) => {
+    if (chrome.runtime.lastError) {
+      sendResponse({ success: false, error: chrome.runtime.lastError.message });
+      return;
+    }
+    sendResponse({ success: true, tabId: tab.id });
+  });
+  return true;
 });
 
-chrome.contextMenus.onClicked.addListener((info) => {
-  if (info.menuItemId === MENU_OPEN) {
-    chrome.action.openPopup();
-  }
+chrome.runtime.onStartup.addListener(() => {
+  startLocationTrackingIfConfigured();
 });
 
 // Meldingen-badge op het extensie-icoon: badge.js scant Eduarte's eigen

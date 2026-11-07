@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Eduarte Tools",
-  "version": "2.1.4",
+  "version": "2.2.0",
   "description": "Automatisch inloggen, donkere modus, thema's en een cijfercalculator voor Eduarte-portalen. Geïnspireerd door Study Tools.",
   "icons": {
     "16": "icons/icon16.png",
@@ -18,7 +18,6 @@
   },
   "permissions": [
     "storage",
-    "contextMenus",
     "geolocation",
     "offscreen"
   ],
@@ -54,10 +53,16 @@
         "https://*.educus.nl/*",
         "https://*.eduarte.nl/*"
       ],
+      "css": [
+        "popup-dist/context-menu.css"
+      ],
       "js": [
+        "eduarte-api.js",
+        "grade-calculator.js",
         "overlay.js",
         "badge-logic.js",
-        "badge.js"
+        "badge.js",
+        "popup-dist/context-menu.js"
       ],
       "run_at": "document_idle",
       "all_frames": false

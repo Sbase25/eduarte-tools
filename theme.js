@@ -200,18 +200,53 @@
   };
 
   function getModernDesignCSS(effectiveBg, effectiveSurface, effectiveText, effectiveBorder, effectiveAccent, isDark) {
+    const onPrimary = isDark ? "#10111a" : "#ffffff";
+    const primaryContainer = `color-mix(in srgb, ${effectiveAccent} ${isDark ? "32%" : "18%"}, ${effectiveBg})`;
+    const surfaceLow = `color-mix(in srgb, ${effectiveSurface} 58%, ${effectiveBg})`;
+    const surfaceHigh = `color-mix(in srgb, ${effectiveSurface} 84%, ${effectiveText})`;
+    const surfaceHighest = `color-mix(in srgb, ${effectiveSurface} 72%, ${effectiveText})`;
+
     return `
-    /* --- MODERN POLISH LAYER --- */
-    @keyframes st-card-in {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* Material 3 color and shape roles adapted to the user's Eduarte theme. */
+    :root {
+      --md-sys-color-primary: ${effectiveAccent};
+      --md-sys-color-on-primary: ${onPrimary};
+      --md-sys-color-primary-container: ${primaryContainer};
+      --md-sys-color-on-primary-container: ${effectiveText};
+      --md-sys-color-secondary: ${effectiveAccent};
+      --md-sys-color-on-secondary: ${onPrimary};
+      --md-sys-color-secondary-container: ${primaryContainer};
+      --md-sys-color-on-secondary-container: ${effectiveText};
+      --md-sys-color-surface: ${effectiveBg};
+      --md-sys-color-surface-container-lowest: ${effectiveBg};
+      --md-sys-color-surface-container-low: ${surfaceLow};
+      --md-sys-color-surface-container: ${effectiveSurface};
+      --md-sys-color-surface-container-high: ${surfaceHigh};
+      --md-sys-color-surface-container-highest: ${surfaceHighest};
+      --md-sys-color-surface-variant: ${effectiveSurface};
+      --md-sys-color-on-surface: ${effectiveText};
+      --md-sys-color-on-surface-variant: color-mix(in srgb, ${effectiveText} 76%, ${effectiveBg});
+      --md-sys-color-outline: color-mix(in srgb, ${effectiveBorder} 70%, ${effectiveText});
+      --md-sys-color-outline-variant: ${effectiveBorder};
+      --md-sys-color-background: ${effectiveBg};
+      --md-sys-color-on-background: ${effectiveText};
+      --md-sys-shape-corner-extra-small: 8px;
+      --md-sys-shape-corner-small: 12px;
+      --md-sys-shape-corner-medium: 16px;
+      --md-sys-shape-corner-large: 24px;
+      --md-sys-shape-corner-extra-large: 32px;
+      color-scheme: ${isDark ? "dark" : "light"};
     }
 
-    /* Algemene achtergrond en tekst */
+    @keyframes eduarte-m3-enter {
+      from { opacity: 0; translate: 0 5px; }
+      to { opacity: 1; translate: 0 0; }
+    }
+
     html, body {
       background-color: ${effectiveBg} !important;
       color: ${effectiveText} !important;
-      transition: background-color 220ms ease, color 220ms ease;
+      transition: background-color 180ms ease, color 180ms ease;
     }
 
     .l-container, .l-flex-content, .content-wrapper, .content, main, .main-content {
@@ -219,7 +254,6 @@
       color: ${effectiveText} !important;
     }
 
-    /* Eduarte Header & Toolbar */
     header.header,
     header.header .header-toolbar,
     .header,
@@ -231,9 +265,9 @@
       background: ${effectiveSurface} !important;
       background-color: ${effectiveSurface} !important;
       color: ${effectiveText} !important;
-      border-bottom: 1px solid color-mix(in srgb, ${effectiveBorder} 65%, transparent) !important;
-      box-shadow: 0 4px 20px rgba(0,0,0,${isDark ? '0.25' : '0.06'}) !important;
-      transition: background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+      border-bottom: 1px solid ${effectiveBorder} !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,${isDark ? ".24" : ".08"}) !important;
+      transition: background-color 180ms ease, border-color 180ms ease;
     }
 
     header.header .header-toolbar *,
@@ -258,62 +292,56 @@
       transform: scale(1.1);
     }
 
-    /* Eduarte Student Sidebar */
     nav.navigation,
     nav.navigation.navigation--student,
     .sidebar {
       background-color: ${effectiveSurface} !important;
-      border-right: 1px solid color-mix(in srgb, ${effectiveBorder} 60%, transparent) !important;
-      box-shadow: 4px 0 24px rgba(0,0,0,${isDark ? '0.2' : '0.04'}) !important;
-      transition: width 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+      border-right: 1px solid ${effectiveBorder} !important;
+      box-shadow: none !important;
+      transition: background-color 180ms ease, border-color 180ms ease;
     }
 
-    /* Alleen kleur/vorm op de menu-items; de layout (icoon- en label-positie,
-       en welk icoon zichtbaar is) laten we aan Eduarte zelf over. */
-    nav.navigation.navigation--student .navigation-items--main > li > a {
-      border-radius: .85rem !important;
-      color: color-mix(in srgb, ${effectiveText} 85%, transparent) !important;
-      transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    nav.navigation.navigation--student .navigation-items--main > li > a,
+    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current] {
+      min-height: 48px;
+      margin: 4px 8px !important;
+      border-radius: 999px !important;
+      color: color-mix(in srgb, ${effectiveText} 82%, transparent) !important;
+      transition: background-color 160ms ease, color 160ms ease;
     }
 
     nav.navigation.navigation--student .navigation-items--main > li > a:hover {
-      background: color-mix(in srgb, ${effectiveAccent} 15%, transparent) !important;
+      background: color-mix(in srgb, ${effectiveAccent} 12%, transparent) !important;
       color: ${effectiveText} !important;
     }
 
-    nav.navigation.navigation--student .navigation-items--main > li.is-selected > a {
-      background: linear-gradient(90deg, color-mix(in srgb, ${effectiveAccent} 22%, transparent), color-mix(in srgb, ${effectiveAccent} 8%, transparent)) !important;
+    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a,
+    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] {
+      background: ${primaryContainer} !important;
       color: ${effectiveText} !important;
       font-weight: 600 !important;
-      box-shadow: inset 3px 0 0 ${effectiveAccent}, 0 4px 14px rgba(0,0,0,${isDark ? '0.2' : '0.05'});
+      box-shadow: none !important;
     }
 
-    /* Start / Dashboard Cards & Now-Cards */
     li.now--soft,
     li.now--tomorrow,
     li[class*="now--"],
     #iddf > li {
       background-color: ${effectiveSurface} !important;
-      border: 1px solid color-mix(in srgb, ${effectiveBorder} 65%, transparent) !important;
-      border-radius: 18px !important;
-      box-shadow: 0 4px 16px rgba(0,0,0,${isDark ? '0.18' : '0.05'});
-      border-left: 4px solid ${effectiveAccent} !important;
-      transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
-      animation: st-card-in 320ms ease both;
+      border: 1px solid ${effectiveBorder} !important;
+      border-radius: 24px !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,${isDark ? ".24" : ".08"}) !important;
+      border-inline-start: 3px solid ${effectiveAccent} !important;
+      transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
+      animation: eduarte-m3-enter 220ms ease both;
       color: ${effectiveText} !important;
     }
-
-    #iddf > li:nth-child(1), #iddf > li:nth-child(2) { animation-delay: 0ms; }
-    #iddf > li:nth-child(3) { animation-delay: 60ms; }
-    #iddf > li:nth-child(4) { animation-delay: 120ms; }
-    #iddf > li:nth-child(5) { animation-delay: 180ms; }
 
     li.now--soft:hover,
     li.now--tomorrow:hover,
     li[class*="now--"]:hover,
     #iddf > li:hover {
-      box-shadow: 0 8px 28px rgba(0,0,0,${isDark ? '0.28' : '0.10'});
-      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,${isDark ? ".25" : ".1"}) !important;
     }
 
     .now--wrapper ul#iddf {
@@ -322,7 +350,6 @@
       gap: .65rem;
     }
 
-    /* Kaarten, Panels, Studiewijzers & Overzichten */
     .card,
     .container-card,
     .container-studiewijzer,
@@ -334,37 +361,33 @@
     .box {
       background-color: ${effectiveSurface} !important;
       color: ${effectiveText} !important;
-      border: 1px solid color-mix(in srgb, ${effectiveBorder} 60%, transparent) !important;
-      border-radius: 16px !important;
-      box-shadow: 0 6px 20px rgba(0,0,0,${isDark ? '0.18' : '0.04'});
-      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+      border: 1px solid ${effectiveBorder} !important;
+      border-radius: 22px 22px 8px 22px !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,${isDark ? ".22" : ".07"}) !important;
+      transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
     }
 
     .card:hover,
     .container-studiewijzer:hover,
     .result-overview:hover,
     .container-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(0,0,0,${isDark ? '0.28' : '0.08'});
+      box-shadow: 0 4px 12px rgba(0,0,0,${isDark ? ".2" : ".08"}) !important;
     }
 
-    /* Tabellen & Cijferlijsten */
     .table, table, .result-overview--grades table {
       background-color: ${effectiveSurface} !important;
       color: ${effectiveText} !important;
       border-collapse: separate !important;
       border-spacing: 0 !important;
-      border-radius: 14px !important;
-      overflow: hidden !important;
-      border: 1px solid color-mix(in srgb, ${effectiveBorder} 60%, transparent) !important;
+      border-radius: 18px !important;
+      border: 1px solid ${effectiveBorder} !important;
     }
 
     table thead th, .result-overview--grades thead th {
-      background-color: color-mix(in srgb, ${effectiveSurface} 90%, ${effectiveBg}) !important;
+      background-color: ${surfaceLow} !important;
       color: ${effectiveText} !important;
       font-weight: 600 !important;
-      border-bottom: 2px solid ${effectiveBorder} !important;
-      padding: 10px 14px !important;
+      border-bottom: 1px solid ${effectiveBorder} !important;
     }
 
     table tbody tr, .result-overview--grades tbody tr {
@@ -381,48 +404,55 @@
       padding: 10px 14px !important;
     }
 
-    /* Knoppen & Interactieve elementen */
     button, .button, [role="button"], input[type="submit"], input[type="button"] {
-      border-radius: 12px !important;
-      transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, filter 160ms ease;
+      border-radius: 16px 16px 6px 16px;
+      transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
     }
 
-    button:hover, .button:hover, [role="button"]:hover {
-      transform: translateY(-1px);
+    button:focus-visible, .button:focus-visible, [role="button"]:focus-visible,
+    a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid ${effectiveAccent} !important;
+      outline-offset: 2px !important;
     }
 
-    /* Formuliervelden */
-    input[type="text"], input[type="password"], input[type="number"], select, textarea {
-      background-color: ${isDark ? 'rgba(0,0,0,0.25)' : '#ffffff'} !important;
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"],
+    input[type="search"], select, textarea {
+      box-sizing: border-box;
+      max-width: 100%;
+      min-height: 40px;
+      background-color: ${surfaceHigh} !important;
       color: ${effectiveText} !important;
-      border: 1px solid ${effectiveBorder} !important;
-      border-radius: 10px !important;
-      padding: 8px 12px !important;
+      border: 1px solid ${effectiveBorder};
+      border-radius: 14px 14px 6px 14px;
+      padding: 8px 12px;
       outline: 0 !important;
-      transition: border-color 160ms ease, box-shadow 160ms ease;
+      transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
     }
 
-    input:focus, select:focus, textarea:focus {
-      border-color: ${effectiveAccent} !important;
-      box-shadow: 0 0 0 3px color-mix(in srgb, ${effectiveAccent} 25%, transparent) !important;
+    input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus,
+    input[type="number"]:focus, input[type="search"]:focus, select:focus, textarea:focus {
+      border: 2px solid ${effectiveAccent} !important;
+      padding: 7px 11px;
+      box-shadow: none !important;
     }
 
-    /* Scrollbars */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: color-mix(in srgb, ${effectiveBorder} 80%, transparent); border-radius: 99px; }
     ::-webkit-scrollbar-thumb:hover { background: ${effectiveAccent}; }
 
-    /* Cijfercalculator highlight effect */
     .eduarte-tools-grade-source {
       cursor: pointer !important;
-      transition: outline 160ms ease, background-color 160ms ease, transform 160ms ease;
-      border-radius: 6px !important;
+      transition: outline 160ms ease, background-color 160ms ease;
+      border-radius: 8px !important;
     }
     .eduarte-tools-grade-source:hover {
       outline: 2px solid ${effectiveAccent} !important;
       background-color: color-mix(in srgb, ${effectiveAccent} 18%, transparent) !important;
-      transform: scale(1.05);
+    }
+    .eduarte-tools-grade-selected {
+      outline: 2px solid ${effectiveAccent} !important;
+      outline-offset: -2px !important;
     }
 
     @media (prefers-reduced-motion: reduce) {

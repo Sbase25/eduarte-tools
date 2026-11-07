@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build && vite build --config vite.context-menu.config.js"
   },
   "dependencies": {
+    "@material/web": "^2.5.0",
     "vue": "^3.4.21"
   },
   "devDependencies": {

@@ -19,7 +19,7 @@ function isSelected(color) {
 <template>
   <div class="swatches">
     <button v-for="color in accentSwatches" :key="color" type="button" class="swatch" :style="{ background: color }"
-      :class="{ selected: isSelected(color) }" @click="value = color">
+      :class="{ selected: isSelected(color) }" :aria-label="`Accentkleur ${color}`" :aria-pressed="isSelected(color)" @click="value = color">
       <Icon class="check">check</Icon>
     </button>
     <label class="swatch custom" title="Eigen kleur kiezen">
@@ -35,7 +35,7 @@ function isSelected(color) {
   position: relative;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 13px 17px 13px 17px;
   border: 2px solid transparent;
   cursor: pointer;
   display: grid;
@@ -43,15 +43,16 @@ function isSelected(color) {
   padding: 0;
   transition: transform 180ms cubic-bezier(.34,1.56,.64,1), border-color 180ms ease;
 }
-.swatch:hover { transform: scale(1.1); }
-.swatch:active { transform: scale(.92); }
+.swatch:hover { transform: scale(1.06) rotate(-3deg); }
+.swatch:active { transform: scale(.94); }
 .swatch .check { font-size: 17px; color: #fff; opacity: 0; transition: opacity 150ms; }
-.swatch.selected { border-color: var(--color-on-surface); }
+.swatch.selected { border-color: var(--color-on-surface); border-radius: 50%; box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-primary); }
 .swatch.selected .check { opacity: 1; }
 .swatch.custom {
   background: var(--color-surface-container-high) !important;
   color: var(--color-on-surface-variant);
-  border: 2px dashed var(--color-outline-variant);
+  border: 1px dashed var(--color-outline-variant);
+  border-radius: 17px 17px 6px 17px;
 }
 .swatch.custom input {
   position: absolute;
