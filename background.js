@@ -53,7 +53,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return;
   }
 
-  const isExtensionPage = sender.url?.startsWith(`chrome-extension://${chrome.runtime.id}/`);
+  const isExtensionPage = sender.url?.startsWith(chrome.runtime.getURL(""));
   if (!sender.tab && !isExtensionPage) {
     sendResponse({ success: false, error: "Deze actie is alleen beschikbaar vanuit Eduarte Tools." });
     return;
@@ -134,7 +134,42 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   badgeCountsByTab.delete(tabId);
 });
 
+// Chrome heeft een offscreen-document nodig voor geolocation vanuit de service
+// worker. Firefox draait de achtergrond als pagina met DOM, dus daar gebruiken
+// we navigator.geolocation rechtstreeks.
+const HAS_OFFSCREEN = typeof chrome.offscreen !== "undefined";
+let backgroundWatchStarted = false;
+
+function readBackgroundPosition() {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      resolve({ success: false, code: 2, error: "Locatiebepaling wordt niet ondersteund." });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coordinates = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+        saveLocation(coordinates);
+        resolve({ success: true, coordinates });
+      },
+      (error) => resolve({ success: false, code: error.code, error: error.message }),
+      { enableHighAccuracy: false, maximumAge: 300000, timeout: 30000 }
+    );
+  });
+}
+
 async function ensureLocationTracker() {
+  if (!HAS_OFFSCREEN) {
+    if (!backgroundWatchStarted && typeof navigator !== "undefined" && navigator.geolocation) {
+      backgroundWatchStarted = true;
+      navigator.geolocation.watchPosition(
+        (position) => saveLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+        (error) => console.warn("Location tracking failed.", error.message),
+        { enableHighAccuracy: false, maximumAge: 300000, timeout: 30000 }
+      );
+    }
+    return;
+  }
   const hasDocument = await chrome.offscreen.hasDocument();
   if (!hasDocument) {
     await chrome.offscreen.createDocument({
@@ -153,6 +188,19 @@ function startLocationTrackingIfConfigured() {
   });
 }
 
+function saveLocation({ latitude, longitude }) {
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+  getLocationLabel(latitude, longitude)
+    .catch((error) => {
+      console.warn("Detected location could not be named.", error);
+      return "Huidige locatie";
+    })
+    .then((locationLabel) => chrome.storage.local.set({
+      eduarteWeatherCoordinates: { latitude, longitude },
+      eduarteWeatherLocationLabel: locationLabel,
+    }));
+}
+
 async function getLocationLabel(latitude, longitude) {
   const response = await fetch(
     `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
@@ -169,6 +217,13 @@ async function getLocationLabel(latitude, longitude) {
 // voorrang wanneer de gebruiker locatiegebruik heeft toegestaan.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "START_LOCATION_TRACKING") {
+    if (!HAS_OFFSCREEN) {
+      ensureLocationTracker()
+        .then(() => readBackgroundPosition())
+        .then(sendResponse)
+        .catch((error) => sendResponse({ success: false, error: error.message }));
+      return true;
+    }
     ensureLocationTracker()
       .then(() => chrome.runtime.sendMessage({ type: "REQUEST_CURRENT_LOCATION" }))
       .then((result) => sendResponse(result || {
@@ -180,18 +235,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.type === "LOCATION_UPDATED") {
-    const { latitude, longitude } = request.coordinates || {};
-    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-      getLocationLabel(latitude, longitude)
-        .catch((error) => {
-          console.warn("Detected location could not be named.", error);
-          return "Huidige locatie";
-        })
-        .then((locationLabel) => chrome.storage.local.set({
-          eduarteWeatherCoordinates: { latitude, longitude },
-          eduarteWeatherLocationLabel: locationLabel,
-        }));
-    }
+    saveLocation(request.coordinates || {});
     return;
   }
 

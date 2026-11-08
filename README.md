@@ -74,6 +74,19 @@ Eduarte Tools heeft nu ook een Instagram-account met nieuws, tips en updates:
 [@eduartetools](https://www.instagram.com/eduartetools/). Ook te vinden in de
 extensie onder **Over**, en als sluitbare melding op de Eduarte-startpagina.
 
+## Firefox
+
+Eduarte Tools werkt ook in Firefox 128 of nieuwer. Bouw de Firefox-versie met:
+
+```
+node scripts/build-firefox.mjs
+```
+
+Dit maakt `dist/firefox/` en `dist/eduarte-tools-firefox-<versie>.zip`. Laad tijdelijk via
+`about:debugging` → **Deze Firefox** → **Tijdelijke add-on laden** (kies `manifest.json`),
+of upload de zip naar addons.mozilla.org. Geef de extensie in Firefox toegang tot je
+Eduarte-site (Add-ons → Eduarte Tools → Machtigingen), anders draait hij daar niet.
+
 ## Installatie
 
 1. Download of clone deze repository.
