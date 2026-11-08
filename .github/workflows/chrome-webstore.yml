@@ -9,9 +9,12 @@ on:
       - "badge-logic.js"
       - "badge.js"
       - "content.js"
+      - "eduarte-api.js"
+      - "grade-calculator.js"
       - "overlay.js"
       - "location-tracker.html"
       - "location-tracker.js"
+      - "popup-app/**"
       - "popup-dist/**"
       - "theme.js"
       - "icons/**"
@@ -29,6 +32,26 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            popup-app/package-lock.json
+
+      - name: Install test dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build popup
+        run: |
+          npm ci --prefix popup-app
+          npm run build --prefix popup-app
+
       - name: Validate manifest
         shell: bash
         run: |
@@ -41,8 +64,32 @@ jobs:
           set -euo pipefail
           rm -rf extension-package extension.zip
           mkdir -p extension-package
-          cp manifest.json background.js badge-logic.js badge.js content.js overlay.js theme.js location-tracker.html location-tracker.js extension-package/
+          cp manifest.json background.js badge-logic.js badge.js content.js eduarte-api.js grade-calculator.js overlay.js theme.js location-tracker.html location-tracker.js extension-package/
           cp -R icons assets popup-dist extension-package/
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          package = Path("extension-package")
+          manifest = json.loads((package / "manifest.json").read_text())
+          referenced = list(manifest.get("icons", {}).values())
+          action = manifest.get("action", {})
+          if action.get("default_popup"):
+              referenced.append(action["default_popup"])
+          referenced.extend(action.get("default_icon", {}).values())
+          worker = manifest.get("background", {}).get("service_worker")
+          if worker:
+              referenced.append(worker)
+          for resource in manifest.get("web_accessible_resources", []):
+              referenced.extend(resource.get("resources", []))
+          for script in manifest.get("content_scripts", []):
+              referenced.extend(script.get("js", []))
+              referenced.extend(script.get("css", []))
+
+          missing = [path for path in referenced if not (package / path).is_file()]
+          if missing:
+              raise SystemExit(f"Manifest files missing from package: {', '.join(missing)}")
+          PY
           (cd extension-package && zip -q -r ../extension.zip .)
 
       - name: Get Google access token

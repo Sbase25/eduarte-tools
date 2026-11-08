@@ -1,6 +1,46 @@
 const LOCATION_TRACKER_DOCUMENT = "location-tracker.html";
+const PACK_GRADE_CACHE_KEY = "eduartePackGradeCache";
+
+function isEduarteTab(tab) {
+  try {
+    const url = new URL(tab.url);
+    return url.protocol === "https:"
+      && (/(^|\.)eduarte\.nl$/.test(url.hostname) || /(^|\.)educus\.nl$/.test(url.hostname));
+  } catch {
+    return false;
+  }
+}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request?.type === "CACHE_EDUARTE_GRADES") {
+    if (!sender.tab || !isEduarteTab(sender.tab)) {
+      sendResponse({ success: false, error: "Cijfers kunnen alleen vanaf een Eduarte-pagina worden opgeslagen." });
+      return;
+    }
+
+    const grades = (Array.isArray(request.grades) ? request.grades : [])
+      .filter((grade) => grade && Number.isFinite(grade.result) && grade.result >= 0 && grade.result <= 10)
+      .map((grade, index) => ({
+        id: String(grade.id ?? index).slice(0, 160),
+        result: grade.result,
+        weight: Number.isFinite(grade.weight) && grade.weight > 0 ? grade.weight : 1,
+        hasWeight: grade.hasWeight === true,
+        title: String(grade.title || `Cijfer ${index + 1}`).slice(0, 160),
+      }));
+    if (!grades.length) {
+      sendResponse({ success: true });
+      return;
+    }
+
+    chrome.storage.session.set({
+      [PACK_GRADE_CACHE_KEY]: { grades, updatedAt: Date.now() },
+    }).then(() => sendResponse({ success: true })).catch((error) => {
+      console.error("Eduarte Tools could not cache the current Eduarte grades.", error);
+      sendResponse({ success: false, error: "De cijfers konden niet tijdelijk worden opgeslagen." });
+    });
+    return true;
+  }
+
   if (!request || request.type !== "OPEN_EDUARTE_TOOLS_PAGE") return;
 
   const extensionPage = request.page === "packs"
@@ -13,15 +53,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return;
   }
 
-  const isEduarteTab = (tab) => {
-    try {
-      const url = new URL(tab.url);
-      return url.protocol === "https:"
-        && (/(^|\.)eduarte\.nl$/.test(url.hostname) || /(^|\.)educus\.nl$/.test(url.hostname));
-    } catch {
-      return false;
-    }
-  };
   const isExtensionPage = sender.url?.startsWith(`chrome-extension://${chrome.runtime.id}/`);
   if (!sender.tab && !isExtensionPage) {
     sendResponse({ success: false, error: "Deze actie is alleen beschikbaar vanuit Eduarte Tools." });
@@ -51,6 +82,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             resolve(Array.isArray(response?.grades) ? response.grades : []);
           });
         });
+      }
+      if (!grades.length) {
+        const cached = await chrome.storage.session.get(PACK_GRADE_CACHE_KEY);
+        grades = Array.isArray(cached[PACK_GRADE_CACHE_KEY]?.grades)
+          ? cached[PACK_GRADE_CACHE_KEY].grades
+          : [];
       }
     }
 

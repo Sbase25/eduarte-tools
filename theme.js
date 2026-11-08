@@ -768,6 +768,438 @@
       box-shadow: none !important;
     }
 
+    body:has(.agenda) header.header:not(:has(> .header-tabs)) {
+      display: block !important;
+      height: auto !important;
+      min-height: 0 !important;
+      margin-right: 12px !important;
+      overflow: visible !important;
+    }
+
+    body:has(.agenda) header.header:not(:has(> .header-tabs)) > .header-toolbar {
+      display: flex !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      align-items: center !important;
+      min-height: 68px !important;
+      padding: 8px 10px 8px 20px !important;
+      gap: 8px !important;
+    }
+
+    body:has(.agenda) header.header .header-toolbar > h1 {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      font-size: clamp(18px, 1.5vw, 26px) !important;
+      font-weight: 700 !important;
+    }
+
+    body:has(.agenda) #eduarte-tools-portal-actions {
+      flex: 0 0 auto !important;
+      gap: 6px !important;
+      margin-left: auto !important;
+      margin-right: 2px !important;
+      padding: 0 2px !important;
+    }
+
+    body:has(.agenda) #eduarte-tools-portal-actions .et-portal-action {
+      width: 40px !important;
+      height: 40px !important;
+    }
+
+    body:has(.agenda) .content-wrapper {
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+      padding-right: 12px !important;
+      background:
+        radial-gradient(ellipse at 92% 18%, rgba(38, 104, 255, .18), transparent 32%),
+        radial-gradient(ellipse at 70% 100%, rgba(132, 47, 255, .16), transparent 40%),
+        linear-gradient(145deg, #09133f 0%, #0b1647 48%, #111042 100%) !important;
+    }
+
+    body:has(.agenda) .agenda-filter {
+      position: fixed !important;
+      top: 92px !important;
+      right: 16px !important;
+      left: 0 !important;
+      z-index: 200 !important;
+      width: auto !important;
+    }
+
+    @media (min-width: 960px) {
+      body:has(.agenda) .agenda-filter {
+        left: calc(var(--navigation-width, 16rem) + 16px) !important;
+      }
+    }
+
+    body:has(.agenda) .agenda-filter {
+      display: flex !important;
+      box-sizing: border-box !important;
+      height: 70px !important;
+      min-height: 70px !important;
+      margin: 0 !important;
+      padding: 8px 14px !important;
+      overflow-x: auto !important;
+      border: 1px solid color-mix(in srgb, ${border} 72%, ${text} 28%) !important;
+      border-radius: 20px !important;
+      background:
+        radial-gradient(ellipse at 100% 0%, rgba(77, 89, 255, .24), transparent 52%),
+        linear-gradient(110deg, rgba(14, 25, 77, .94), rgba(11, 20, 59, .92)) !important;
+      box-shadow: 0 12px 30px rgba(2,7,28,.28), inset 0 1px rgba(255,255,255,.08) !important;
+      backdrop-filter: blur(18px) saturate(140%) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+    }
+
+    body:has(.agenda) .s5-filterbar-toggle {
+      top: 119px !important;
+      left: -44px !important;
+      border-radius: 12px 0 0 12px !important;
+      box-shadow: 0 5px 16px rgba(2,7,28,.24) !important;
+    }
+
+    body:has(.agenda) .s5-filterbar-toggle a {
+      display: grid !important;
+      width: 44px !important;
+      height: 46px !important;
+      place-items: center !important;
+    }
+
+    body:has(.agenda) .s5-filterbar-toggle svg {
+      width: 20px !important;
+      height: 20px !important;
+    }
+
+    body:has(.agenda) .agenda-filter .filter--inner {
+      display: flex !important;
+      flex: 1 1 auto !important;
+      align-items: center !important;
+      gap: 14px !important;
+      min-width: 0 !important;
+    }
+
+    body:has(.agenda) .agenda-filter .btn,
+    body:has(.agenda) .agenda-filter div.datepicker,
+    body:has(.agenda) .agenda-filter .popover-tabs ul {
+      border: 1px solid color-mix(in srgb, ${border} 72%, ${text} 28%) !important;
+      border-radius: 999px !important;
+      background: color-mix(in srgb, ${surface} 77%, ${accent} 23%) !important;
+      box-shadow: inset 0 1px rgba(255,255,255,.07) !important;
+    }
+
+    body:has(.agenda) .agenda-filter .btn {
+      display: grid !important;
+      width: 46px !important;
+      height: 46px !important;
+      flex: 0 0 46px !important;
+      place-items: center !important;
+      padding: 0 !important;
+      color: ${text} !important;
+    }
+
+    body:has(.agenda) .agenda-filter div.datepicker {
+      flex: 0 0 190px !important;
+      width: 190px !important;
+      min-width: 190px !important;
+      margin: 0 !important;
+      padding: 0 12px !important;
+    }
+
+    body:has(.agenda) .agenda-filter div.datepicker .input-group {
+      position: relative !important;
+    }
+
+    body:has(.agenda) .agenda-filter div.datepicker input {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 44px !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: ${text} !important;
+      padding: 0 12px 0 42px !important;
+      text-align: left !important;
+    }
+
+    body:has(.agenda) .agenda-filter div.datepicker .input-group > svg.svg-sprites.datepicker {
+      position: absolute !important;
+      top: 50% !important;
+      right: auto !important;
+      left: 14px !important;
+      width: 22px !important;
+      height: 22px !important;
+      min-width: 22px !important;
+      border: 0 !important;
+      background: transparent !important;
+      color: ${text} !important;
+      transform: translateY(-50%) !important;
+    }
+
+    body:has(.agenda) .agenda-filter .popover-tabs ul {
+      display: flex !important;
+      width: 330px !important;
+      box-sizing: border-box !important;
+      align-items: center !important;
+      gap: 4px !important;
+      padding: 4px !important;
+    }
+
+    body:has(.agenda) .agenda-filter .popover-tabs li {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      border-radius: 999px !important;
+      color: ${text} !important;
+    }
+
+    body:has(.agenda) .agenda-filter .popover-tabs li a {
+      display: flex !important;
+      min-height: 38px !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 14px !important;
+      border-radius: inherit !important;
+      color: inherit !important;
+    }
+
+    body:has(.agenda) .agenda-filter .popover-tabs li.is-selected {
+      background: linear-gradient(105deg,
+        color-mix(in srgb, ${accent} 82%, #2468ff 18%),
+        color-mix(in srgb, ${accent} 72%, #8154ed 28%)) !important;
+      color: #fff !important;
+      box-shadow: inset 0 1px rgba(255,255,255,.24), 0 4px 14px color-mix(in srgb, ${accent} 32%, transparent) !important;
+    }
+
+    body:has(.agenda) .agenda-filter .popover-tabs li.is-selected a {
+      color: #fff !important;
+    }
+
+    body:has(.agenda) .agenda-filter .filter-checkbox {
+      color: ${text} !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+    }
+
+    body:has(.agenda) .agenda-filter .filter-checkbox input {
+      accent-color: ${accent} !important;
+    }
+
+    body:has(.agenda) .agenda {
+      display: flex !important;
+      align-items: stretch !important;
+      box-sizing: border-box !important;
+      width: calc(100% - 16px) !important;
+      min-width: 0 !important;
+      margin: 0 16px 16px 0 !important;
+      overflow: hidden !important;
+      border: 1px solid color-mix(in srgb, ${border} 72%, ${text} 28%) !important;
+      border-radius: 26px !important;
+      background:
+        radial-gradient(ellipse at 100% 0%, rgba(47, 78, 223, .12), transparent 40%),
+        linear-gradient(145deg, rgba(9, 17, 54, .97), rgba(10, 15, 43, .96)) !important;
+      box-shadow: 0 20px 46px rgba(2,7,28,.3), inset 0 1px rgba(255,255,255,.07) !important;
+      backdrop-filter: blur(16px) saturate(135%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(135%) !important;
+    }
+
+    body:has(.agenda) .agenda--schedule {
+      display: none !important;
+    }
+
+    body:has(.agenda) .agenda--time {
+      flex: 0 0 76px !important;
+      width: 76px !important;
+      padding-top: 44px !important;
+      border-right: 1px solid color-mix(in srgb, ${border} 75%, transparent) !important;
+      background: linear-gradient(180deg, rgba(28, 38, 105, .72), rgba(16, 25, 76, .86)) !important;
+      text-align: center !important;
+    }
+
+    body:has(.agenda) .agenda--time h4 {
+      display: none !important;
+    }
+
+    body:has(.agenda) .agenda--time ul {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    body:has(.agenda) .agenda--time li {
+      display: flex !important;
+      height: 108px !important;
+      justify-content: center !important;
+      border: 0 !important;
+      background: transparent !important;
+      line-height: 1 !important;
+    }
+
+    body:has(.agenda) .agenda--time li span {
+      width: auto !important;
+      margin: 7px 0 0 !important;
+      padding: 8px 10px !important;
+      border: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      border-radius: 999px !important;
+      background: color-mix(in srgb, ${accent} 14%, ${surface}) !important;
+      color: ${text} !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+
+    body:has(.agenda) .agenda--days {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      padding-top: 44px !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      background: linear-gradient(150deg, rgba(8, 15, 48, .82), rgba(12, 17, 54, .92)) !important;
+      scrollbar-color: color-mix(in srgb, ${accent} 62%, ${border}) transparent !important;
+    }
+
+    body:has(.agenda) .agenda--day {
+      flex: 1 0 168px !important;
+      min-width: 168px !important;
+      border-right: 1px solid color-mix(in srgb, ${border} 76%, transparent) !important;
+      background: linear-gradient(180deg, rgba(50, 67, 151, .08), rgba(28, 35, 100, .03)) !important;
+    }
+
+    body:has(.agenda) .agenda--day .lead {
+      top: -44px !important;
+      min-width: calc(100% - 2px) !important;
+      height: 44px !important;
+      margin: 0 1px !important;
+      padding: 0 6px !important;
+      border: 1px solid color-mix(in srgb, ${border} 75%, ${text} 25%) !important;
+      border-radius: 15px 15px 6px 6px !important;
+      background: linear-gradient(110deg, rgba(39, 55, 134, .88), rgba(33, 45, 114, .9)) !important;
+      color: ${text} !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      line-height: 42px !important;
+      text-transform: lowercase !important;
+    }
+
+    body:has(.agenda) .agenda--day:first-child .lead {
+      background: linear-gradient(110deg, #7437d1, #4f36bd) !important;
+      color: #fff !important;
+    }
+
+    body:has(.agenda) .agenda--day:last-child .lead {
+      background: linear-gradient(110deg, #345ce8, #273bc5) !important;
+      color: #fff !important;
+    }
+
+    body:has(.agenda) .agenda--day.is-today .lead {
+      background: linear-gradient(105deg,
+        color-mix(in srgb, ${accent} 82%, #245fff 18%),
+        color-mix(in srgb, ${accent} 68%, #7044e8 32%)) !important;
+      color: #fff !important;
+      box-shadow: 0 4px 16px color-mix(in srgb, ${accent} 28%, transparent) !important;
+    }
+
+    body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
+      border-right: 1px solid color-mix(in srgb, ${border} 76%, transparent) !important;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 106px,
+        color-mix(in srgb, ${border} 58%, transparent) 107px,
+        color-mix(in srgb, ${border} 58%, transparent) 108px
+      ) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course,
+    body:has(.agenda) .agenda--day li.agenda--appointment,
+    body:has(.agenda) .agenda--day li.agenda--bpv {
+      border: 0 !important;
+      border-radius: 16px !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course > div {
+      box-sizing: border-box !important;
+      padding: 10px 12px !important;
+      border: 1px solid color-mix(in srgb, ${accent} 58%, #d7c3ff 42%) !important;
+      border-left: 3px solid rgba(229, 222, 255, .76) !important;
+      border-radius: 16px !important;
+      background:
+        radial-gradient(ellipse at 100% 100%, rgba(52, 179, 255, .62), transparent 46%),
+        linear-gradient(145deg, #af7aff, #7550e8 72%, #5748d8) !important;
+      color: #fff !important;
+      box-shadow: inset 0 1px rgba(255,255,255,.28), 0 8px 18px rgba(3,8,35,.24) !important;
+    }
+
+    body:has(.agenda) .agenda--day:nth-of-type(3) li.agenda--course:nth-child(odd) > div {
+      background:
+        radial-gradient(ellipse at 100% 100%, rgba(38, 192, 255, .56), transparent 48%),
+        linear-gradient(145deg, #82a6ff, #557af0 72%, #435ee0) !important;
+    }
+
+    body:has(.agenda) .agenda--day:nth-of-type(3) li.agenda--course:nth-child(even) > div {
+      background:
+        radial-gradient(ellipse at 100% 100%, rgba(54, 195, 255, .5), transparent 48%),
+        linear-gradient(145deg, #c18bff, #875af0 72%, #6651dc) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span,
+    body:has(.agenda) .agenda--day li.agenda--course p,
+    body:has(.agenda) .agenda--day li.agenda--bpv span,
+    body:has(.agenda) .agenda--day li.agenda--bpv p {
+      font-size: 13px !important;
+      color: #fff !important;
+      white-space: normal !important;
+      overflow-wrap: break-word !important;
+      word-break: normal !important;
+      text-overflow: clip !important;
+      line-height: 1.35 !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--appointment > div {
+      box-sizing: border-box !important;
+      padding: 10px 12px !important;
+      border: 1px solid rgba(151,231,247,.7) !important;
+      border-left: 4px solid #8ce8fb !important;
+      border-radius: 16px !important;
+      background: linear-gradient(145deg, #a5e8f4, #69c9e8) !important;
+      color: #112b4d !important;
+      box-shadow: inset 0 1px rgba(255,255,255,.45), 0 5px 16px rgba(3,8,35,.18) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--appointment span,
+    body:has(.agenda) .agenda--day li.agenda--appointment p {
+      color: #112b4d !important;
+    }
+
+    body:has(.agenda) .agenda--present-time {
+      margin-inline: 8px !important;
+      border-color: #ff6a76 !important;
+      box-shadow: 0 0 8px rgba(255,106,118,.35) !important;
+    }
+
+    @media (max-width: 700px) {
+      body:has(.agenda) header.header:not(:has(> .header-tabs)) > .header-toolbar {
+        min-height: 58px !important;
+        padding: 6px 6px 6px 12px !important;
+      }
+      body:has(.agenda) #eduarte-tools-portal-actions { gap: 4px !important; }
+      body:has(.agenda) #eduarte-tools-portal-actions .et-portal-action {
+        width: 34px !important;
+        height: 34px !important;
+      }
+      body:has(.agenda) .agenda-filter {
+        top: 78px !important;
+        right: 8px !important;
+        left: 0 !important;
+        width: auto !important;
+        height: 66px !important;
+        min-height: 66px !important;
+        padding-inline: 8px !important;
+      }
+      body:has(.agenda) .s5-filterbar-toggle { top: 96px !important; }
+      body:has(.agenda) .agenda--time { flex-basis: 62px !important; width: 62px !important; }
+      body:has(.agenda) .agenda--day { flex-basis: 148px !important; min-width: 148px !important; }
+    }
+
     nav.navigation.navigation--student a {
       min-height: 46px !important;
       margin: 3px 8px !important;

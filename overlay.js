@@ -1,13 +1,43 @@
 (function () {
   if (location.hostname === "login.microsoftonline.com") return;
   if (globalThis.EduarteApi && chrome.runtime?.onMessage) {
+    const isResultsPage = () => Boolean(
+      document.querySelector(".result-overview--grades, #id-grades")
+      || /resultaten|cijfers/i.test(location.pathname)
+    );
+    const toPackGrades = (grades) => grades.map(
+      ({ id, result, weight, hasWeight, title }) => ({ id, result, weight, hasWeight, title })
+    );
+    const readPackGrades = () => isResultsPage()
+      ? toPackGrades(globalThis.EduarteApi.getGrades(document))
+      : [];
+
     chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       if (request?.type !== "GET_EDUARTE_GRADES") return;
-      const grades = globalThis.EduarteApi.getGrades(document).map(
-        ({ id, result, weight, hasWeight, title }) => ({ id, result, weight, hasWeight, title })
-      );
-      sendResponse({ grades });
+      sendResponse({ grades: readPackGrades() });
     });
+
+    const cachePackGrades = (grades) => {
+      if (!grades.length) return;
+      chrome.runtime.sendMessage({ type: "CACHE_EDUARTE_GRADES", grades }, (response) => {
+        const error = chrome.runtime.lastError;
+        if (error) console.warn("Eduarte Tools kon de cijfersessie niet bijwerken.", error.message);
+        else if (!response?.success) console.warn("Eduarte Tools kon de cijfersessie niet bijwerken.", response?.error);
+      });
+    };
+    const initialGrades = readPackGrades();
+    let previousGrades = JSON.stringify(initialGrades);
+    if (initialGrades.length) cachePackGrades(initialGrades);
+    if (isResultsPage()) {
+      globalThis.EduarteApi.watchGrades(document, (grades) => {
+        if (!grades.length) return;
+        const packGrades = toPackGrades(grades);
+        const signature = JSON.stringify(packGrades);
+        if (signature === previousGrades) return;
+        previousGrades = signature;
+        cachePackGrades(packGrades);
+      });
+    }
   }
 
   const WEATHER_CODES = {
@@ -59,6 +89,340 @@
     const hasNowWrapper = !!(document.querySelector(".now--wrapper") || document.querySelector("#iddf") || document.querySelector("li.now--soft") || document.querySelector("li.now--tomorrow"));
     const isHomePath = path === "/" || path === "" || path === "/vandaag" || path === "/start" || path === "/dashboard" || path.endsWith("/start") || path.endsWith("/home") || path.endsWith("/vandaag");
     return isHomePath || hasNowWrapper;
+  }
+
+  function initPortalToolbar() {
+    const TOOLBAR_ID = "eduarte-tools-portal-actions";
+    const STYLE_ID = "eduarte-tools-portal-actions-style";
+    let updateFrame = 0;
+
+    function findProfileLink() {
+      return [...document.querySelectorAll("nav a[href], header a[href]")].find((link) =>
+        /\b(profiel|profile|account)\b/i.test([
+          link.textContent,
+          link.getAttribute("aria-label"),
+          link.getAttribute("title"),
+          link.getAttribute("href"),
+        ].filter(Boolean).join(" "))
+      );
+    }
+
+    function findMessagesLink() {
+      return [...document.querySelectorAll("nav a[href], header a[href]")].find((link) =>
+        /\b(berichten|messages|meldingen|notifications)\b/i.test([
+          link.textContent,
+          link.getAttribute("aria-label"),
+          link.getAttribute("title"),
+          link.getAttribute("href"),
+        ].filter(Boolean).join(" "))
+      );
+    }
+
+    function getUnreadCount(actions) {
+      if (typeof BADGE_SCAN_SELECTOR === "undefined" || typeof sumBadgeCounts !== "function") return 0;
+      const badges = [...document.querySelectorAll(BADGE_SCAN_SELECTOR)]
+        .filter((badge) => !actions.contains(badge));
+      return sumBadgeCounts(badges);
+    }
+
+    function addStyles() {
+      if (document.getElementById(STYLE_ID)) return;
+      const style = document.createElement("style");
+      style.id = STYLE_ID;
+      style.textContent = `
+        #${TOOLBAR_ID} {
+          position: relative;
+          display: flex;
+          flex: 0 0 auto;
+          align-items: center;
+          gap: 8px;
+          margin-left: auto;
+          padding: 0 10px;
+          color: #f3f6ff;
+          font: 500 13px/1.3 system-ui, sans-serif;
+        }
+        #${TOOLBAR_ID} .et-portal-action {
+          position: relative;
+          display: grid;
+          flex: 0 0 auto;
+          width: 42px;
+          height: 42px;
+          place-items: center;
+          padding: 0;
+          border: 1px solid rgba(164,190,255,.16);
+          border-radius: 50%;
+          background: linear-gradient(145deg, rgba(33,63,151,.72), rgba(17,29,75,.9));
+          color: #f3f6ff;
+          box-shadow: inset 0 1px rgba(255,255,255,.14), 0 5px 16px rgba(2,7,28,.2);
+          cursor: pointer;
+          text-decoration: none;
+          transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+        }
+        #${TOOLBAR_ID} .et-portal-action:hover,
+        #${TOOLBAR_ID} .et-portal-action[aria-expanded="true"] {
+          transform: translateY(-1px);
+          border-color: rgba(130,168,255,.65);
+          background: linear-gradient(145deg, rgba(50,91,209,.88), rgba(37,49,135,.95));
+        }
+        #${TOOLBAR_ID} .et-portal-action:focus-visible {
+          outline: 2px solid #91b5ff;
+          outline-offset: 3px;
+        }
+        #${TOOLBAR_ID} .et-portal-action svg { width: 20px; height: 20px; fill: currentColor; }
+        #${TOOLBAR_ID} .et-portal-bell::after {
+          position: absolute;
+          top: 5px;
+          right: 6px;
+          width: 7px;
+          height: 7px;
+          border: 1px solid #182858;
+          border-radius: 50%;
+          background: #64a7ff;
+          content: "";
+        }
+        #${TOOLBAR_ID} .et-portal-count {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          display: none;
+          min-width: 17px;
+          height: 17px;
+          align-items: center;
+          justify-content: center;
+          padding: 0 4px;
+          border: 1px solid #101a44;
+          border-radius: 99px;
+          background: #fb4b72;
+          color: white;
+          font-size: 10px;
+          font-weight: 800;
+          line-height: 1;
+        }
+        #${TOOLBAR_ID} .et-portal-avatar {
+          overflow: hidden;
+          border-color: rgba(168,204,255,.7);
+          background: linear-gradient(145deg, #72c6ff, #3565ed 62%, #6447d9);
+          color: white;
+          font-size: 14px;
+          font-weight: 750;
+          letter-spacing: -.03em;
+          box-shadow: inset 0 1px rgba(255,255,255,.36), 0 5px 18px rgba(35,91,229,.35);
+        }
+        #${TOOLBAR_ID} .et-portal-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        #${TOOLBAR_ID} .et-portal-popover {
+          position: absolute;
+          z-index: 2147483645;
+          top: calc(100% + 10px);
+          right: 8px;
+          display: none;
+          width: min(320px, calc(100vw - 32px));
+          padding: 16px;
+          border: 1px solid rgba(139,169,255,.3);
+          border-radius: 20px;
+          background: linear-gradient(145deg, rgba(18,30,76,.97), rgba(9,15,43,.98));
+          color: #f3f6ff;
+          box-shadow: 0 18px 48px rgba(1,5,24,.5), inset 0 1px rgba(255,255,255,.08);
+          backdrop-filter: blur(20px) saturate(145%);
+          -webkit-backdrop-filter: blur(20px) saturate(145%);
+        }
+        #${TOOLBAR_ID} .et-portal-popover.open { display: block; animation: et-portal-pop-in 150ms ease both; }
+        #${TOOLBAR_ID} .et-portal-popover h2 {
+          margin: 0 0 6px;
+          color: inherit;
+          font: 700 15px/1.3 system-ui, sans-serif;
+        }
+        #${TOOLBAR_ID} .et-portal-popover p {
+          margin: 0;
+          color: #bac9ed;
+          font: 400 12px/1.5 system-ui, sans-serif;
+        }
+        #${TOOLBAR_ID} .et-portal-search {
+          display: none;
+          position: absolute;
+          z-index: 2147483645;
+          top: calc(100% + 10px);
+          right: 8px;
+          width: min(360px, calc(100vw - 32px));
+          padding: 8px;
+          border: 1px solid rgba(139,169,255,.3);
+          border-radius: 18px;
+          background: linear-gradient(145deg, rgba(18,30,76,.97), rgba(9,15,43,.98));
+          box-shadow: 0 18px 48px rgba(1,5,24,.5);
+        }
+        #${TOOLBAR_ID} .et-portal-search.open { display: block; animation: et-portal-pop-in 150ms ease both; }
+        #${TOOLBAR_ID} .et-portal-search input {
+          box-sizing: border-box;
+          width: 100%;
+          min-height: 42px;
+          padding: 0 13px;
+          border: 1px solid rgba(153,180,255,.25);
+          border-radius: 12px;
+          outline: 0;
+          background: rgba(5,12,39,.7);
+          color: #f3f6ff;
+          font: 500 13px system-ui, sans-serif;
+        }
+        #${TOOLBAR_ID} .et-portal-search input:focus { border-color: #75a3ff; box-shadow: 0 0 0 3px rgba(70,123,255,.2); }
+        #${TOOLBAR_ID} .et-portal-search input::placeholder { color: #9cadd4; }
+        #${TOOLBAR_ID} .et-portal-message-link {
+          display: inline-flex;
+          margin-top: 12px;
+          padding: 8px 12px;
+          border-radius: 999px;
+          background: linear-gradient(100deg, #386cf1, #654fe8);
+          color: #fff;
+          font: 650 12px system-ui, sans-serif;
+          text-decoration: none;
+        }
+        #${TOOLBAR_ID} .et-portal-message-link[hidden] { display: none; }
+        @keyframes et-portal-pop-in {
+          from { opacity: 0; transform: translateY(-4px) scale(.98); }
+          to { opacity: 1; transform: none; }
+        }
+        @media (max-width: 520px) {
+          #${TOOLBAR_ID} { gap: 5px; padding-inline: 5px; }
+          #${TOOLBAR_ID} .et-portal-action { width: 36px; height: 36px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          #${TOOLBAR_ID} *, #${TOOLBAR_ID} *::before, #${TOOLBAR_ID} *::after {
+            animation-duration: 1ms !important;
+            transition-duration: 1ms !important;
+          }
+        }
+      `;
+      document.head?.appendChild(style);
+    }
+
+    function mount() {
+      const headerToolbar = document.querySelector("header.header .header-toolbar");
+      if (!headerToolbar || headerToolbar.querySelector(`#${TOOLBAR_ID}`)) return;
+      addStyles();
+
+      const actions = document.createElement("div");
+      actions.id = TOOLBAR_ID;
+      actions.innerHTML = `
+        <button class="et-portal-action et-portal-search-button" type="button" aria-label="Zoeken" title="Zoeken" aria-expanded="false">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 1 0 4.65 13.39l4.23 4.23 1.41-1.41-4.23-4.23A7.5 7.5 0 0 0 10.5 3Zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"/></svg>
+        </button>
+        <button class="et-portal-action et-portal-bell" type="button" aria-label="Meldingen" title="Meldingen" aria-expanded="false">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22a2.25 2.25 0 0 0 2.2-1.75H9.8A2.25 2.25 0 0 0 12 22Zm7-5-1.6-2.1V10a5.4 5.4 0 0 0-4.4-5.3V4a1 1 0 0 0-2 0v.7A5.4 5.4 0 0 0 6.6 10v4.9L5 17v1h14v-1Z"/></svg>
+          <span class="et-portal-count" aria-hidden="true"></span>
+        </button>
+        <a class="et-portal-action et-portal-avatar" aria-label="Profiel" title="Profiel"></a>
+        <form class="et-portal-search" role="search" aria-label="Zoeken op deze pagina">
+          <input type="search" placeholder="Zoek op deze pagina…" aria-label="Zoekterm">
+        </form>
+        <section class="et-portal-popover" aria-label="Meldingen" aria-live="polite">
+          <h2>Meldingen</h2>
+          <p class="et-portal-notification-copy"></p>
+          <a class="et-portal-message-link" hidden>Open berichten</a>
+        </section>
+      `;
+
+      const searchButton = actions.querySelector(".et-portal-search-button");
+      const searchForm = actions.querySelector(".et-portal-search");
+      const searchInput = searchForm.querySelector("input");
+      const notificationButton = actions.querySelector(".et-portal-bell");
+      const notificationPanel = actions.querySelector(".et-portal-popover");
+      const notificationCopy = actions.querySelector(".et-portal-notification-copy");
+      const count = actions.querySelector(".et-portal-count");
+      const profile = actions.querySelector(".et-portal-avatar");
+      const messageLink = actions.querySelector(".et-portal-message-link");
+      const profileLink = findProfileLink();
+      const existingMessageLink = findMessagesLink();
+      const profileImage = profileLink?.querySelector("img");
+      const profileName = profileImage?.alt
+        || profileLink?.textContent?.trim()
+        || document.querySelector("[class*='user-name'], [class*='username']")?.textContent?.trim()
+        || "";
+      const initials = profileName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "•";
+      if (profileLink?.href) profile.href = profileLink.href;
+      else {
+        profile.href = "#";
+        profile.addEventListener("click", (event) => event.preventDefault());
+      }
+      if (profileImage?.src) {
+        const image = document.createElement("img");
+        image.src = profileImage.src;
+        image.alt = "";
+        profile.replaceChildren(image);
+      } else {
+        profile.textContent = initials;
+      }
+      if (existingMessageLink?.href) {
+        messageLink.href = existingMessageLink.href;
+        messageLink.hidden = false;
+      }
+
+      const updateUnreadCount = () => {
+        const unread = getUnreadCount(actions);
+        count.textContent = unread > 99 ? "99+" : String(unread);
+        count.style.display = unread ? "flex" : "none";
+        notificationButton.setAttribute("aria-label", unread ? `${unread} ongelezen meldingen` : "Meldingen");
+        notificationCopy.textContent = unread
+          ? `Eduarte toont ${unread} ongelezen ${unread === 1 ? "melding" : "meldingen"}.`
+          : "Er zijn geen ongelezen meldingen gevonden.";
+      };
+
+      searchButton.addEventListener("click", () => {
+        const open = searchForm.classList.toggle("open");
+        notificationPanel.classList.remove("open");
+        searchButton.setAttribute("aria-expanded", String(open));
+        notificationButton.setAttribute("aria-expanded", "false");
+        if (open) searchInput.focus();
+      });
+      searchForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const term = searchInput.value.trim();
+        if (!term) return;
+        searchForm.classList.remove("open");
+        searchButton.setAttribute("aria-expanded", "false");
+        window.find?.(term, false, false, true, false, true, false);
+      });
+      notificationButton.addEventListener("click", () => {
+        const open = notificationPanel.classList.toggle("open");
+        searchForm.classList.remove("open");
+        notificationButton.setAttribute("aria-expanded", String(open));
+        searchButton.setAttribute("aria-expanded", "false");
+        updateUnreadCount();
+      });
+      document.addEventListener("pointerdown", (event) => {
+        if (actions.contains(event.target)) return;
+        searchForm.classList.remove("open");
+        notificationPanel.classList.remove("open");
+        searchButton.setAttribute("aria-expanded", "false");
+        notificationButton.setAttribute("aria-expanded", "false");
+      }, true);
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        searchForm.classList.remove("open");
+        notificationPanel.classList.remove("open");
+        searchButton.setAttribute("aria-expanded", "false");
+        notificationButton.setAttribute("aria-expanded", "false");
+      });
+
+      updateUnreadCount();
+      headerToolbar.appendChild(actions);
+      const observer = new MutationObserver((records) => {
+        if (!records.some((record) => !actions.contains(record.target))) return;
+        if (updateFrame) return;
+        updateFrame = requestAnimationFrame(() => {
+          updateFrame = 0;
+          if (actions.isConnected) updateUnreadCount();
+        });
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+      setTimeout(() => observer.disconnect(), 60000);
+    }
+
+    mount();
+    const observer = new MutationObserver(mount);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(() => observer.disconnect(), 15000);
   }
 
   // --- STARTPAGINA DASHBOARD WIDGETS ---
@@ -1203,6 +1567,7 @@
     });
   }
 
+  initPortalToolbar();
   initStartWidget();
   initGradesOverlay();
   initShortcuts();

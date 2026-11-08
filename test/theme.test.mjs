@@ -55,6 +55,28 @@ describe("theme CSS generation", () => {
     expect(css).toContain("inset 0 -3px #c084fc");
   });
 
+  it("styles the agenda as a full-width weekly grid without hiding the header actions", () => {
+    const css = buildTheme({ eduartePortalLayoutEnabled: true });
+
+    expect(css).toContain("body:has(.agenda) #eduarte-tools-portal-actions");
+    expect(css).toContain("margin-right: 2px !important");
+    expect(css).toContain("height: 70px !important");
+    expect(css).toContain("top: 92px !important");
+    expect(css).toContain("left: calc(var(--navigation-width, 16rem) + 16px) !important");
+    expect(css).toContain("width: 190px !important");
+    expect(css).toContain("width: 330px !important");
+    expect(css).toContain("flex: 1 0 168px !important");
+    expect(css).toContain("padding: 10px 12px !important");
+    expect(css).toContain("overflow-wrap: break-word !important");
+    expect(css).toContain(".agenda-filter div.datepicker .input-group > svg.svg-sprites.datepicker");
+    expect(css).toContain("padding: 0 12px 0 42px !important");
+    expect(css).toContain("body:has(.agenda) .s5-filterbar-toggle");
+    expect(css).toContain("body:has(.agenda) .agenda--schedule");
+    expect(css).toContain("body:has(.agenda) .agenda--days");
+    expect(css).toContain("body:has(.agenda) .agenda--day li.agenda--course > div");
+    expect(css).toContain("white-space: normal");
+  });
+
   it("omits portal layout styling when it is disabled", () => {
     const css = buildTheme({ eduartePortalLayoutEnabled: false });
 
