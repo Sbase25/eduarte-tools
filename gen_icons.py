@@ -82,7 +82,8 @@ def make_icon(size):
     draw_moon(img, size)
     return img
 
-for icon_size in (16, 48, 128):
-    make_icon(icon_size).save(f"icons/icon{icon_size}.png")
+if __name__ == "__main__":
+    for icon_size in (16, 48, 128):
+        make_icon(icon_size).save(f"icons/icon{icon_size}.png")
 
-print("Iconen gegenereerd")
+    print("Iconen gegenereerd")

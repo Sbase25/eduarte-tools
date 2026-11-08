@@ -1,8 +1,6 @@
 
 <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/da601ae4-1599-4e6c-a09d-42d0209f5c85" />
 
-
-
 # Eduarte Tools
 
 Een Chrome-extensie die het Eduarte-studentenportaal 
@@ -64,8 +62,8 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   de licentievermelding staat in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
 - **Aanpasbare Sneltoetsen** — spring met een zelf ingestelde toetscombinatie
   (bijv. Ctrl+A → Agenda, Ctrl+R → Resultaten) direct naar een Eduarte-pagina.
-- **Aan/uit-zetbare Widgets** — Pomodoro Focus Timer, Snelle Cijfercalculator,
-  Snelkoppelingen en Dagelijkse Studie-Tip, elk apart in- of uit te schakelen.
+- **Aan/uit-zetbare Widgets** — Pomodoro Focus Timer, Snelle Cijfercalculator en
+  Snelkoppelingen, elk apart in- of uit te schakelen.
 - **Meldingen-badge op extensie-icoon** — toont het aantal ongelezen items dat
   Eduarte zelf al toont (bijv. bij Berichten) als cijfer op het extensie-icoon.
   Best-effort: de detectie is generiek en kan per schoolomgeving verschillen.
@@ -92,17 +90,13 @@ Voor het weer kan de extensie, na jouw toestemming, je huidige locatie
 gebruiken. De coördinaten worden lokaal bewaard en alleen naar Open-Meteo
 (weer) en OpenStreetMap Nominatim (plaatsnaam) gestuurd.
 
-
-
-
-
 ## Waarom dit bestaat
 
 Eduarte's studentenportaal draait op een server-gerenderde Java/Wicket-app
-zonder een publieke JSON-API zoals Magister die heeft, dus een volledige
-herbouw zoals Study Tools' "Start"-dashboard is (nog) niet gedaan. Deze
-extensie richt zich op wat wél robuust en breed toepasbaar is: theming via
-Eduarte's eigen CSS-tokensysteem.
+zonder een publieke JSON-API zoals Magister die heeft, dus de extensie
+leest wat de pagina zelf al toont. Ze richt zich op wat robuust en breed
+toepasbaar is: theming via Eduarte's eigen CSS-tokensysteem, aangevuld met
+een eigen startdashboard en cijfertools.
 
 ## Bijdragen
 
