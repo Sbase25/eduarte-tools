@@ -741,6 +741,12 @@
       -webkit-backdrop-filter: blur(20px) saturate(135%) !important;
     }
 
+    @media (min-width: 960px) {
+      header.header {
+        left: calc(var(--navigation-width) + 12px) !important;
+      }
+    }
+
     header.header .header-toolbar,
     .header .header-toolbar,
     .header-toolbar,

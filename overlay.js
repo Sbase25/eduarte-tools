@@ -236,7 +236,7 @@
               }
               .et-home-toolbar {
                 display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
                 align-items: center;
                 gap: 0;
                 width: 100%;
@@ -281,11 +281,16 @@
               .et-home-toolbar .et-shortcuts-list {
                 display: grid;
                 grid-template-columns: repeat(7, minmax(0, 1fr));
+                flex: 1 1 0;
+                width: 100%;
+                min-width: 0;
                 gap: 5px;
               }
               .et-home-toolbar .et-shortcut-btn {
                 justify-content: center;
                 min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 padding: 6px 4px;
                 gap: 4px;
                 border-radius: 10px;
@@ -294,13 +299,6 @@
               }
               .et-home-toolbar .et-shortcut-btn span { font-size: 12px; }
               .et-home-empty-title { display: none !important; }
-              @media (min-width: 768px) {
-                header.header:has(.et-home-toolbar) {
-                  box-sizing: border-box !important;
-                  width: calc(100% - 16px) !important;
-                  margin-left: 16px !important;
-                }
-              }
               header.header .header-toolbar:has(.et-home-toolbar) {
                 position: relative !important;
                 display: flex !important;
