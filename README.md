@@ -70,6 +70,12 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   Eduarte zelf al toont (bijv. bij Berichten) als cijfer op het extensie-icoon.
   Best-effort: de detectie is generiek en kan per schoolomgeving verschillen.
 
+## Volg ons op Instagram
+
+Eduarte Tools heeft nu ook een Instagram-account met nieuws, tips en updates:
+[@eduartetools](https://www.instagram.com/eduartetools/). Ook te vinden in de
+extensie onder **Over**.
+
 ## Installatie
 
 1. Download of clone deze repository.
