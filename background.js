@@ -133,7 +133,11 @@ async function getLocationLabel(latitude, longitude) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "START_LOCATION_TRACKING") {
     ensureLocationTracker()
-      .then(() => sendResponse({ success: true }))
+      .then(() => chrome.runtime.sendMessage({ type: "REQUEST_CURRENT_LOCATION" }))
+      .then((result) => sendResponse(result || {
+        success: false,
+        error: "De locatie-service gaf geen antwoord. Probeer het opnieuw.",
+      }))
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true;
   }

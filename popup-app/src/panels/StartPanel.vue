@@ -7,34 +7,39 @@ import MaterialSlider from "../components/MaterialSlider.vue";
 const props = defineProps(["state"]);
 const s = props.state;
 const locationStatus = ref("");
+const requestingLocation = ref(false);
 
 function useCurrentLocation() {
-  if (!navigator.geolocation) {
-    locationStatus.value = "Je browser ondersteunt geen locatiebepaling.";
+  if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
+    locationStatus.value = "Locatie werkt alleen vanuit de geïnstalleerde extensie.";
     return;
   }
 
+  if (requestingLocation.value) return;
+  requestingLocation.value = true;
   locationStatus.value = "Locatie ophalen...";
-  navigator.geolocation.getCurrentPosition(
-    ({ coords }) => {
-      s.eduarteWeatherCoordinates = {
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-      };
+  chrome.runtime.sendMessage({ type: "START_LOCATION_TRACKING" }, (response) => {
+    requestingLocation.value = false;
+    const runtimeError = chrome.runtime.lastError;
+    if (runtimeError) {
+      locationStatus.value = `Locatie kon niet worden opgehaald: ${runtimeError.message}`;
+      return;
+    }
+
+    if (response?.success && response.coordinates) {
+      s.eduarteWeatherCoordinates = response.coordinates;
       s.eduarteWeatherUseLocation = true;
-      chrome.runtime.sendMessage({ type: "START_LOCATION_TRACKING" });
-      locationStatus.value = "Live locatie ingesteld. De gedetecteerde plaatsnaam verschijnt zo meteen op je dashboard.";
-    },
-    (error) => {
-      const messages = {
-        1: "Locatietoegang is geweigerd. Kies een plaatsnaam als alternatief.",
-        2: "Je locatie is niet beschikbaar. Probeer het opnieuw.",
-        3: "Het ophalen van je locatie duurde te lang. Probeer het opnieuw.",
-      };
-      locationStatus.value = messages[error.code] || "Locatie kon niet worden opgehaald.";
-    },
-    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
-  );
+      locationStatus.value = "Locatie ingesteld. Het weer wordt bijgewerkt.";
+      return;
+    }
+
+    const messages = {
+      1: "Locatietoegang is geweigerd. Controleer de locatie-instellingen van je browser.",
+      2: "Je locatie is niet beschikbaar. Controleer of locatieservices zijn ingeschakeld.",
+      3: "Het ophalen van je locatie duurde te lang. Controleer je verbinding en probeer het opnieuw.",
+    };
+    locationStatus.value = messages[response?.code] || response?.error || "Locatie kon niet worden opgehaald.";
+  });
 }
 </script>
 
@@ -45,7 +50,9 @@ function useCurrentLocation() {
   <div class="setting">
     <h3 class="setting-title">Weer op basis van je locatie</h3>
     <span class="setting-subtitle">Gebruik je huidige locatie voor automatisch bijgewerkt weer. De extensie werkt de locatie bij wanneer je verplaatst.</span>
-    <md-filled-tonal-button class="location-button" type="button" @click="useCurrentLocation">Gebruik huidige locatie</md-filled-tonal-button>
+    <md-filled-tonal-button class="location-button" type="button" :disabled="requestingLocation" @click="useCurrentLocation">
+      {{ requestingLocation ? "Locatie ophalen..." : "Gebruik huidige locatie" }}
+    </md-filled-tonal-button>
     <span v-if="locationStatus" class="location-status" role="status">{{ locationStatus }}</span>
   </div>
   <div class="setting">
