@@ -34,6 +34,9 @@ describe("theme CSS generation", () => {
     const css = buildTheme({});
 
     expect(css).toContain("header.header:has(> .header-tabs)");
+    expect(css).toContain("left: calc(var(--navigation-width) + 12px)");
+    expect(css).toContain("body:has(.agenda) header.header:not(:has(> .header-tabs))");
+    expect(css).toContain("height: 56px !important");
     expect(css).toContain("flex-wrap: wrap");
     expect(css).toContain("flex: 1 1 0");
     expect(css).toContain("li:not(:has(> a))");

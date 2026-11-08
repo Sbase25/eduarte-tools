@@ -63,7 +63,6 @@ function useCurrentLocation() {
   <SwitchInput v-model="s.eduarteShortcutsEnabled" title="Snelkoppelingen (Quick Links)" subtitle="Knoppen naar Teams, Outlook Webmail, OneDrive, Office 365 en Cijfers." />
   <SwitchInput v-model="s.eduartePomodoroEnabled" title="Pomodoro Focus Timer" subtitle="Interactieve studie- en pauzetimer (25m focus, 5m pauze) op je dashboard." />
   <SwitchInput v-model="s.eduarteQuickCalcEnabled" title="Snelle Cijfercalculator Widget" subtitle="Bereken direct op je dashboard welk cijfer je nodig hebt voor een streefgemiddelde." />
-  <SwitchInput v-model="s.eduarteQuoteEnabled" title="Dagelijkse Studie Quote & Tips" subtitle="Inspirerende quotes en handige studietips die dagelijks wisselen." />
   <div class="setting">
     <h3 class="setting-title">Kaartanimatie Intensiteit</h3>
     <MaterialSlider v-model="s.eduarteAnimationSpeed" min="0" max="100" label="Animatie-snelheid" />
