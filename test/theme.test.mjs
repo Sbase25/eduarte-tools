@@ -35,6 +35,7 @@ describe("theme CSS generation", () => {
 
     expect(css).toContain("header.header:has(> .header-tabs)");
     expect(css).toContain("left: calc(var(--navigation-width) + 12px)");
+    expect(css).toContain(".agenda-filter {\n      box-sizing: border-box !important;\n      width: calc(100% - 24px) !important;\n      margin: 0 12px !important;");
     expect(css).toContain("flex-wrap: wrap");
     expect(css).toContain("flex: 1 1 0");
     expect(css).toContain("li:not(:has(> a))");
