@@ -856,12 +856,6 @@
       -webkit-backdrop-filter: blur(14px) !important;
     }
 
-    .agenda-filter {
-      box-sizing: border-box !important;
-      width: calc(100% - 24px) !important;
-      margin: 0 12px !important;
-      border-radius: 20px !important;
-    }
     `;
   }
 
