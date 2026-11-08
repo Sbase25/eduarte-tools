@@ -50,16 +50,6 @@
     }).format(new Date());
   }
 
-  const STUDY_QUOTES = [
-    { quote: "Succes is de som van kleine inspanningen, dag in dag uit herhaald.", author: "Robert Collier" },
-    { quote: "Focus op vooruitgang, niet op perfectie.", author: "Studietip" },
-    { quote: "Begin gewoon: de motivatie volgt vaak pas tijdens het werken.", author: "Productiviteit" },
-    { quote: "Elke expert was ooit een beginner.", author: "Helen Hayes" },
-    { quote: "Neem op tijd een pauze: 25 minuten focus en 5 minuten rust (Pomodoro).", author: "Studietip" },
-    { quote: "Geloof dat je het kunt en je bent al op de helft.", author: "Theodore Roosevelt" },
-    { quote: "Moeilijke wegen leiden vaak naar prachtige bestemmingen.", author: "Motivatie" },
-  ];
-
   function isDashboardPage() {
     const path = (location.pathname || "").toLowerCase();
     // Exclude sub-pages that are clearly not the start/dashboard
@@ -99,7 +89,6 @@
         "eduarteShortcutsEnabled",
         "eduartePomodoroEnabled",
         "eduarteQuickCalcEnabled",
-        "eduarteQuoteEnabled",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -109,9 +98,8 @@
         const showShortcuts = settings.eduarteShortcutsEnabled !== false;
         const showPomodoro = settings.eduartePomodoroEnabled !== false;
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
-        const showQuote = settings.eduarteQuoteEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc && !showQuote) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -236,7 +224,7 @@
               }
               .et-home-toolbar {
                 display: grid;
-                grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+                grid-template-columns: minmax(0, 1fr);
                 align-items: center;
                 gap: 0;
                 width: 100%;
@@ -248,7 +236,6 @@
                 background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 92%, var(--color-bg-fill-action, #3b82f6) 8%);
               }
               .et-home-toolbar.et-home-toolbar-single { grid-template-columns: minmax(0, 1fr); }
-              .et-home-toolbar .et-quote-card,
               .et-home-toolbar .et-shortcut-toolbar {
                 box-sizing: border-box;
                 width: 100%;
@@ -260,19 +247,6 @@
                 background: transparent;
                 box-shadow: none;
               }
-              .et-home-toolbar .et-quote-card {
-                justify-content: center;
-                gap: 8px;
-              }
-              .et-home-toolbar .et-quote-card + .et-shortcut-toolbar {
-                border-left: 2px solid color-mix(in srgb, var(--color-border-primary, #9ca3af) 90%, var(--color-text-primary, #fff) 10%) !important;
-              }
-              .et-home-toolbar .et-quote-text {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-              }
-              .et-home-toolbar .et-quote-author { font-size: 11px; }
               .et-home-toolbar .et-shortcut-toolbar {
                 justify-content: center;
                 gap: 0;
@@ -323,15 +297,10 @@
               }
               @media (max-width: 1100px) {
                 .et-home-toolbar { grid-template-columns: 1fr; gap: 0; }
-                .et-home-toolbar .et-quote-card + .et-shortcut-toolbar {
-                  border-left: 0;
-                  border-top: 2px solid color-mix(in srgb, var(--color-border-primary, #9ca3af) 90%, var(--color-text-primary, #fff) 10%);
-                }
                 .et-home-toolbar .et-shortcuts-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
                 header.header .header-toolbar:has(.et-home-toolbar) { min-height: 130px !important; }
               }
               @media (max-width: 700px) {
-                .et-home-toolbar .et-quote-card { align-items: center; flex-direction: row; }
                 .et-home-toolbar .et-shortcuts-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
                 .et-home-toolbar .et-shortcut-btn { white-space: normal; }
               }
@@ -455,33 +424,7 @@
                 color: var(--color-bg-fill-action, #3b82f6);
               }
 
-              /* Quote styling */
-              .et-quote-card {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 14px;
-                border-inline-start: 3px solid var(--color-bg-fill-action, #3b82f6);
-                border-radius: 12px;
-                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 94%, var(--color-bg-fill-action, #3b82f6) 6%);
-              }
-              .et-quote-text {
-                flex: 1 1 auto;
-                font-style: italic;
-                font-size: 13px;
-                line-height: 1.4;
-                margin: 0;
-                color: var(--color-text-primary, #f9fafb);
-              }
-              .et-quote-author {
-                flex: 0 0 auto;
-                font-size: 12px;
-                font-weight: 500;
-                color: var(--color-text-tertiary, #9ca3af);
-                white-space: nowrap;
-              }
               @media (max-width: 700px) {
-                .et-quote-card { align-items: flex-start; flex-direction: column; }
                 .et-shortcut-toolbar { align-items: flex-start; flex-direction: column; gap: 8px; }
                 .et-shortcuts-list { width: 100%; }
               }
@@ -515,13 +458,6 @@
                     <button class="et-weather-refresh" title="Ververs weerbericht">🔄</button>
                   </div>
                 ` : ''}
-              </div>
-            ` : ''}
-
-            ${showQuote ? `
-              <div class="et-quote-card">
-                <p class="et-quote-text" id="et-quote-content"></p>
-                <div class="et-quote-author" id="et-quote-by"></div>
               </div>
             ` : ''}
 
@@ -585,13 +521,10 @@
             target.appendChild(container);
           }
 
-          if (showQuote || showShortcuts) {
+          if (showShortcuts) {
             const headerToolbar = document.querySelector("header.header .header-toolbar");
             if (headerToolbar) {
-              const toolbarItems = [
-                container.querySelector(".et-quote-card"),
-                container.querySelector(".et-shortcut-toolbar"),
-              ].filter(Boolean);
+              const toolbarItems = [container.querySelector(".et-shortcut-toolbar")].filter(Boolean);
               if (toolbarItems.length) {
                 const homeToolbar = document.createElement("div");
                 homeToolbar.className = "et-home-toolbar";
@@ -657,18 +590,6 @@
                 fetchWeatherData();
               }
             });
-          }
-
-          // Quote instellen op basis van de dag
-          if (showQuote) {
-            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-            const selectedQuote = STUDY_QUOTES[dayOfYear % STUDY_QUOTES.length];
-            const textEl = document.getElementById("et-quote-content");
-            const authorEl = document.getElementById("et-quote-by");
-            if (textEl && authorEl) {
-              textEl.textContent = `"${selectedQuote.quote}"`;
-              authorEl.textContent = `— ${selectedQuote.author}`;
-            }
           }
 
           // Pomodoro Focus Timer logica

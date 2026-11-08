@@ -747,6 +747,16 @@
       }
     }
 
+    body:has(.agenda) header.header:not(:has(> .header-tabs)) {
+      height: 56px !important;
+      min-height: 56px !important;
+    }
+
+    body:has(.agenda) header.header:not(:has(> .header-tabs)) > .header-toolbar {
+      min-height: 56px !important;
+      padding-block: 4px !important;
+    }
+
     header.header .header-toolbar,
     .header .header-toolbar,
     .header-toolbar,
