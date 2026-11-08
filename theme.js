@@ -1008,7 +1008,7 @@
     body:has(.agenda) .agenda--time {
       flex: 0 0 76px !important;
       width: 76px !important;
-      padding-top: 44px !important;
+      padding-top: 52px !important;
       border-right: 1px solid color-mix(in srgb, ${border} 75%, transparent) !important;
       background: linear-gradient(180deg, rgba(28, 38, 105, .72), rgba(16, 25, 76, .86)) !important;
       text-align: center !important;
@@ -1048,7 +1048,7 @@
     body:has(.agenda) .agenda--days {
       flex: 1 1 0 !important;
       min-width: 0 !important;
-      padding-top: 44px !important;
+      padding-top: 0 !important;
       overflow-x: auto !important;
       overflow-y: hidden !important;
       background: linear-gradient(150deg, rgba(8, 15, 48, .82), rgba(12, 17, 54, .92)) !important;
@@ -1063,12 +1063,31 @@
     }
 
     body:has(.agenda) .agenda--day .lead {
-      top: -44px !important;
-      min-width: calc(100% - 2px) !important;
-      height: 44px !important;
+      /* Datumkop in de normale flow: Eduarte's scroll-script zet top via JS en
+         liet de datums onder de filterbalk of buiten beeld verdwijnen. */
+      position: static !important;
+      top: auto !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-sizing: border-box !important;
+      width: auto !important;
+      min-width: 0 !important;
+      height: 52px !important;
       margin: 0 1px !important;
-      padding: 0 6px !important;
+      padding: 0 8px !important;
       border: 1px solid color-mix(in srgb, ${border} 75%, ${text} 25%) !important;
+      border-radius: 15px 15px 6px 6px !important;
+      background: linear-gradient(110deg, rgba(39, 55, 134, .88), rgba(33, 45, 114, .9)) !important;
+      color: ${text} !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      line-height: 1.2 !important;
+      white-space: nowrap !important;
+      text-transform: capitalize !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    } 75%, ${text} 25%) !important;
       border-radius: 15px 15px 6px 6px !important;
       background: linear-gradient(110deg, rgba(39, 55, 134, .88), rgba(33, 45, 114, .9)) !important;
       color: ${text} !important;

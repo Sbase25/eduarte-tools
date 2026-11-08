@@ -74,7 +74,7 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 
 Eduarte Tools heeft nu ook een Instagram-account met nieuws, tips en updates:
 [@eduartetools](https://www.instagram.com/eduartetools/). Ook te vinden in de
-extensie onder **Over**.
+extensie onder **Over**, en als sluitbare melding op de Eduarte-startpagina.
 
 ## Installatie
 

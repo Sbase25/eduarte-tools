@@ -453,6 +453,7 @@
         "eduarteShortcutsEnabled",
         "eduartePomodoroEnabled",
         "eduarteQuickCalcEnabled",
+        "eduarteInstagramDismissed",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -793,11 +794,34 @@
                 .et-shortcuts-list { width: 100%; }
               }
 
+              .et-ig-card {
+                display: flex; align-items: center; gap: 14px;
+                background: linear-gradient(120deg, color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 30%, var(--color-bg-surface, #1f2937)), color-mix(in srgb, #c13584 28%, var(--color-bg-surface, #1f2937)));
+              }
+              .et-ig-emoji { font-size: 30px; line-height: 1; }
+              .et-ig-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+              .et-ig-text b { font-size: 15px; }
+              .et-ig-text span { font-size: 12.5px; color: var(--color-text-secondary, #e5e7eb); }
+              .et-ig-link {
+                flex: 0 0 auto; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700;
+                text-decoration: none; color: #fff; background: linear-gradient(90deg, #7c3aed, #c13584);
+              }
+              .et-ig-close { flex: 0 0 auto; border: 0; background: transparent; color: inherit; font-size: 18px; cursor: pointer; opacity: .7; padding: 4px 8px; border-radius: 8px; }
+              .et-ig-close:hover { opacity: 1; background: rgba(255,255,255,.1); }
               @keyframes st-card-in {
                 from { opacity: 0; transform: translateY(6px); }
                 to { opacity: 1; transform: translateY(0); }
               }
             </style>
+
+            ${settings.eduarteInstagramDismissed ? '' : `
+              <div class="et-card et-ig-card" id="et-ig-card">
+                <span class="et-ig-emoji">📸</span>
+                <div class="et-ig-text"><b>Eduarte Tools heeft nu Instagram!</b><span>Nieuws, tips en updates vind je op @eduartetools.</span></div>
+                <a class="et-ig-link" href="https://www.instagram.com/eduartetools/" target="_blank" rel="noopener noreferrer">Volg ons</a>
+                <button class="et-ig-close" type="button" title="Sluiten" aria-label="Sluiten">✕</button>
+              </div>
+            `}
 
             <!-- Bovenste kaart: Weer & Begroeting -->
             ${(showGreeting || showWeather) ? `
@@ -884,6 +908,11 @@
           } else {
             target.appendChild(container);
           }
+
+          container.querySelector(".et-ig-close")?.addEventListener("click", () => {
+            container.querySelector("#et-ig-card")?.remove();
+            try { chrome.storage.local.set({ eduarteInstagramDismissed: true }); } catch (e) { /* ignore */ }
+          });
 
           if (showShortcuts) {
             const headerToolbar = document.querySelector("header.header .header-toolbar");
