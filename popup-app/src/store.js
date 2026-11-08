@@ -15,6 +15,7 @@ const KEYS = [
   "eduarteShortcutsEnabled", "eduartePomodoroEnabled", "eduarteQuickCalcEnabled", "eduarteQuoteEnabled",
   "eduarteAnimationSpeed", "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum",
   "eduartePassThreshold", "eduarteShortcutKeysEnabled", "eduarteShortcuts", "eduarteBadgeEnabled",
+  "eduartePortalLayoutEnabled", "eduarteContextMenuEnabled",
 ];
 
 const DEFAULTS = {
@@ -58,6 +59,8 @@ const DEFAULTS = {
     "/resultaten": { key: "r", ctrl: true, alt: false, shift: false },
   },
   eduarteBadgeEnabled: true,
+  eduartePortalLayoutEnabled: true,
+  eduarteContextMenuEnabled: true,
 };
 
 const hasChrome = typeof chrome !== "undefined" && chrome.storage && chrome.storage.local;

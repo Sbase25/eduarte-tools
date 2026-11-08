@@ -135,13 +135,13 @@
               #${CONTAINER_ID} {
                 display: flex;
                 flex-direction: column;
-                gap: 16px;
+                gap: 12px;
                 margin-bottom: 24px;
                 animation: st-card-in 220ms ease both;
               }
               .et-card {
                 box-sizing: border-box;
-                padding: 18px 22px;
+                padding: 14px 18px;
                 background: var(--color-bg-surface, #1f2937);
                 border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
                 border-radius: 22px 22px 8px 22px;
@@ -209,11 +209,12 @@
               /* Grid for widgets */
               .et-grid {
                 display: grid;
+                align-items: start;
                 grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 16px;
+                gap: 12px;
               }
               .et-widget-title {
-                margin: 0 0 14px 0;
+                margin: 0 0 10px 0;
                 font-size: 14px;
                 font-weight: 600;
                 color: var(--color-text-secondary, #e5e7eb);
@@ -224,19 +225,132 @@
               }
 
               /* Shortcuts styling */
+              .et-shortcut-toolbar {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 14px;
+                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
+                border-radius: 16px;
+                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 92%, var(--color-bg-fill-action, #3b82f6) 8%);
+              }
+              .et-home-toolbar {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-items: center;
+                gap: 0;
+                width: 100%;
+                min-width: 0;
+                min-height: 100%;
+                overflow: hidden;
+                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
+                border-radius: 16px;
+                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 92%, var(--color-bg-fill-action, #3b82f6) 8%);
+              }
+              .et-home-toolbar.et-home-toolbar-single { grid-template-columns: minmax(0, 1fr); }
+              .et-home-toolbar .et-quote-card,
+              .et-home-toolbar .et-shortcut-toolbar {
+                box-sizing: border-box;
+                width: 100%;
+                min-width: 0;
+                min-height: 48px;
+                padding: 6px 14px;
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
+              }
+              .et-home-toolbar .et-quote-card {
+                justify-content: center;
+                gap: 8px;
+              }
+              .et-home-toolbar .et-quote-card + .et-shortcut-toolbar {
+                border-left: 2px solid color-mix(in srgb, var(--color-border-primary, #9ca3af) 90%, var(--color-text-primary, #fff) 10%) !important;
+              }
+              .et-home-toolbar .et-quote-text {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+              .et-home-toolbar .et-quote-author { font-size: 11px; }
+              .et-home-toolbar .et-shortcut-toolbar {
+                justify-content: center;
+                gap: 0;
+              }
+              .et-home-toolbar .et-shortcut-toolbar-label { display: none; }
+              .et-home-toolbar .et-shortcuts-list {
+                display: grid;
+                grid-template-columns: repeat(7, minmax(0, 1fr));
+                gap: 5px;
+              }
+              .et-home-toolbar .et-shortcut-btn {
+                justify-content: center;
+                min-width: 0;
+                padding: 6px 4px;
+                gap: 4px;
+                border-radius: 10px;
+                font-size: 11px;
+                white-space: nowrap;
+              }
+              .et-home-toolbar .et-shortcut-btn span { font-size: 12px; }
+              .et-home-empty-title { display: none !important; }
+              header.header .header-toolbar:has(.et-home-toolbar) {
+                position: relative !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: stretch !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                min-height: 82px !important;
+                padding: 8px 12px !important;
+              }
+              header.header .header-toolbar:has(.et-home-toolbar) > .et-home-toolbar {
+                flex: 1 1 100%;
+                width: 100%;
+                justify-self: stretch;
+              }
+              header.header .header-toolbar:has(.et-home-toolbar) > .header-toolbar--open-navigation {
+                position: absolute;
+                z-index: 1;
+                top: 50%;
+                left: 12px;
+                transform: translateY(-50%);
+              }
+              @media (max-width: 1100px) {
+                .et-home-toolbar { grid-template-columns: 1fr; gap: 0; }
+                .et-home-toolbar .et-quote-card + .et-shortcut-toolbar {
+                  border-left: 0;
+                  border-top: 2px solid color-mix(in srgb, var(--color-border-primary, #9ca3af) 90%, var(--color-text-primary, #fff) 10%);
+                }
+                .et-home-toolbar .et-shortcuts-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+                header.header .header-toolbar:has(.et-home-toolbar) { min-height: 130px !important; }
+              }
+              @media (max-width: 700px) {
+                .et-home-toolbar .et-quote-card { align-items: center; flex-direction: row; }
+                .et-home-toolbar .et-shortcuts-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+                .et-home-toolbar .et-shortcut-btn { white-space: normal; }
+              }
+              .et-shortcut-toolbar-label {
+                flex: 0 0 auto;
+                color: var(--color-text-secondary, #e5e7eb);
+                font-size: 12px;
+                font-weight: 700;
+              }
               .et-shortcuts-list {
                 display: flex;
+                flex: 1 1 auto;
+                align-items: center;
                 flex-wrap: wrap;
-                gap: 9px;
+                gap: 7px;
               }
               .et-shortcut-btn {
                 display: inline-flex;
                 align-items: center;
                 gap: 8px;
-                padding: 9px 15px;
+                padding: 7px 11px;
                 background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 74%, var(--color-text-primary, #fff));
                 border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
-                border-radius: 18px 18px 6px 18px;
+                border-radius: 12px;
                 color: var(--color-text-primary, #f9fafb);
                 text-decoration: none;
                 font-size: 13px;
@@ -339,21 +453,32 @@
               /* Quote styling */
               .et-quote-card {
                 display: flex;
-                flex-direction: column;
-                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-inline-start: 3px solid var(--color-bg-fill-action, #3b82f6);
+                border-radius: 12px;
+                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 94%, var(--color-bg-fill-action, #3b82f6) 6%);
               }
               .et-quote-text {
+                flex: 1 1 auto;
                 font-style: italic;
-                font-size: 13.5px;
-                line-height: 1.55;
-                margin: 0 0 10px 0;
+                font-size: 13px;
+                line-height: 1.4;
+                margin: 0;
                 color: var(--color-text-primary, #f9fafb);
               }
               .et-quote-author {
+                flex: 0 0 auto;
                 font-size: 12px;
                 font-weight: 500;
                 color: var(--color-text-tertiary, #9ca3af);
-                text-align: right;
+                white-space: nowrap;
+              }
+              @media (max-width: 700px) {
+                .et-quote-card { align-items: flex-start; flex-direction: column; }
+                .et-shortcut-toolbar { align-items: flex-start; flex-direction: column; gap: 8px; }
+                .et-shortcuts-list { width: 100%; }
               }
 
               @keyframes st-card-in {
@@ -388,24 +513,31 @@
               </div>
             ` : ''}
 
-            <!-- Grid kaarten: Snelkoppelingen, Pomodoro, Snelle Calculator & Quotes -->
-            ${(showShortcuts || showPomodoro || showQuickCalc || showQuote) ? `
-              <div class="et-grid">
-                ${showShortcuts ? `
-                  <div class="et-card">
-                    <h3 class="et-widget-title">🚀 Snelkoppelingen</h3>
-                    <div class="et-shortcuts-list">
-                      <a href="https://teams.microsoft.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>👥</span> Teams</a>
-                      <a href="https://outlook.office.com/mail" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>✉️</span> Outlook</a>
-                      <a href="https://onedrive.live.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>☁️</span> OneDrive</a>
-                      <a href="https://www.office.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📄</span> Office 365</a>
-                      <a href="https://mbowebshop.nl/Gebruikers/Licenties/" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📄</span> MboWebshop 📚</a>
-                      <a href="/resultaten" class="et-shortcut-btn"><span>📊</span> Cijfers</a>
-                      <a href="/agenda" class="et-shortcut-btn"><span>📅</span> Agenda</a>
-                    </div>
-                  </div>
-                ` : ''}
+            ${showQuote ? `
+              <div class="et-quote-card">
+                <p class="et-quote-text" id="et-quote-content"></p>
+                <div class="et-quote-author" id="et-quote-by"></div>
+              </div>
+            ` : ''}
 
+            ${showShortcuts ? `
+              <nav class="et-shortcut-toolbar" aria-label="Eduarte snelkoppelingen">
+                <span class="et-shortcut-toolbar-label">Snel openen</span>
+                <div class="et-shortcuts-list">
+                  <a href="https://teams.microsoft.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>👥</span> Teams</a>
+                  <a href="https://outlook.office.com/mail" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>✉️</span> Outlook</a>
+                  <a href="https://onedrive.live.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>☁️</span> OneDrive</a>
+                  <a href="https://www.office.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📄</span> Office 365</a>
+                  <a href="https://mbowebshop.nl/Gebruikers/Licenties/" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📚</span> MboWebshop</a>
+                  <a href="/resultaten" class="et-shortcut-btn"><span>📊</span> Cijfers</a>
+                  <a href="/agenda" class="et-shortcut-btn"><span>📅</span> Agenda</a>
+                </div>
+              </nav>
+            ` : ''}
+
+            <!-- Compacte widgetgrid -->
+            ${(showPomodoro || showQuickCalc) ? `
+              <div class="et-grid">
                 ${showPomodoro ? `
                   <div class="et-card">
                     <h3 class="et-widget-title">⏱️ Pomodoro Focus Timer</h3>
@@ -438,13 +570,6 @@
                   </div>
                 ` : ''}
 
-                ${showQuote ? `
-                  <div class="et-card">
-                    <h3 class="et-widget-title">💡 Dagelijkse Studie-Tip</h3>
-                    <p class="et-quote-text" id="et-quote-content"></p>
-                    <div class="et-quote-author" id="et-quote-by"></div>
-                  </div>
-                ` : ''}
               </div>
             ` : ''}
           `;
@@ -453,6 +578,25 @@
             target.insertBefore(container, target.firstChild);
           } else {
             target.appendChild(container);
+          }
+
+          if (showQuote || showShortcuts) {
+            const headerToolbar = document.querySelector("header.header .header-toolbar");
+            if (headerToolbar) {
+              const toolbarItems = [
+                container.querySelector(".et-quote-card"),
+                container.querySelector(".et-shortcut-toolbar"),
+              ].filter(Boolean);
+              if (toolbarItems.length) {
+                const homeToolbar = document.createElement("div");
+                homeToolbar.className = "et-home-toolbar";
+                if (toolbarItems.length === 1) homeToolbar.classList.add("et-home-toolbar-single");
+                toolbarItems.forEach((item) => homeToolbar.appendChild(item));
+                headerToolbar.appendChild(homeToolbar);
+                const title = headerToolbar.querySelector(":scope > h1");
+                if (title && !title.textContent.trim()) title.classList.add("et-home-empty-title");
+              }
+            }
           }
 
           // Weer data ophalen
@@ -514,8 +658,8 @@
           if (showQuote) {
             const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
             const selectedQuote = STUDY_QUOTES[dayOfYear % STUDY_QUOTES.length];
-            const textEl = container.querySelector("#et-quote-content");
-            const authorEl = container.querySelector("#et-quote-by");
+            const textEl = document.getElementById("et-quote-content");
+            const authorEl = document.getElementById("et-quote-by");
             if (textEl && authorEl) {
               textEl.textContent = `"${selectedQuote.quote}"`;
               authorEl.textContent = `— ${selectedQuote.author}`;

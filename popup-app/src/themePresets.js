@@ -1,6 +1,7 @@
 export const presets = [
   { key: "dark", name: "Donker", dark: true, accent: "#3b82f6", bg: "#111827", surface: "#1f2937", text: "#f9fafb", border: "#374151" },
   { key: "blue", name: "Blauw", dark: true, accent: "#38bdf8", bg: "#0b192c", surface: "#13253f", text: "#f0f9ff", border: "#1e3a5f" },
+  { key: "portal", name: "Portal Glow", dark: true, accent: "#3478ff", bg: "#080d22", surface: "#111a36", text: "#f3f6ff", border: "#29365f" },
   { key: "purple", name: "Paars", dark: true, accent: "#c084fc", bg: "#130e24", surface: "#20163b", text: "#faf5ff", border: "#3b2d64" },
   { key: "emerald", name: "Smaragd", dark: true, accent: "#34d399", bg: "#062319", surface: "#0b3829", text: "#ecfdf5", border: "#14533d" },
   { key: "sunset", name: "Sunset", dark: true, accent: "#fb923c", bg: "#1c0f0a", surface: "#2e1810", text: "#fff7ed", border: "#542d1f" },
