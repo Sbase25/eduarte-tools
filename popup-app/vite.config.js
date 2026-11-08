@@ -24,6 +24,7 @@ export default defineConfig({
       input: {
         index: resolve(appDirectory, "index.html"),
         packs: resolve(appDirectory, "packs.html"),
+        team: resolve(appDirectory, "team.html"),
       },
       output: {
         entryFileNames: "assets/[name].js",

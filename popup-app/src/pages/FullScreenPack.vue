@@ -2,6 +2,8 @@
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import Icon from "../components/Icon.vue";
 import { drawGradeCards } from "../pack-cards.js";
+import { loadCollection, mergeCollection, saveCollection } from "../collection.js";
+import { playSound, setSoundEnabled } from "../sound.js";
 
 const isOpening = ref(false);
 const isOpen = ref(false);
@@ -32,6 +34,32 @@ async function loadGradeTransfer() {
   gradesReady.value = true;
 }
 
+const newCardCount = ref(0);
+
+async function revealCards() {
+  const drawn = drawGradeCards(gradePool.value);
+  revealedCards.value = drawn;
+  newCardCount.value = 0;
+  if (drawn.length) {
+    playSound("reveal");
+    try {
+      const { collection, added } = mergeCollection(await loadCollection(), drawn);
+      newCardCount.value = added.length;
+      if (added.length) await saveCollection(collection);
+    } catch (error) {
+      console.error("Eduarte Tools kon de kaarten niet lokaal bewaren.", error);
+    }
+  }
+}
+
+function openTeam() {
+  if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+    chrome.runtime.sendMessage({ type: "OPEN_EDUARTE_TOOLS_PAGE", page: "team" });
+  } else {
+    window.open(new URL("/team.html", window.location.href).href, "_blank", "noopener");
+  }
+}
+
 function openPack() {
   if (isOpening.value || !gradesReady.value) return;
   clearTimeout(revealTimer);
@@ -39,7 +67,7 @@ function openPack() {
   isOpen.value = false;
   revealedCards.value = [];
   revealTimer = setTimeout(() => {
-    revealedCards.value = drawGradeCards(gradePool.value);
+    revealCards();
     isOpening.value = false;
     isOpen.value = true;
     sceneTransform.value = "";
@@ -48,7 +76,7 @@ function openPack() {
 
 function skipOpening() {
   clearTimeout(revealTimer);
-  revealedCards.value = drawGradeCards(gradePool.value);
+  revealCards();
   isOpening.value = false;
   isOpen.value = true;
   sceneTransform.value = "";
@@ -79,6 +107,9 @@ function openSettings() {
 }
 
 onMounted(() => {
+  if (typeof chrome !== "undefined" && chrome.storage?.local) {
+    chrome.storage.local.get("eduarteTeamSound").then((settings) => setSoundEnabled(settings.eduarteTeamSound !== false));
+  }
   loadGradeTransfer().catch((error) => {
     console.error("Eduarte Tools could not load the local grade transfer.", error);
     gradeLoadError.value = "De Eduarte-cijfers konden niet worden opgehaald. Open Packs opnieuw vanaf Eduarte.";
@@ -98,6 +129,7 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
       </div>
       <div class="top-actions">
         <span class="source-label"><i></i> LOKALE EDUARTE-CIJFERS</span>
+        <md-text-button type="button" @click="openTeam">Mijn team</md-text-button>
         <md-icon-button class="settings-button" aria-label="Extensie-instellingen" title="Extensie-instellingen" @click="openSettings">
           <svg slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94a7.5 7.5 0 0 0 .05-1.88l2.03-1.58-2-3.46-2.42.98a7.3 7.3 0 0 0-1.63-.94L14.8 3h-4l-.37 3.06a7.3 7.3 0 0 0-1.63.94l-2.42-.98-2 3.46 2.03 1.58a7.5 7.5 0 0 0 0 1.88l-2.03 1.58 2 3.46 2.42-.98c.5.4 1.05.72 1.63.94L10.8 21h4l.37-3.06c.58-.22 1.13-.54 1.63-.94l2.42.98 2-3.46-2.08-1.58ZM12.8 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" /></svg>
         </md-icon-button>
@@ -108,7 +140,7 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
       <section class="intro">
         <p class="eyebrow">EDUARTE TOOLS <span>·</span> PACK OPENING</p>
         <h1>{{ isOpen ? "Jouw cijfers." : "Open het pack." }}</h1>
-        <p>{{ isOpen ? `${revealedCards.length} Eduarte-cijfers uit jouw pack.` : "Klik op het pack om je Eduarte-cijfers te onthullen." }}</p>
+        <p>{{ isOpen ? `${revealedCards.length} Eduarte-cijfers uit jouw pack${newCardCount ? `, ${newCardCount} nieuw in je verzameling` : ""}.` : "Klik op het pack om je Eduarte-cijfers te onthullen." }}</p>
       </section>
 
       <section class="pack-area" :class="{ 'is-opening': isOpening, 'is-open': isOpen }">
@@ -185,7 +217,7 @@ onBeforeUnmount(() => clearTimeout(revealTimer));
         <md-filled-button v-if="isOpen" class="open-button" type="button" @click="isOpen = false; revealedCards = []">
           Nog een pack openen
         </md-filled-button>
-        <p class="disclaimer"><Icon>info</Icon> Cijfers worden alleen lokaal uit de geopende Eduarte-pagina gelezen en niet bewaard.</p>
+        <p class="disclaimer"><Icon>info</Icon> Cijfers worden alleen lokaal uit de geopende Eduarte-pagina gelezen. Onthulde kaarten (vak, cijfer, rating) worden alleen op dit apparaat bewaard voor Mijn team en nooit verstuurd.</p>
       </div>
     </div>
   </main>

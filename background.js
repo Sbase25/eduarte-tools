@@ -45,9 +45,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   const extensionPage = request.page === "packs"
     ? "popup-dist/packs.html"
-    : request.page === "settings"
-      ? "popup-dist/index.html"
-      : null;
+    : request.page === "team"
+      ? "popup-dist/team.html"
+      : request.page === "settings"
+        ? "popup-dist/index.html"
+        : null;
   if (!extensionPage) {
     sendResponse({ success: false, error: "Onbekende Eduarte Tools-pagina." });
     return;

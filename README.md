@@ -25,6 +25,12 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   extensiepagina, niet naar een server gestuurd en niet bewaard. De
   3D-packanimatie is met toestemming aangepast van Magister Ultimate Team
   v6.10.2.3.
+- **Eduarte Team** — kaarten die je uit packs onthult worden lokaal verzameld
+  (rarity en rating uit je echte cijfer). Stel een team van 5 samen, krijg
+  teamchemie via vakgroepen (bijv. Engels + Duits), speel een penalty-minigame
+  en kies seizoensthema's. Geluidseffecten worden ter plekke gesynthetiseerd;
+  er is geen muziek en er worden geen gegevens verstuurd. Geïnspireerd op
+  Magister Ultimate Team, met toestemming van de maker.
 - **Material 3 Expressive-contextmenu** — rechtsklik op een lege plek op een
   Eduarte-pagina om Eduarte Tools of de pack-opening direct te openen. In
   invoervelden, op links en bij geselecteerde tekst blijft het browsermenu
