@@ -30,27 +30,29 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 - **Material 3 Expressive-contextmenu** — rechtsklik op een lege plek op een
   Eduarte-pagina om Eduarte Tools of de pack-opening direct te openen. In
   invoervelden, op links en bij geselecteerde tekst blijft het browsermenu
-  beschikbaar.
+  beschikbaar. Het menu kan in de thema-instellingen worden uitgeschakeld.
 - De interface gebruikt Google's officiële
   [Material Web Components](https://material-web.dev/) voor Material 3-
   bedieningselementen, gecombineerd met Material 3 Expressive-kleur-, vorm- en
   bewegingstokens.
 - **Start Dashboard Weer- & Begroeting Widget** — live temperatuur, weersicoon,
-  neerslagkans en tijdgebonden begroeting direct op je Eduarte startpagina.
+  neerslagkans en tijdgebonden begroeting direct op je Eduarte startpagina,
+  met een compacte studiequote en snelkoppelingenbalk.
   Kies eenmaal **Gebruik huidige locatie** in de extensie; het weer wordt daarna
   automatisch voor je huidige locatie geladen, iedere 15 minuten vernieuwd en
   direct aangepast wanneer je locatie verandert. Een plaatsnaam blijft
   beschikbaar als alternatief.
 - **Uitgebreide Thema Presets** — kies direct uit Donker, Blauw, Paars, Smaragd,
-  Sunset, OLED Zwart, Nord, Cyberpunk of Licht.
+  Portal Glow, Sunset, OLED Zwart, Nord, Cyberpunk of Licht. Portal Glow heeft
+  een diepblauwe achtergrond met heldere blauwe accenten en glasachtige,
+  afgeronde Eduarte-panelen. De afgeronde portaalstijl wordt standaard bij elk
+  thema gebruikt en kan onafhankelijk in de instellingen worden uitgeschakeld.
 - **Eigen achtergrond & Glassmorphism** — stel je eigen wallpaper URL in met
   aanpasbare achtergrondvervaging (blur) en overlay-intensiteit.
 - **Typografie / Lettertypen** — kies uit strakke fonts zoals Inter, Roboto, Poppins,
   Lexend of JetBrains Mono.
 - **Donkere modus & Accentkleuren** — herschrijft Eduarte's eigen CSS-tokens
   (`--color-bg`, `--color-text-primary`, ...) met dynamische accenten en custom CSS ondersteuning.
-- **"Human"-thema** — het iconische donkere glaseffect met achtergrondfoto,
-  geïnspireerd op Study Tools voor Magister (door Nick Verbruggen).
 - **Eigen thema** — kies 4 basiskleuren (achtergrond, oppervlak, tekst,
   randen); de rest wordt automatisch afgeleid.
 - **Huiswerk & Deadlines Widget** — houd zelf je huiswerk en deadlines bij

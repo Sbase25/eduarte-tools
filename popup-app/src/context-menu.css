@@ -4,78 +4,117 @@
   z-index: 2147483647;
   inset: 0;
   pointer-events: none;
+  color-scheme: light dark;
   font-family: Roboto, "Noto Sans", system-ui, sans-serif;
 
-  --md-sys-color-primary: #6750a4;
-  --md-sys-color-on-primary: #fff;
-  --md-sys-color-secondary: #625b71;
-  --md-sys-color-on-secondary: #fff;
-  --md-sys-color-secondary-container: #e8def8;
-  --md-sys-color-on-secondary-container: #1d192b;
-  --md-sys-color-surface: #f7f2fa;
-  --md-sys-color-surface-container: #f0eaf4;
-  --md-sys-color-surface-container-high: #ece6f0;
-  --md-sys-color-on-surface: #211a26;
-  --md-sys-color-on-surface-variant: #625a69;
-  --md-sys-color-outline: #7a7182;
-  --md-ref-typeface-brand: Roboto, "Noto Sans", system-ui, sans-serif;
-  --md-ref-typeface-plain: Roboto, "Noto Sans", system-ui, sans-serif;
-  --md-menu-container-shape: 24px;
-  --md-menu-item-container-shape: 18px;
-  --md-menu-container-color: var(--md-sys-color-surface-container);
+  --menu-primary: #6750a4;
+  --menu-surface: #f7f2fa;
+  --menu-surface-container: #f0eaf4;
+  --menu-text: #211a26;
+  --menu-text-secondary: #625a69;
+  --menu-outline: rgba(98, 90, 105, .2);
 }
 
-#eduarte-tools-context-menu .menu-anchor {
-  position: fixed;
-  z-index: -1;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
+#eduarte-tools-context-menu *,
+#eduarte-tools-context-menu *::before,
+#eduarte-tools-context-menu *::after {
+  box-sizing: border-box;
 }
 
 #eduarte-tools-context-menu .expressive-menu {
+  position: fixed;
+  display: grid;
+  width: min(320px, calc(100vw - 16px));
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid var(--menu-outline);
+  border-radius: 24px;
+  background: var(--menu-surface-container);
+  color: var(--menu-text);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .28), 0 2px 8px rgba(0, 0, 0, .16);
   pointer-events: auto;
-  --md-menu-item-one-line-container-height: 64px;
-  --md-menu-item-label-text-font: var(--md-ref-typeface-plain);
-  --md-menu-item-supporting-text-font: var(--md-ref-typeface-plain);
-  --md-menu-item-leading-icon-color: var(--md-sys-color-primary);
+  animation: eduarte-menu-enter 120ms cubic-bezier(.2, 0, 0, 1) both;
 }
 
 #eduarte-tools-context-menu .menu-heading {
-  padding: 8px 16px 4px;
-  color: var(--md-sys-color-on-surface-variant);
+  padding: 8px 12px 6px;
+  color: var(--menu-text-secondary);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: .12em;
 }
 
-#eduarte-tools-context-menu md-menu-item svg {
+#eduarte-tools-context-menu .menu-item {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  min-height: 60px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#eduarte-tools-context-menu .menu-item:hover,
+#eduarte-tools-context-menu .menu-item:focus-visible {
+  background: color-mix(in srgb, var(--menu-primary) 12%, transparent);
+}
+
+#eduarte-tools-context-menu .menu-item:focus-visible {
+  outline: 2px solid var(--menu-primary);
+  outline-offset: -2px;
+}
+
+#eduarte-tools-context-menu .menu-icon {
+  flex: 0 0 20px;
   width: 20px;
   height: 20px;
-  fill: currentColor;
+  fill: var(--menu-primary);
+}
+
+#eduarte-tools-context-menu .menu-item-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+#eduarte-tools-context-menu .menu-item-label {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+#eduarte-tools-context-menu .menu-item-description {
+  color: var(--menu-text-secondary);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@keyframes eduarte-menu-enter {
+  from { opacity: 0; transform: scale(.96); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @media (prefers-color-scheme: dark) {
   #eduarte-tools-context-menu {
-    --md-sys-color-primary: #d0bcff;
-    --md-sys-color-on-primary: #381e72;
-    --md-sys-color-secondary: #ccc2dc;
-    --md-sys-color-on-secondary: #332d41;
-    --md-sys-color-secondary-container: #4a4458;
-    --md-sys-color-on-secondary-container: #e8def8;
-    --md-sys-color-surface: #141218;
-    --md-sys-color-surface-container: #211e26;
-    --md-sys-color-surface-container-high: #2b2630;
-    --md-sys-color-on-surface: #e9e0ed;
-    --md-sys-color-on-surface-variant: #c9bfce;
-    --md-sys-color-outline: #938a99;
+    --menu-primary: #d0bcff;
+    --menu-surface: #141218;
+    --menu-surface-container: #211e26;
+    --menu-text: #e9e0ed;
+    --menu-text-secondary: #c9bfce;
+    --menu-outline: rgba(201, 191, 206, .2);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #eduarte-tools-context-menu *,
   #eduarte-tools-context-menu *::before,
-  #eduarte-tools-context-menu *::after {
+  #eduarte-tools-context-menu *::after,
+  #eduarte-tools-context-menu * {
     animation-duration: 1ms !important;
     transition-duration: 1ms !important;
   }

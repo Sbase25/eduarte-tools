@@ -21,6 +21,14 @@
       text: "#f0f9ff",
       border: "#1e3a5f",
     },
+    portal: {
+      dark: true,
+      accent: "#3478ff",
+      bg: "#080d22",
+      surface: "#111a36",
+      text: "#f3f6ff",
+      border: "#29365f",
+    },
     purple: {
       dark: true,
       accent: "#c084fc",
@@ -455,6 +463,18 @@
       outline-offset: -2px !important;
     }
 
+    fieldset {
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
+      border-radius: 16px;
+    }
+
+    legend {
+      max-width: 100%;
+      padding-inline: 6px;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
@@ -497,6 +517,357 @@
       backdrop-filter: blur(${Math.max(6, Math.round(blur * 0.75))}px) !important;
       -webkit-backdrop-filter: blur(${Math.max(6, Math.round(blur * 0.75))}px) !important;
       border: 1px solid rgba(255,255,255,.12) !important;
+    }
+    `;
+  }
+
+  function buildPortalLayoutCSS(s) {
+    const bg = s.bg || "#080d22";
+    const accent = s.accent || "#3478ff";
+    const surface = s.surface || "#111a36";
+    const text = s.text || "#f3f6ff";
+    const border = s.border || "#29365f";
+    return `
+    header.header:has(> .header-tabs) {
+      display: flex !important;
+      flex-direction: column !important;
+      width: auto !important;
+      min-height: 0 !important;
+      gap: 0 !important;
+      overflow: hidden !important;
+      border: 1px solid color-mix(in srgb, ${border} 72%, ${text} 28%) !important;
+      border-radius: 24px !important;
+      background: linear-gradient(110deg,
+        color-mix(in srgb, ${surface} 92%, ${accent} 8%),
+        ${surface}) !important;
+      box-shadow: 0 14px 40px rgba(2,7,28,.2), inset 0 1px rgba(255,255,255,.06) !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-toolbar {
+      display: flex !important;
+      align-items: center !important;
+      flex: 0 0 auto !important;
+      min-height: 68px !important;
+      margin: 0 !important;
+      padding: 0 20px !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: linear-gradient(110deg,
+        color-mix(in srgb, ${surface} 92%, ${accent} 8%),
+        ${surface}) !important;
+      box-shadow: none !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      flex: 0 0 auto !important;
+      min-height: 64px !important;
+      margin: 0 !important;
+      padding: 6px 12px 0 !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      border: 0 !important;
+      border-top: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      border-radius: 0 !important;
+      background: linear-gradient(110deg,
+        color-mix(in srgb, ${surface} 91%, ${accent} 9%),
+        color-mix(in srgb, ${surface} 97%, ${accent} 3%)) !important;
+      box-shadow: none !important;
+      scrollbar-width: thin !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      max-width: none !important;
+      box-sizing: border-box !important;
+      min-height: 58px !important;
+      gap: 6px !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      list-style: none !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li {
+      display: flex !important;
+      flex: 1 1 0 !important;
+      max-width: 220px !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+      align-items: stretch !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      list-style: none !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li:not(:has(> a)) {
+      display: none !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li > a {
+      display: inline-flex !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      flex: 1 1 auto !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: 58px !important;
+      margin: 0 !important;
+      padding: 0 10px !important;
+      border: 0 !important;
+      border-radius: 14px 14px 0 0 !important;
+      background: transparent !important;
+      color: color-mix(in srgb, ${text} 78%, transparent) !important;
+      font-weight: 600 !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+      transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li > a:hover {
+      background: color-mix(in srgb, ${accent} 14%, transparent) !important;
+      color: ${text} !important;
+    }
+
+    @media (max-width: 700px) {
+      header.header:has(> .header-tabs) > .header-tabs > ul > li {
+        flex-basis: 45% !important;
+        max-width: none !important;
+      }
+    }
+
+    @media (max-width: 420px) {
+      header.header:has(> .header-tabs) > .header-tabs > ul > li {
+        flex-basis: 100% !important;
+      }
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li.is-selected > a {
+      border: 0 !important;
+      border-radius: 14px 14px 0 0 !important;
+      background: linear-gradient(180deg,
+        color-mix(in srgb, ${accent} 28%, ${surface}),
+        color-mix(in srgb, ${accent} 17%, ${surface})) !important;
+      box-shadow: inset 0 1px rgba(255,255,255,.12), inset 0 -3px ${accent} !important;
+      color: ${text} !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs--toggle {
+      display: none !important;
+    }
+
+    .result-overview--table {
+      overflow: hidden !important;
+      border: 1px solid color-mix(in srgb, ${border} 75%, ${text} 25%) !important;
+      border-radius: 18px !important;
+      border-collapse: separate !important;
+      border-spacing: 0 !important;
+      background: color-mix(in srgb, ${surface} 96%, ${accent} 4%) !important;
+      box-shadow: 0 8px 26px rgba(2,7,28,.16) !important;
+    }
+
+    .result-overview--table > thead > tr > th {
+      padding: 14px 16px !important;
+      border-bottom: 1px solid color-mix(in srgb, ${border} 82%, transparent) !important;
+      background: color-mix(in srgb, ${surface} 86%, ${accent} 14%) !important;
+      color: ${text} !important;
+      font-weight: 700 !important;
+    }
+
+    .result-overview--table > tbody > tr > td {
+      padding: 13px 16px !important;
+      border-bottom: 1px solid color-mix(in srgb, ${border} 76%, transparent) !important;
+      background: color-mix(in srgb, ${surface} 97%, ${bg}) !important;
+      color: ${text} !important;
+      transition: background-color 160ms ease !important;
+    }
+
+    .result-overview--table > tbody > tr:nth-child(even) > td {
+      background: color-mix(in srgb, ${surface} 90%, ${accent} 10%) !important;
+    }
+
+    .result-overview--table > tbody > tr:hover > td {
+      background: color-mix(in srgb, ${surface} 78%, ${accent} 22%) !important;
+    }
+
+    .result-overview--table > tbody > tr:last-child > td {
+      border-bottom: 0 !important;
+    }
+
+    nav.navigation,
+    nav.navigation.navigation--student,
+    .sidebar {
+      box-sizing: border-box !important;
+      height: calc(100vh - 24px) !important;
+      margin: 12px 0 12px 12px !important;
+      overflow: hidden !important;
+      border: 1px solid color-mix(in srgb, ${border} 72%, ${text} 28%) !important;
+      border-radius: 26px !important;
+      background: linear-gradient(155deg,
+        color-mix(in srgb, ${surface} 95%, ${accent} 5%),
+        color-mix(in srgb, ${surface} 98%, ${text} 2%)) !important;
+      box-shadow: 0 18px 50px rgba(2,7,28,.32), inset 0 1px rgba(255,255,255,.07) !important;
+      backdrop-filter: blur(20px) saturate(140%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+    }
+
+    header.header,
+    .header,
+    .header-wrapper,
+    .app-header,
+    .page-header {
+      box-sizing: border-box !important;
+      min-height: 68px !important;
+      margin: 12px 12px 0 0 !important;
+      border: 1px solid color-mix(in srgb, ${border} 72%, ${text} 28%) !important;
+      border-radius: 24px !important;
+      background: linear-gradient(110deg,
+        color-mix(in srgb, ${surface} 95%, ${accent} 5%),
+        color-mix(in srgb, ${surface} 98%, ${text} 2%)) !important;
+      box-shadow: 0 14px 40px rgba(2,7,28,.2), inset 0 1px rgba(255,255,255,.06) !important;
+      backdrop-filter: blur(20px) saturate(135%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(135%) !important;
+    }
+
+    header.header .header-toolbar,
+    .header .header-toolbar,
+    .header-toolbar,
+    .header-top {
+      margin: 0 !important;
+      border: 0 !important;
+      border-radius: inherit !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    nav.navigation.navigation--student a {
+      min-height: 46px !important;
+      margin: 3px 8px !important;
+      padding-inline: 14px !important;
+      border: 1px solid transparent !important;
+      border-radius: 999px !important;
+      color: color-mix(in srgb, ${text} 82%, transparent) !important;
+      transition: background 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 3px !important;
+      padding: 10px 8px !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a {
+      min-height: 48px !important;
+      margin: 0 2px !important;
+      background: transparent !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a .icon,
+    nav.navigation.navigation--student .navigation-items--main > li > a > svg,
+    nav.navigation.navigation--student .navigation-items--main > li > a > i {
+      color: var(--portal-nav-icon-color, #b9c9ee) !important;
+      filter: drop-shadow(0 1px 5px color-mix(in srgb, currentColor 32%, transparent));
+      transition: color 180ms ease, transform 180ms ease, filter 180ms ease;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li:nth-child(1) > a { --portal-nav-icon-color: color-mix(in srgb, ${accent}, #9db8ff 55%); }
+    nav.navigation.navigation--student .navigation-items--main > li:nth-child(2) > a { --portal-nav-icon-color: color-mix(in srgb, ${accent}, #8bc9ff 55%); }
+    nav.navigation.navigation--student .navigation-items--main > li:nth-child(3) > a { --portal-nav-icon-color: color-mix(in srgb, ${accent}, #a7b5ff 55%); }
+    nav.navigation.navigation--student .navigation-items--main > li:nth-child(4) > a { --portal-nav-icon-color: color-mix(in srgb, ${accent}, #83b9ff 55%); }
+    nav.navigation.navigation--student .navigation-items--main > li:nth-child(5) > a { --portal-nav-icon-color: color-mix(in srgb, ${accent}, #9aabff 55%); }
+    nav.navigation.navigation--student .navigation-items--main > li:nth-child(6) > a { --portal-nav-icon-color: color-mix(in srgb, ${accent}, #b7a4ff 55%); }
+    nav.navigation.navigation--student .navigation-items--main > li:nth-child(7) > a { --portal-nav-icon-color: color-mix(in srgb, ${accent}, #83c8ff 55%); }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a:hover {
+      transform: translateX(2px);
+      border-color: color-mix(in srgb, ${accent} 24%, transparent) !important;
+      background: color-mix(in srgb, ${accent} 16%, transparent) !important;
+      color: #fff !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a,
+    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] {
+      border: 1px solid color-mix(in srgb, ${accent} 55%, ${text} 45%) !important;
+      background: linear-gradient(105deg,
+        color-mix(in srgb, ${accent} 76%, #1756d9 24%),
+        color-mix(in srgb, ${accent} 82%, #536cff 18%)) !important;
+      box-shadow: 0 7px 22px color-mix(in srgb, ${accent} 34%, transparent), inset 0 1px rgba(255,255,255,.22) !important;
+      color: #fff !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a .icon,
+    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] .icon,
+    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a > svg,
+    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] > svg,
+    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a > i,
+    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] > i {
+      transform: scale(1.06);
+      color: #fff !important;
+      filter: drop-shadow(0 1px 7px rgba(255,255,255,.3));
+    }
+
+    nav.navigation.navigation--student > :is(.navigation-header, .navigation-brand, .logo),
+    nav.navigation.navigation--student .navigation-header,
+    nav.navigation.navigation--student .navigation-brand {
+      border-bottom: 1px solid color-mix(in srgb, ${border} 75%, transparent) !important;
+    }
+
+    nav.navigation.navigation--student .navigation-header img,
+    nav.navigation.navigation--student .navigation-brand img,
+    nav.navigation.navigation--student .navigation-header svg,
+    nav.navigation.navigation--student .navigation-brand svg {
+      filter: drop-shadow(0 0 8px color-mix(in srgb, ${accent} 42%, transparent));
+    }
+
+    .card,
+    .container-card,
+    .container-studiewijzer,
+    .agenda-filter,
+    .agenda--day,
+    .agenda--day li,
+    .result-overview,
+    .panel,
+    .box {
+      border-color: color-mix(in srgb, ${border} 78%, ${text} 22%) !important;
+      background: linear-gradient(145deg,
+        color-mix(in srgb, ${surface} 96%, ${accent} 4%),
+        color-mix(in srgb, ${surface} 99%, ${text} 1%)) !important;
+      box-shadow: 0 12px 32px rgba(2,7,28,.16), inset 0 1px rgba(255,255,255,.035) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+    }
+    `;
+  }
+
+  function buildPortalGlowCSS() {
+    return `
+    html {
+      min-height: 100%;
+      background-color: #080d22 !important;
+      background-image:
+        radial-gradient(ellipse 42% 42% at 100% 0%, rgba(43,111,255,.92) 0%, rgba(37,76,227,.66) 46%, transparent 100%),
+        radial-gradient(ellipse 44% 42% at 0% 100%, rgba(31,83,225,.9) 0%, rgba(31,64,174,.58) 52%, transparent 100%),
+        radial-gradient(ellipse 34% 30% at 102% 100%, rgba(111,75,255,.58), transparent 100%),
+        linear-gradient(135deg, #101a44 0%, #080d22 48%, #111944 100%) !important;
+      background-attachment: fixed !important;
+      background-size: cover !important;
+    }
+
+    body, .l-container, .l-flex-content, .content-wrapper, .content, main, .main-content {
+      background-color: transparent !important;
     }
     `;
   }
@@ -554,6 +925,20 @@
       css += buildWallpaperCSS(url, s.wallpaperBlur ?? 12, s.wallpaperOverlay ?? 55, effectiveAccent);
     }
 
+    if (s.portalLayout !== false) {
+      css += buildPortalLayoutCSS({
+        accent: effectiveAccent,
+        bg: effectiveBg,
+        surface: effectiveSurface,
+        text: effectiveText,
+        border: effectiveBorder,
+      });
+    }
+
+    if (presetKey === "portal" && !useCustom && !hasWallpaper) {
+      css += buildPortalGlowCSS();
+    }
+
     return css;
   }
 
@@ -607,6 +992,7 @@
         "eduarteModernNav",
         "eduarteAnimations",
         "eduarteFloatingCards",
+        "eduartePortalLayoutEnabled",
       ],
       (data) => {
         applyTheme({
@@ -621,6 +1007,7 @@
           font: data.eduarteFont || "default",
           customEnabled: !!data.eduarteCustomTheme,
           custom: data.eduarteCustomColors || null,
+          portalLayout: data.eduartePortalLayoutEnabled !== false,
         });
       }
     );
@@ -645,6 +1032,7 @@
       changes.eduarteModernNav ||
       changes.eduarteAnimations ||
       changes.eduarteFloatingCards
+      || changes.eduartePortalLayoutEnabled
     ) {
       loadAndApply();
     }

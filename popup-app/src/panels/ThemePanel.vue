@@ -33,7 +33,8 @@ function applyPreset(preset) {
   <div class="section-label">Uiterlijk</div>
   <SwitchInput v-model="s.eduarteDarkMode" title="Donkere modus" subtitle="Gebruik een donker kleurenpalet voor Eduarte." />
   <SwitchInput v-model="s.eduarteModernStyle" title="Material 3-stijl" subtitle="Material 3-kleuren, expressieve vormen en rustige animaties op Eduarte." />
-  <SwitchInput v-model="s.eduarteHumanTheme" title="Human-thema" subtitle="Origineel Study Tools glas-effect met achtergrond." />
+  <SwitchInput v-model="s.eduartePortalLayoutEnabled" title="Afgeronde portaalstijl" subtitle="Gebruik de afgeronde navigatie en glasachtige panelen bij elk thema." />
+  <SwitchInput v-model="s.eduarteContextMenuEnabled" title="Eduarte Tools-contextmenu" subtitle="Toon het eigen contextmenu bij rechtsklikken op lege ruimte in Eduarte." />
 
   <div class="section-label">Accentkleur</div>
   <ColorSwatches v-model="s.eduarteAccentColor" />
