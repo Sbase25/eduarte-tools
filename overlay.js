@@ -294,6 +294,13 @@
               }
               .et-home-toolbar .et-shortcut-btn span { font-size: 12px; }
               .et-home-empty-title { display: none !important; }
+              @media (min-width: 768px) {
+                header.header:has(.et-home-toolbar) {
+                  box-sizing: border-box !important;
+                  width: calc(100% - 16px) !important;
+                  margin-left: 16px !important;
+                }
+              }
               header.header .header-toolbar:has(.et-home-toolbar) {
                 position: relative !important;
                 display: flex !important;
