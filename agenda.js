@@ -276,6 +276,16 @@
     });
   }
 
+  // Net een agenda-link gemaakt terwijl Eduarte al open stond: meteen de week versturen
+  function syncWhenLinkCreated(doc) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      const change = changes.eduarteCalendarFeed;
+      if (area !== "local" || !change?.newValue || change.oldValue?.id === change.newValue.id) return;
+      const week = /^\/agenda/i.test(location.pathname) ? Promise.resolve(getWeekLessons(doc)) : fetchAgendaDocument().then(getWeekLessons);
+      week.then(sendWeekToCalendar).catch(() => {});
+    });
+  }
+
   // Maakt het weekrooster compacter (64px per uur) en zet korte lesnamen + tijden in de blokken
   function enhanceAgenda(doc) {
     const agenda = doc.querySelector(".agenda");
@@ -347,6 +357,7 @@
       new MutationObserver(() => addCalendarButtons(document)).observe(document.body, { childList: true, subtree: true });
     });
     autoSync(document);
+    syncWhenLinkCreated(document);
   }
 
   return {
