@@ -19,7 +19,8 @@
   "permissions": [
     "storage",
     "geolocation",
-    "offscreen"
+    "offscreen",
+    "identity"
   ],
   "background": {
     "service_worker": "background.js"
@@ -45,7 +46,8 @@
     "https://nominatim.openstreetmap.org/*",
     "https://*.microsoftonline.com/*",
     "https://login.microsoft.com/*",
-    "https://login.live.com/*"
+    "https://login.live.com/*",
+    "https://graph.microsoft.com/*"
   ],
   "content_scripts": [
     {

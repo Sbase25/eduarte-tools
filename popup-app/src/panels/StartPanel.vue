@@ -3,6 +3,7 @@ import { ref } from "vue";
 import SwitchInput from "../components/SwitchInput.vue";
 import MaterialTextField from "../components/MaterialTextField.vue";
 import MaterialSlider from "../components/MaterialSlider.vue";
+import OutlookSync from "../components/OutlookSync.vue";
 
 const props = defineProps(["state"]);
 const s = props.state;
@@ -62,12 +63,15 @@ function useCurrentLocation() {
   <SwitchInput v-model="s.eduarteGreetingEnabled" title="Persoonlijke Begroeting & Datum" subtitle="Toon een groet (bijv. Goedemorgen) en de datum bovenaan." />
   <SwitchInput v-model="s.eduarteShortcutsEnabled" title="Snelkoppelingen (Quick Links)" subtitle="Knoppen naar Teams, Outlook Webmail, OneDrive, Office 365 en Cijfers." />
   <SwitchInput v-model="s.eduartePomodoroEnabled" title="Pomodoro Focus Timer" subtitle="Interactieve studie- en pauzetimer (25m focus, 5m pauze) op je dashboard." />
+  <SwitchInput v-model="s.eduarteTodayEnabled" title="Vandaag & Nu bezig" subtitle="Je huidige les met voortgang en een tijdlijn van de lessen van vandaag." />
+  <SwitchInput v-model="s.eduarteCompactAgenda" title="Compacte agenda" subtitle="Hele week op één scherm, korte lesnamen en een kleur per vak." />
   <SwitchInput v-model="s.eduarteQuickCalcEnabled" title="Snelle Cijfercalculator Widget" subtitle="Bereken direct op je dashboard welk cijfer je nodig hebt voor een streefgemiddelde." />
   <div class="setting">
     <h3 class="setting-title">Kaartanimatie Intensiteit</h3>
     <MaterialSlider v-model="s.eduarteAnimationSpeed" min="0" max="100" label="Animatie-snelheid" />
     <div class="range-value">Animatie-snelheid</div>
   </div>
+  <OutlookSync :state="s" />
 </template>
 
 <style scoped>

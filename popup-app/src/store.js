@@ -16,6 +16,7 @@ const KEYS = [
   "eduarteAnimationSpeed", "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum",
   "eduartePassThreshold", "eduarteShortcutKeysEnabled", "eduarteShortcuts", "eduarteBadgeEnabled",
   "eduartePortalLayoutEnabled", "eduarteContextMenuEnabled",
+  "eduarteTodayEnabled", "eduarteCompactAgenda", "eduarteOutlookClientId",
 ];
 
 const DEFAULTS = {
@@ -60,6 +61,9 @@ const DEFAULTS = {
   eduarteBadgeEnabled: true,
   eduartePortalLayoutEnabled: true,
   eduarteContextMenuEnabled: true,
+  eduarteTodayEnabled: true,
+  eduarteCompactAgenda: true,
+  eduarteOutlookClientId: "",
 };
 
 const hasChrome = typeof chrome !== "undefined" && chrome.storage && chrome.storage.local;

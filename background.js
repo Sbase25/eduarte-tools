@@ -1,3 +1,6 @@
+// Firefox laadt outlook-sync.js via manifest.background.scripts; Chrome via importScripts
+if (typeof importScripts === "function" && !globalThis.EduarteOutlook) importScripts("outlook-sync.js");
+
 const LOCATION_TRACKER_DOCUMENT = "location-tracker.html";
 const PACK_GRADE_CACHE_KEY = "eduartePackGradeCache";
 
@@ -12,6 +15,53 @@ function isEduarteTab(tab) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request?.type === "OUTLOOK_SYNC_WEEK") {
+    if (!sender.tab || !isEduarteTab(sender.tab)) {
+      sendResponse({ success: false, error: "Het rooster kan alleen vanaf een Eduarte-pagina worden gesynchroniseerd." });
+      return;
+    }
+    chrome.storage.local.get(["eduarteOutlookSync"], (s) => {
+      if (!s.eduarteOutlookSync) {
+        sendResponse({ success: false, error: "Koppel eerst Outlook via Eduarte Tools → Startpagina." });
+        return;
+      }
+      const week = request.week || {};
+      const lessons = (Array.isArray(week.lessons) ? week.lessons : [])
+        .filter((l) => l && !Number.isNaN(Date.parse(l.start)) && !Number.isNaN(Date.parse(l.end)))
+        .slice(0, 200)
+        .map((l) => ({
+          title: String(l.title || "Les").slice(0, 120),
+          subject: String(l.subject || "").slice(0, 300),
+          location: String(l.location || "").slice(0, 120),
+          participants: String(l.participants || "").slice(0, 160),
+          start: new Date(l.start).toISOString(),
+          end: new Date(l.end).toISOString(),
+        }));
+      if (Number.isNaN(Date.parse(week.from)) || Number.isNaN(Date.parse(week.to))) {
+        sendResponse({ success: false, error: "Ongeldige week." });
+        return;
+      }
+      globalThis.EduarteOutlook.syncWeek({ from: new Date(week.from).toISOString(), to: new Date(week.to).toISOString(), lessons })
+        .then(sendResponse);
+    });
+    return true;
+  }
+
+  if (request?.type === "OUTLOOK_CONNECT" || request?.type === "OUTLOOK_DISCONNECT") {
+    if (!sender.url?.startsWith(chrome.runtime.getURL(""))) {
+      sendResponse({ success: false, error: "Deze actie is alleen beschikbaar vanuit Eduarte Tools." });
+      return;
+    }
+    const action = request.type === "OUTLOOK_CONNECT" ? globalThis.EduarteOutlook.connect : globalThis.EduarteOutlook.disconnect;
+    action().then(sendResponse, (error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+
+  if (request?.type === "OUTLOOK_REDIRECT_URL") {
+    sendResponse({ success: true, url: globalThis.EduarteOutlook.redirectUrl() });
+    return;
+  }
+
   if (request?.type === "CACHE_EDUARTE_GRADES") {
     if (!sender.tab || !isEduarteTab(sender.tab)) {
       sendResponse({ success: false, error: "Cijfers kunnen alleen vanaf een Eduarte-pagina worden opgeslagen." });
