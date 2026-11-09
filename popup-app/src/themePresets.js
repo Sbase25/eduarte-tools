@@ -1,4 +1,5 @@
 export const presets = [
+  { key: "graphite", name: "Grafiet", dark: true, accent: "#ff7a59", bg: "#0c0e13", surface: "#14171f", text: "#eceef3", border: "#252a37" },
   { key: "dark", name: "Donker", dark: true, accent: "#3b82f6", bg: "#111827", surface: "#1f2937", text: "#f9fafb", border: "#374151" },
   { key: "blue", name: "Blauw", dark: true, accent: "#38bdf8", bg: "#0b192c", surface: "#13253f", text: "#f0f9ff", border: "#1e3a5f" },
   { key: "portal", name: "Portal Glow", dark: true, accent: "#3478ff", bg: "#080d22", surface: "#111a36", text: "#f3f6ff", border: "#29365f" },

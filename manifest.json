@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Eduarte Tools",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Automatisch inloggen, donkere modus, thema's en een cijfercalculator voor Eduarte-portalen. Geïnspireerd door Study Tools.",
   "icons": {
     "16": "icons/icon16.png",
@@ -45,7 +45,8 @@
     "https://nominatim.openstreetmap.org/*",
     "https://*.microsoftonline.com/*",
     "https://login.microsoft.com/*",
-    "https://login.live.com/*"
+    "https://login.live.com/*",
+    "https://eduarte-agenda.sbaselmans1.workers.dev/*"
   ],
   "content_scripts": [
     {
@@ -59,6 +60,7 @@
       "js": [
         "eduarte-api.js",
         "grade-calculator.js",
+        "agenda.js",
         "overlay.js",
         "badge-logic.js",
         "badge.js",

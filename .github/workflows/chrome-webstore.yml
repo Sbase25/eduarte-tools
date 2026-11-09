@@ -11,6 +11,8 @@ on:
       - "content.js"
       - "eduarte-api.js"
       - "grade-calculator.js"
+      - "agenda.js"
+      - "calendar-feed.js"
       - "overlay.js"
       - "location-tracker.html"
       - "location-tracker.js"
@@ -64,7 +66,7 @@ jobs:
           set -euo pipefail
           rm -rf extension-package extension.zip
           mkdir -p extension-package
-          cp manifest.json background.js badge-logic.js badge.js content.js eduarte-api.js grade-calculator.js overlay.js theme.js location-tracker.html location-tracker.js extension-package/
+          cp manifest.json background.js badge-logic.js badge.js content.js eduarte-api.js grade-calculator.js agenda.js calendar-feed.js overlay.js theme.js location-tracker.html location-tracker.js extension-package/
           cp -R icons assets popup-dist extension-package/
           python3 - <<'PY'
           import json
@@ -80,6 +82,8 @@ jobs:
           worker = manifest.get("background", {}).get("service_worker")
           if worker:
               referenced.append(worker)
+              # background.js laadt calendar-feed.js via importScripts
+              referenced.append("calendar-feed.js")
           for resource in manifest.get("web_accessible_resources", []):
               referenced.extend(resource.get("resources", []))
           for script in manifest.get("content_scripts", []):

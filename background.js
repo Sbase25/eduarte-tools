@@ -1,3 +1,6 @@
+// Firefox laadt calendar-feed.js via manifest.background.scripts; Chrome via importScripts
+if (typeof importScripts === "function" && !globalThis.EduarteCalendar) importScripts("calendar-feed.js");
+
 const LOCATION_TRACKER_DOCUMENT = "location-tracker.html";
 const PACK_GRADE_CACHE_KEY = "eduartePackGradeCache";
 
@@ -12,6 +15,25 @@ function isEduarteTab(tab) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request?.type === "CALENDAR_SYNC_WEEK") {
+    if (!sender.tab || !isEduarteTab(sender.tab)) {
+      sendResponse({ success: false, error: "Het rooster kan alleen vanaf een Eduarte-pagina worden gesynchroniseerd." });
+      return;
+    }
+    globalThis.EduarteCalendar.syncWeek(request.week || {}).then(sendResponse);
+    return true;
+  }
+
+  if (request?.type === "CALENDAR_CREATE" || request?.type === "CALENDAR_DELETE") {
+    if (!sender.url?.startsWith(chrome.runtime.getURL(""))) {
+      sendResponse({ success: false, error: "Deze actie is alleen beschikbaar vanuit Eduarte Tools." });
+      return;
+    }
+    const action = request.type === "CALENDAR_CREATE" ? globalThis.EduarteCalendar.create : globalThis.EduarteCalendar.remove;
+    action().then(sendResponse, (error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+
   if (request?.type === "CACHE_EDUARTE_GRADES") {
     if (!sender.tab || !isEduarteTab(sender.tab)) {
       sendResponse({ success: false, error: "Cijfers kunnen alleen vanaf een Eduarte-pagina worden opgeslagen." });

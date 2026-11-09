@@ -5,6 +5,14 @@
   const STYLE_ID = "eduarte-tools-theme-style";
 
   const PRESETS = {
+    graphite: {
+      dark: true,
+      accent: "#ff7a59",
+      bg: "#0c0e13",
+      surface: "#14171f",
+      text: "#eceef3",
+      border: "#252a37",
+    },
     dark: {
       dark: true,
       accent: "#3b82f6",
@@ -811,10 +819,7 @@
       min-width: 0 !important;
       box-sizing: border-box !important;
       padding-right: 12px !important;
-      background:
-        radial-gradient(ellipse at 92% 18%, rgba(38, 104, 255, .18), transparent 32%),
-        radial-gradient(ellipse at 70% 100%, rgba(132, 47, 255, .16), transparent 40%),
-        linear-gradient(145deg, #09133f 0%, #0b1647 48%, #111042 100%) !important;
+      background: ${bg} !important;
     }
 
     body:has(.agenda) .agenda-filter {
@@ -842,10 +847,8 @@
       overflow-x: auto !important;
       border: 1px solid color-mix(in srgb, ${border} 72%, ${text} 28%) !important;
       border-radius: 20px !important;
-      background:
-        radial-gradient(ellipse at 100% 0%, rgba(77, 89, 255, .24), transparent 52%),
-        linear-gradient(110deg, rgba(14, 25, 77, .94), rgba(11, 20, 59, .92)) !important;
-      box-shadow: 0 12px 30px rgba(2,7,28,.28), inset 0 1px rgba(255,255,255,.08) !important;
+      background: color-mix(in srgb, ${surface} 94%, transparent) !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25) !important;
       backdrop-filter: blur(18px) saturate(140%) !important;
       -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
     }
@@ -962,11 +965,9 @@
     }
 
     body:has(.agenda) .agenda-filter .popover-tabs li.is-selected {
-      background: linear-gradient(105deg,
-        color-mix(in srgb, ${accent} 82%, #2468ff 18%),
-        color-mix(in srgb, ${accent} 72%, #8154ed 28%)) !important;
+      background: ${accent} !important;
       color: #fff !important;
-      box-shadow: inset 0 1px rgba(255,255,255,.24), 0 4px 14px color-mix(in srgb, ${accent} 32%, transparent) !important;
+      box-shadow: none !important;
     }
 
     body:has(.agenda) .agenda-filter .popover-tabs li.is-selected a {
@@ -983,6 +984,10 @@
       accent-color: ${accent} !important;
     }
 
+    body:has(.agenda) .content:has(> .agenda-filter) {
+      padding-top: 106px !important;
+    }
+
     body:has(.agenda) .agenda {
       display: flex !important;
       align-items: stretch !important;
@@ -993,10 +998,8 @@
       overflow: hidden !important;
       border: 1px solid color-mix(in srgb, ${border} 72%, ${text} 28%) !important;
       border-radius: 26px !important;
-      background:
-        radial-gradient(ellipse at 100% 0%, rgba(47, 78, 223, .12), transparent 40%),
-        linear-gradient(145deg, rgba(9, 17, 54, .97), rgba(10, 15, 43, .96)) !important;
-      box-shadow: 0 20px 46px rgba(2,7,28,.3), inset 0 1px rgba(255,255,255,.07) !important;
+      background: ${surface} !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,.2) !important;
       backdrop-filter: blur(16px) saturate(135%) !important;
       -webkit-backdrop-filter: blur(16px) saturate(135%) !important;
     }
@@ -1006,11 +1009,11 @@
     }
 
     body:has(.agenda) .agenda--time {
-      flex: 0 0 76px !important;
-      width: 76px !important;
-      padding-top: 52px !important;
-      border-right: 1px solid color-mix(in srgb, ${border} 75%, transparent) !important;
-      background: linear-gradient(180deg, rgba(28, 38, 105, .72), rgba(16, 25, 76, .86)) !important;
+      flex: 0 0 58px !important;
+      width: 58px !important;
+      padding-top: 44px !important;
+      border-right: 1px solid color-mix(in srgb, ${border} 60%, transparent) !important;
+      background: transparent !important;
       text-align: center !important;
     }
 
@@ -1034,15 +1037,19 @@
 
     body:has(.agenda) .agenda--time li span {
       width: auto !important;
-      margin: 7px 0 0 !important;
-      padding: 8px 10px !important;
-      border: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
-      border-radius: 999px !important;
-      background: color-mix(in srgb, ${accent} 14%, ${surface}) !important;
-      color: ${text} !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      color: color-mix(in srgb, ${text} 62%, transparent) !important;
       font-size: 12px !important;
-      font-weight: 700 !important;
+      font-weight: 600 !important;
       font-variant-numeric: tabular-nums !important;
+      align-self: flex-start !important;
+      height: auto !important;
+      line-height: 1 !important;
+      transform: translateY(-6px) !important;
     }
 
     body:has(.agenda) .agenda--days {
@@ -1051,7 +1058,7 @@
       padding-top: 0 !important;
       overflow-x: auto !important;
       overflow-y: hidden !important;
-      background: linear-gradient(150deg, rgba(8, 15, 48, .82), rgba(12, 17, 54, .92)) !important;
+      background: transparent !important;
       scrollbar-color: color-mix(in srgb, ${accent} 62%, ${border}) transparent !important;
     }
 
@@ -1059,7 +1066,7 @@
       flex: 1 0 168px !important;
       min-width: 168px !important;
       border-right: 1px solid color-mix(in srgb, ${border} 76%, transparent) !important;
-      background: linear-gradient(180deg, rgba(50, 67, 151, .08), rgba(28, 35, 100, .03)) !important;
+      background: transparent !important;
     }
 
     body:has(.agenda) .agenda--day .lead {
@@ -1073,46 +1080,40 @@
       box-sizing: border-box !important;
       width: auto !important;
       min-width: 0 !important;
-      height: 52px !important;
-      margin: 0 1px !important;
+      height: 44px !important;
+      margin: 0 !important;
       padding: 0 8px !important;
-      border: 1px solid color-mix(in srgb, ${border} 75%, ${text} 25%) !important;
-      border-radius: 15px 15px 6px 6px !important;
-      background: linear-gradient(110deg, rgba(39, 55, 134, .88), rgba(33, 45, 114, .9)) !important;
-      color: ${text} !important;
-      font-size: 14px !important;
+      border: 0 !important;
+      border-bottom: 1px solid color-mix(in srgb, ${border} 60%, transparent) !important;
+      border-radius: 0 !important;
+      background: ${surface} !important;
+      color: color-mix(in srgb, ${text} 80%, transparent) !important;
+      font-size: 13px !important;
       font-weight: 700 !important;
       line-height: 1.2 !important;
       white-space: nowrap !important;
       text-transform: capitalize !important;
       visibility: visible !important;
       opacity: 1 !important;
-    } 75%, ${text} 25%) !important;
-      border-radius: 15px 15px 6px 6px !important;
-      background: linear-gradient(110deg, rgba(39, 55, 134, .88), rgba(33, 45, 114, .9)) !important;
-      color: ${text} !important;
+    }
+
+    /* Lege dagen (meestal het weekend) smaller maken zodat lesdagen meer ruimte krijgen */
+    body:has(.agenda) .agenda--day:not(:has(li.agenda--course, li.agenda--appointment, li.agenda--bpv)) {
+      flex: 0 0 72px !important;
+      min-width: 72px !important;
+    }
+
+    body:has(.agenda) .agenda--day:not(:has(li.agenda--course, li.agenda--appointment, li.agenda--bpv)) .lead {
+      opacity: .55 !important;
       font-size: 12px !important;
-      font-weight: 700 !important;
-      line-height: 42px !important;
-      text-transform: lowercase !important;
-    }
-
-    body:has(.agenda) .agenda--day:first-child .lead {
-      background: linear-gradient(110deg, #7437d1, #4f36bd) !important;
-      color: #fff !important;
-    }
-
-    body:has(.agenda) .agenda--day:last-child .lead {
-      background: linear-gradient(110deg, #345ce8, #273bc5) !important;
-      color: #fff !important;
+      white-space: normal !important;
+      text-align: center !important;
     }
 
     body:has(.agenda) .agenda--day.is-today .lead {
-      background: linear-gradient(105deg,
-        color-mix(in srgb, ${accent} 82%, #245fff 18%),
-        color-mix(in srgb, ${accent} 68%, #7044e8 32%)) !important;
-      color: #fff !important;
-      box-shadow: 0 4px 16px color-mix(in srgb, ${accent} 28%, transparent) !important;
+      background: color-mix(in srgb, ${accent} 14%, ${surface}) !important;
+      color: ${text} !important;
+      box-shadow: inset 0 -2px ${accent} !important;
     }
 
     body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
@@ -1137,27 +1138,40 @@
 
     body:has(.agenda) .agenda--day li.agenda--course > div {
       box-sizing: border-box !important;
-      padding: 10px 12px !important;
-      border: 1px solid color-mix(in srgb, ${accent} 58%, #d7c3ff 42%) !important;
-      border-left: 3px solid rgba(229, 222, 255, .76) !important;
-      border-radius: 16px !important;
-      background:
-        radial-gradient(ellipse at 100% 100%, rgba(52, 179, 255, .62), transparent 46%),
-        linear-gradient(145deg, #af7aff, #7550e8 72%, #5748d8) !important;
-      color: #fff !important;
-      box-shadow: inset 0 1px rgba(255,255,255,.28), 0 8px 18px rgba(3,8,35,.24) !important;
+      height: calc(100% - 3px) !important;
+      margin: 1px 3px 0 !important;
+      padding: 7px 9px !important;
+      overflow: hidden !important;
+      border: 1px solid color-mix(in srgb, var(--et-course, ${accent}) 30%, transparent) !important;
+      border-left: 3px solid var(--et-course, ${accent}) !important;
+      border-radius: 10px !important;
+      background: color-mix(in srgb, var(--et-course, ${accent}) 18%, ${surface}) !important;
+      color: ${text} !important;
+      box-shadow: 0 2px 6px rgba(3,8,35,.18) !important;
+      transition: background-color 150ms ease !important;
     }
 
-    body:has(.agenda) .agenda--day:nth-of-type(3) li.agenda--course:nth-child(odd) > div {
-      background:
-        radial-gradient(ellipse at 100% 100%, rgba(38, 192, 255, .56), transparent 48%),
-        linear-gradient(145deg, #82a6ff, #557af0 72%, #435ee0) !important;
+    body:has(.agenda) .agenda--day li.agenda--course:hover > div {
+      background: color-mix(in srgb, var(--et-course, ${accent}) 28%, ${surface}) !important;
     }
 
-    body:has(.agenda) .agenda--day:nth-of-type(3) li.agenda--course:nth-child(even) > div {
-      background:
-        radial-gradient(ellipse at 100% 100%, rgba(54, 195, 255, .5), transparent 48%),
-        linear-gradient(145deg, #c18bff, #875af0 72%, #6651dc) !important;
+    body:has(.agenda) .agenda--day li.agenda--course .is-subject {
+      display: -webkit-box !important;
+      -webkit-line-clamp: 1 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+      margin-bottom: 2px !important;
+      font-weight: 700 !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course .is-location,
+    body:has(.agenda) .agenda--day li.agenda--course .is-participant {
+      display: block !important;
+      overflow: hidden !important;
+      opacity: .78 !important;
+      font-size: 12px !important;
+      white-space: nowrap !important;
+      text-overflow: ellipsis !important;
     }
 
     body:has(.agenda) .agenda--day li.agenda--course span,
@@ -1165,7 +1179,7 @@
     body:has(.agenda) .agenda--day li.agenda--bpv span,
     body:has(.agenda) .agenda--day li.agenda--bpv p {
       font-size: 13px !important;
-      color: #fff !important;
+      color: ${text} !important;
       white-space: normal !important;
       overflow-wrap: break-word !important;
       word-break: normal !important;
@@ -1191,8 +1205,38 @@
 
     body:has(.agenda) .agenda--present-time {
       margin-inline: 8px !important;
-      border-color: #ff6a76 !important;
-      box-shadow: 0 0 8px rgba(255,106,118,.35) !important;
+      border-color: ${accent} !important;
+      box-shadow: none !important;
+    }
+
+    /* Compacte agenda (agenda.js schaalt de lesblokken naar 64px per uur) */
+    html.et-compact-agenda body:has(.agenda) .agenda--time li {
+      height: 64px !important;
+    }
+
+    html.et-compact-agenda body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 63px,
+        color-mix(in srgb, ${border} 55%, transparent) 63px,
+        color-mix(in srgb, ${border} 55%, transparent) 64px
+      ) !important;
+    }
+
+    html.et-compact-agenda body:has(.agenda) .agenda--day li.agenda--course > div {
+      padding: 5px 8px !important;
+    }
+
+    body:has(.agenda) .agenda--day li .et-agenda-time {
+      display: block !important;
+      font-size: 11.5px !important;
+      opacity: .7 !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+
+    body:has(.agenda) .agenda--day.is-today {
+      background: color-mix(in srgb, ${accent} 4%, transparent) !important;
     }
 
     @media (max-width: 700px) {
@@ -1315,6 +1359,221 @@
       box-shadow: 0 12px 32px rgba(2,7,28,.16), inset 0 1px rgba(255,255,255,.035) !important;
       backdrop-filter: blur(14px) !important;
       -webkit-backdrop-filter: blur(14px) !important;
+    }
+
+    /* ---- Platte interface: vaste zijbalk, slanke bovenbalk, rustige kaarten ---- */
+    nav.navigation,
+    nav.navigation.navigation--student,
+    .sidebar {
+      height: 100vh !important;
+      margin: 0 !important;
+      border: 0 !important;
+      border-right: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      border-radius: 0 !important;
+      background: color-mix(in srgb, ${surface} 55%, ${bg}) !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main,
+    nav.navigation.navigation--student .navigation-footer ul {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2px !important;
+      margin: 0 !important;
+      padding: 10px !important;
+    }
+
+    nav.navigation.navigation--student .navigation-footer {
+      padding: 0 !important;
+      border-top: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+    }
+
+    /* Eduarte zet lege <li>'s tussen de items; die gaven ongelijke tussenruimtes */
+    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li:not(:has(a)) {
+      display: none !important;
+    }
+
+    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li > a {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-height: 40px !important;
+      height: 40px !important;
+      padding: 0 12px !important;
+    }
+
+    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li > a > svg {
+      flex: 0 0 24px !important;
+      width: 24px !important;
+      height: 24px !important;
+      margin: 0 !important;
+      overflow: visible !important;
+    }
+
+    nav.navigation.navigation--student a,
+    nav.navigation.navigation--student .navigation-items--main > li > a {
+      min-height: 40px !important;
+      margin: 0 !important;
+      padding-inline: 12px !important;
+      border: 0 !important;
+      border-radius: 10px !important;
+      color: color-mix(in srgb, ${text} 66%, transparent) !important;
+      font-weight: 600 !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li > a .icon,
+    nav.navigation.navigation--student .navigation-items--main > li > a > svg,
+    nav.navigation.navigation--student .navigation-items--main > li > a > i {
+      color: inherit !important;
+      filter: none !important;
+    }
+
+    nav.navigation.navigation--student a:hover,
+    nav.navigation.navigation--student .navigation-items--main > li > a:hover {
+      transform: none !important;
+      border: 0 !important;
+      background: color-mix(in srgb, ${surface} 85%, ${text} 15%) !important;
+      color: ${text} !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a,
+    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] {
+      border: 0 !important;
+      background: color-mix(in srgb, ${accent} 14%, transparent) !important;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, ${accent} 22%, transparent) !important;
+      color: ${text} !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a :is(.icon, svg, i),
+    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] :is(.icon, svg, i) {
+      transform: none !important;
+      color: ${accent} !important;
+      filter: none !important;
+    }
+
+    nav.navigation.navigation--student .navigation-header img,
+    nav.navigation.navigation--student .navigation-brand img,
+    nav.navigation.navigation--student .navigation-header svg,
+    nav.navigation.navigation--student .navigation-brand svg {
+      filter: none !important;
+    }
+
+    header.header,
+    .header,
+    .header-wrapper,
+    .app-header,
+    .page-header,
+    header.header:has(> .header-tabs) {
+      min-height: 60px !important;
+      margin: 0 !important;
+      border: 0 !important;
+      border-bottom: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      border-radius: 0 !important;
+      background: color-mix(in srgb, ${bg} 88%, transparent) !important;
+      box-shadow: none !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+    }
+
+    @media (min-width: 960px) {
+      header.header {
+        left: var(--navigation-width) !important;
+      }
+    }
+
+    header.header .header-toolbar > h1 {
+      font-size: 20px !important;
+      font-weight: 800 !important;
+      letter-spacing: -.02em !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-toolbar,
+    header.header:has(> .header-tabs) > .header-tabs {
+      background: transparent !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs {
+      min-height: 0 !important;
+      padding: 0 12px !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul {
+      justify-content: flex-start !important;
+      min-height: 44px !important;
+      gap: 4px !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li {
+      flex: 0 0 auto !important;
+      max-width: none !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li > a {
+      min-height: 44px !important;
+      padding: 0 14px !important;
+      border-radius: 0 !important;
+      font-size: 13.5px !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li > a:hover {
+      background: transparent !important;
+    }
+
+    header.header:has(> .header-tabs) > .header-tabs > ul > li.is-selected > a {
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: inset 0 -2px ${accent} !important;
+    }
+
+    body:has(.agenda) header.header:not(:has(> .header-tabs)) {
+      margin-right: 0 !important;
+    }
+
+    .card,
+    .container-card,
+    .container-studiewijzer,
+    .result-overview,
+    .panel,
+    .box {
+      border: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      border-radius: 14px !important;
+      background: ${surface} !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    .result-overview--table {
+      border: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      border-radius: 14px !important;
+      background: ${surface} !important;
+      box-shadow: none !important;
+    }
+
+    .result-overview--table > thead > tr > th {
+      background: ${surface} !important;
+      color: color-mix(in srgb, ${text} 60%, transparent) !important;
+      font-size: 12px !important;
+      letter-spacing: .04em !important;
+      text-transform: uppercase !important;
+    }
+
+    .result-overview--table > tbody > tr > td,
+    .result-overview--table > tbody > tr:nth-child(even) > td {
+      background: ${surface} !important;
+    }
+
+    .result-overview--table > tbody > tr:hover > td {
+      background: color-mix(in srgb, ${surface} 90%, ${text} 10%) !important;
     }
 
     `;

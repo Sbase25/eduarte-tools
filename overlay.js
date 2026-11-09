@@ -72,6 +72,61 @@
     return { text: "Goedenacht", icon: "✨" };
   }
 
+  // Lijn-iconen (Lucide-stijl) voor de startpagina
+  const ICONS = {
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+    cloud: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
+    grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+    book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+    chart: '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+    arrow: '<path d="M5 12h14M12 5l7 7-7 7"/>',
+    timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    reset: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+    sunrise: '<path d="M12 2v8M4.93 10.93l1.41 1.41M2 18h2M20 18h2M19.07 10.93l-1.41 1.41M22 22H2M8 6l4-4 4 4M16 18a4 4 0 0 0-8 0"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    instagram: '<rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
+  };
+
+  function icon(name) {
+    return `<svg class="et-i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ""}</svg>`;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  }
+
+  // Leest wat Eduarte zelf op de startpagina zet: begroeting, huidige les, "vrij over …" en "morgen begin je om …"
+  function readNativeNow(wrapper) {
+    const scope = wrapper.closest(".now--wrapper") || wrapper;
+    const heading = Array.from(scope.querySelectorAll(":scope > h1, :scope > h2"))
+      .find((el) => /^Goede(morgen|middag|navond|nacht)\s+\S/i.test(el.textContent.trim()));
+    const items = Array.from(scope.querySelectorAll(":scope > ul:not(.d-none) > li"));
+    const lessonItem = items.find((li) => li.querySelector(".now--body.is-now h4, h4"));
+    let lesson = null;
+    if (lessonItem) {
+      const h4 = lessonItem.querySelector("h4");
+      const label = h4.querySelector("strong")?.textContent || "";
+      lesson = {
+        title: h4.textContent.replace(label, "").trim(),
+        meta: lessonItem.querySelector("p")?.textContent.trim().replace(/ met /, " · ") || "",
+      };
+    }
+    const textOf = (li) => li.textContent.replace(/\s+/g, " ").trim();
+    const free = items.filter((li) => li !== lessonItem && !li.classList.contains("now--tomorrow")).map(textOf).find(Boolean) || "";
+    const tomorrowItem = items.find((li) => li.classList.contains("now--tomorrow"));
+    return {
+      greetingName: heading ? heading.textContent.trim().replace(/^\S+\s+/, "") : "",
+      lesson,
+      free,
+      tomorrow: tomorrowItem ? textOf(tomorrowItem) : "",
+    };
+  }
+
   function getFormattedDate() {
     return new Intl.DateTimeFormat("nl-NL", {
       weekday: "long",
@@ -145,27 +200,26 @@
           position: relative;
           display: grid;
           flex: 0 0 auto;
-          width: 42px;
-          height: 42px;
+          width: 38px;
+          height: 38px;
           place-items: center;
           padding: 0;
-          border: 1px solid rgba(164,190,255,.16);
-          border-radius: 50%;
-          background: linear-gradient(145deg, rgba(33,63,151,.72), rgba(17,29,75,.9));
-          color: #f3f6ff;
-          box-shadow: inset 0 1px rgba(255,255,255,.14), 0 5px 16px rgba(2,7,28,.2);
+          border: 1px solid color-mix(in srgb, var(--color-border-primary, #252a37) 80%, transparent);
+          border-radius: 10px;
+          background: var(--color-bg-surface, #14171f);
+          color: var(--color-text-primary, #eceef3);
+          box-shadow: none;
           cursor: pointer;
           text-decoration: none;
           transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
         }
         #${TOOLBAR_ID} .et-portal-action:hover,
         #${TOOLBAR_ID} .et-portal-action[aria-expanded="true"] {
-          transform: translateY(-1px);
-          border-color: rgba(130,168,255,.65);
-          background: linear-gradient(145deg, rgba(50,91,209,.88), rgba(37,49,135,.95));
+          border-color: var(--color-bg-fill-action, #ff7a59);
+          background: color-mix(in srgb, var(--color-bg-surface, #14171f) 88%, var(--color-text-primary, #eceef3));
         }
         #${TOOLBAR_ID} .et-portal-action:focus-visible {
-          outline: 2px solid #91b5ff;
+          outline: 2px solid var(--color-bg-fill-action, #ff7a59);
           outline-offset: 3px;
         }
         #${TOOLBAR_ID} .et-portal-action svg { width: 20px; height: 20px; fill: currentColor; }
@@ -175,9 +229,9 @@
           right: 6px;
           width: 7px;
           height: 7px;
-          border: 1px solid #182858;
+          border: 0;
           border-radius: 50%;
-          background: #64a7ff;
+          background: var(--color-bg-fill-action, #ff7a59);
           content: "";
         }
         #${TOOLBAR_ID} .et-portal-count {
@@ -200,13 +254,13 @@
         }
         #${TOOLBAR_ID} .et-portal-avatar {
           overflow: hidden;
-          border-color: rgba(168,204,255,.7);
-          background: linear-gradient(145deg, #72c6ff, #3565ed 62%, #6447d9);
-          color: white;
+          border-color: transparent;
+          background: var(--color-bg-fill-action, #ff7a59);
+          color: #fff;
           font-size: 14px;
           font-weight: 750;
           letter-spacing: -.03em;
-          box-shadow: inset 0 1px rgba(255,255,255,.36), 0 5px 18px rgba(35,91,229,.35);
+          box-shadow: none;
         }
         #${TOOLBAR_ID} .et-portal-avatar img {
           width: 100%;
@@ -453,6 +507,7 @@
         "eduarteShortcutsEnabled",
         "eduartePomodoroEnabled",
         "eduarteQuickCalcEnabled",
+        "eduarteTodayEnabled",
         "eduarteInstagramDismissed",
       ],
       (settings) => {
@@ -463,8 +518,9 @@
         const showShortcuts = settings.eduarteShortcutsEnabled !== false;
         const showPomodoro = settings.eduartePomodoroEnabled !== false;
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
+        const showToday = settings.eduarteTodayEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc && !showToday) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -483,425 +539,328 @@
 
           const container = document.createElement("div");
           container.id = CONTAINER_ID;
+          const C = `#${CONTAINER_ID}`;
+          const native = readNativeNow(target);
+          const name = native.greetingName;
+          const greetingText = name ? `${getGreeting().text}, ${escapeHtml(name)}` : getGreeting().text;
+          const cityLabel = settings.eduarteWeatherUseLocation !== false && settings.eduarteWeatherCoordinates
+            ? (settings.eduarteWeatherLocationLabel || "Huidige locatie")
+            : (settings.eduarteWeatherCity || "Utrecht");
+
           container.innerHTML = `
             <style>
-              #${CONTAINER_ID} {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                margin-bottom: 24px;
-                animation: st-card-in 220ms ease both;
-              }
-              .et-card {
-                box-sizing: border-box;
-                padding: 14px 18px;
-                background: var(--color-bg-surface, #1f2937);
-                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
-                border-radius: 22px 22px 8px 22px;
-                box-shadow: 0 1px 3px rgba(0,0,0,.16);
-                color: var(--color-text-primary, #f9fafb);
-                transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-              }
-              .et-card:hover {
-                box-shadow: 0 3px 8px rgba(0,0,0,.18);
-                border-color: var(--color-bg-fill-action, #3b82f6);
-              }
-              .et-top-card {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                justify-content: space-between;
-                gap: 16px;
-                background: linear-gradient(135deg, var(--color-bg-surface, #1f2937), color-mix(in srgb, var(--color-bg-surface, #1f2937) 85%, var(--color-bg-fill-action, #3b82f6) 15%));
-              }
-              .et-greeting-section {
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-              }
-              .et-greeting-title {
-                margin: 0;
-                font-size: 22px;
-                font-weight: 700;
-                letter-spacing: -0.02em;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-              }
-              .et-greeting-date {
-                font-size: 13px;
-                color: var(--color-text-tertiary, #9ca3af);
-                text-transform: capitalize;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-              }
-              .et-weather-section {
-                display: flex;
-                align-items: center;
+              ${C} {
+                --et-surface: var(--color-bg-surface, #14171f);
+                --et-text: var(--color-text-primary, #eceef3);
+                --et-muted: color-mix(in srgb, var(--et-text) 55%, transparent);
+                --et-line: color-mix(in srgb, var(--et-text) 8%, transparent);
+                --et-surface-2: color-mix(in srgb, var(--et-surface) 92%, var(--et-text));
+                --et-accent: var(--color-bg-fill-action, #ff7a59);
+                --et-accent-2: color-mix(in oklch, var(--et-accent), #a855f7 55%);
+                --et-accent-soft: color-mix(in srgb, var(--et-accent) 14%, transparent);
+                --et-ok: #34d399;
+                display: grid;
+                grid-template-columns: repeat(12, minmax(0, 1fr));
                 gap: 14px;
-                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 76%, var(--color-text-primary, #fff));
-                padding: 10px 16px;
-                border-radius: 18px 18px 6px 18px;
-                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
+                margin-bottom: 24px;
+                color: var(--et-text);
+                font-family: "Segoe UI Variable Text", "Segoe UI Variable", "Inter", system-ui, sans-serif;
+                font-size: 13.5px;
+                line-height: 1.45;
+                -webkit-font-smoothing: antialiased;
               }
-              .et-weather-icon { font-size: 32px; line-height: 1; }
-              .et-weather-info { display: flex; flex-direction: column; gap: 2px; }
-              .et-weather-temp { font-size: 18px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
-              .et-weather-desc { font-size: 12px; color: var(--color-text-tertiary, #9ca3af); }
-              .et-weather-chips { display: flex; align-items: center; gap: 8px; margin-left: 6px; font-size: 11px; color: var(--color-text-tertiary, #9ca3af); }
-              .et-chip { display: inline-flex; align-items: center; gap: 4px; background: color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 14%, transparent); padding: 4px 9px; border-radius: 99px; font-weight: 500; }
-              .et-weather-refresh {
-                border: 0; background: transparent; color: var(--color-text-tertiary, #9ca3af);
-                cursor: pointer; font-size: 16px; padding: 6px; border-radius: 12px; transition: color 0.2s ease, background-color 0.2s ease;
-              }
-              .et-weather-refresh:hover { color: var(--color-text-primary, #fff); background: color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 14%, transparent); }
+              ${C} > * { animation: et-in 360ms cubic-bezier(.2, .8, .2, 1) both; }
+              ${C} > :nth-child(3) { animation-delay: 40ms; }
+              ${C} > :nth-child(4) { animation-delay: 80ms; }
+              ${C} > :nth-child(5) { animation-delay: 120ms; }
+              ${C} > :nth-child(6) { animation-delay: 160ms; }
+              ${C} > :nth-child(7) { animation-delay: 200ms; }
+              ${C} > :nth-child(8) { animation-delay: 240ms; }
+              @keyframes et-in { from { opacity: 0; transform: translateY(8px) scale(.99); } }
+              @media (prefers-reduced-motion: reduce) { ${C} > * { animation: none; } }
+              .now--wrapper:has(> ${C}) { max-width: min(1160px, 100%) !important; }
+              .now--wrapper:has(> ${C}.et-replaces-native) > h1,
+              .now--wrapper:has(> ${C}.et-replaces-native) > ul:not(.d-none) { display: none !important; }
 
-              /* Grid for widgets */
-              .et-grid {
-                display: grid;
-                align-items: start;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 12px;
-              }
-              .et-widget-title {
-                margin: 0 0 10px 0;
-                font-size: 14px;
-                font-weight: 600;
-                color: var(--color-text-secondary, #e5e7eb);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                letter-spacing: -0.01em;
-              }
+              ${C} svg.et-i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-              /* Shortcuts styling */
-              .et-shortcut-toolbar {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 10px 14px;
-                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
-                border-radius: 16px;
-                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 92%, var(--color-bg-fill-action, #3b82f6) 8%);
-              }
-              .et-home-toolbar {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr);
-                align-items: center;
-                gap: 0;
-                width: 100%;
-                min-width: 0;
-                min-height: 100%;
-                overflow: hidden;
-                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
-                border-radius: 16px;
-                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 92%, var(--color-bg-fill-action, #3b82f6) 8%);
-              }
-              .et-home-toolbar.et-home-toolbar-single { grid-template-columns: minmax(0, 1fr); }
-              .et-home-toolbar .et-shortcut-toolbar {
+              ${C} .et-card {
+                position: relative;
+                grid-column: span 12;
                 box-sizing: border-box;
-                width: 100%;
                 min-width: 0;
-                min-height: 48px;
-                padding: 6px 14px;
-                border: 0;
-                border-radius: 0;
-                background: transparent;
-                box-shadow: none;
+                padding: 18px 20px;
+                border: 1px solid var(--et-line);
+                border-radius: 20px;
+                background:
+                  linear-gradient(180deg, color-mix(in srgb, var(--et-text) 3%, transparent), transparent 60%),
+                  var(--et-surface);
+                box-shadow: 0 1px 0 color-mix(in srgb, var(--et-text) 5%, transparent) inset, 0 10px 30px -18px rgba(0,0,0,.6);
+                transition: border-color .2s ease, transform .2s ease;
               }
-              .et-home-toolbar .et-shortcut-toolbar {
-                justify-content: center;
-                gap: 0;
+              ${C} .et-card:hover { border-color: color-mix(in srgb, var(--et-text) 14%, transparent); }
+              ${C} .et-label {
+                display: flex; align-items: center; gap: 8px;
+                margin: 0 0 14px;
+                color: var(--et-muted);
+                font-size: 12px; font-weight: 600; letter-spacing: .02em;
               }
-              .et-home-toolbar .et-shortcut-toolbar-label { display: none; }
-              .et-home-toolbar .et-shortcuts-list {
-                display: grid;
-                grid-template-columns: repeat(7, minmax(0, 1fr));
-                flex: 1 1 0;
-                width: 100%;
-                min-width: 0;
-                gap: 5px;
-              }
-              .et-home-toolbar .et-shortcut-btn {
-                justify-content: center;
-                min-width: 0;
+              ${C} .et-label svg.et-i { width: 15px; height: 15px; color: var(--et-accent); }
+              ${C} .et-label a { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: var(--et-text) !important; font-weight: 600; text-decoration: none !important; opacity: .7; transition: opacity .15s; }
+              ${C} .et-label a:hover { opacity: 1; }
+
+              /* Hero */
+              ${C} .et-hello {
+                grid-column: span 7;
+                display: flex; flex-direction: column; justify-content: space-between; gap: 22px;
                 overflow: hidden;
-                text-overflow: ellipsis;
-                padding: 6px 4px;
-                gap: 4px;
-                border-radius: 10px;
-                font-size: 11px;
-                white-space: nowrap;
+                padding: 24px 26px;
+                background:
+                  radial-gradient(60% 90% at 100% 0%, color-mix(in srgb, var(--et-accent) 28%, transparent), transparent 70%),
+                  radial-gradient(50% 80% at 75% 120%, color-mix(in srgb, var(--et-accent-2) 22%, transparent), transparent 70%),
+                  var(--et-surface);
               }
-              .et-home-toolbar .et-shortcut-btn span { font-size: 12px; }
-              .et-home-empty-title { display: none !important; }
-              header.header .header-toolbar:has(.et-home-toolbar) {
-                position: relative !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: stretch !important;
-                box-sizing: border-box !important;
-                width: 100% !important;
-                min-height: 82px !important;
-                padding: 8px 12px !important;
+              ${C} .et-hello small { color: var(--et-muted); font-size: 13px; font-weight: 500; }
+              ${C} .et-hello small::first-letter { text-transform: uppercase; }
+              ${C} .et-hello h2 { margin: 4px 0 0; color: var(--et-text); font-size: 32px; font-weight: 700; line-height: 1.1; letter-spacing: -.035em; }
+              ${C} .et-hello h2 span { background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+              ${C} .et-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+              ${C} .et-chip {
+                display: inline-flex; align-items: center; gap: 7px;
+                padding: 6px 12px; border: 1px solid var(--et-line); border-radius: 99px;
+                background: color-mix(in srgb, var(--et-surface) 60%, transparent);
+                backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+                color: var(--et-text); font-size: 12.5px; font-weight: 500; white-space: nowrap;
               }
-              header.header .header-toolbar:has(.et-home-toolbar) > .et-home-toolbar {
-                flex: 1 1 100%;
-                width: 100%;
-                justify-self: stretch;
+              ${C} .et-chip b { font-weight: 700; }
+              ${C} .et-chip svg.et-i { width: 14px; height: 14px; opacity: .75; }
+              ${C} button.et-chip { cursor: pointer; font-family: inherit; }
+              ${C} button.et-chip:hover { border-color: color-mix(in srgb, var(--et-accent) 50%, transparent); }
+
+              /* Nu bezig */
+              ${C} .et-now { grid-column: span 5; display: flex; flex-direction: column; padding: 22px 24px; }
+              ${C} .et-tag {
+                align-self: flex-start;
+                display: inline-flex; align-items: center; gap: 7px;
+                padding: 4px 10px; border-radius: 99px;
+                background: var(--et-accent-soft); color: var(--et-accent);
+                font-size: 11.5px; font-weight: 700;
               }
-              header.header .header-toolbar:has(.et-home-toolbar) > .header-toolbar--open-navigation {
-                position: absolute;
-                z-index: 1;
-                top: 50%;
-                left: 12px;
-                transform: translateY(-50%);
+              ${C} .et-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+              ${C} .et-now.is-live .et-tag::before { animation: et-pulse 1.6s infinite; }
+              ${C} .et-now.is-free .et-tag { background: color-mix(in srgb, var(--et-ok) 14%, transparent); color: var(--et-ok); }
+              @keyframes et-pulse { 0% { box-shadow: 0 0 0 0 currentColor; } 70%, 100% { box-shadow: 0 0 0 6px transparent; } }
+              ${C} .et-now h4 { margin: 14px 0 2px; color: var(--et-text); font-size: 22px; font-weight: 700; letter-spacing: -.025em; }
+              ${C} .et-now .et-meta { color: var(--et-muted); }
+              ${C} .et-progress { margin-top: auto; padding-top: 18px; }
+              ${C} .et-bar { position: relative; height: 8px; margin-bottom: 8px; border-radius: 99px; background: var(--et-surface-2); }
+              ${C} .et-bar > div { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); box-shadow: 0 0 16px color-mix(in srgb, var(--et-accent) 45%, transparent); transition: width .6s ease; }
+              ${C} .et-bar-row { display: flex; justify-content: space-between; align-items: baseline; color: var(--et-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+              ${C} .et-bar-row b { color: var(--et-text); font-size: 13px; }
+
+              /* Snelkoppelingen */
+              ${C} .et-links { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; padding: 10px; }
+              ${C} .et-link {
+                display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0;
+                padding: 12px 6px 10px; border-radius: 14px;
+                color: var(--et-text) !important; font-size: 12.5px; font-weight: 600; text-decoration: none !important;
+                transition: background-color .15s ease, transform .15s ease;
               }
+              ${C} .et-link:hover { background: var(--et-surface-2); transform: translateY(-2px); }
+              ${C} .et-link span {
+                display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px;
+                background: var(--tile); color: #fff;
+                box-shadow: 0 6px 16px -6px var(--tile), inset 0 1px rgba(255,255,255,.25);
+              }
+              ${C} .et-link span svg.et-i { width: 19px; height: 19px; }
+              ${C} .et-link em { max-width: 100%; overflow: hidden; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+
+              /* Vandaag */
+              ${C} .et-today { grid-column: span 5; }
+              ${C} .et-tl { position: relative; display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+              ${C} .et-tl li { position: relative; display: grid; grid-template-columns: 42px 14px minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 10px 8px 4px; border-radius: 12px; transition: background-color .15s; }
+              ${C} .et-tl li:not(.et-empty)::after { content: ""; position: absolute; left: 62px; top: 50%; bottom: -50%; width: 2px; background: var(--et-line); }
+              ${C} .et-tl li:last-child::after { display: none; }
+              ${C} .et-tl li.is-current { background: var(--et-surface-2); }
+              ${C} .et-tl li.is-past { opacity: .45; }
+              ${C} .et-tl time { color: var(--et-muted); font-size: 12px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+              ${C} .et-tl i { position: relative; z-index: 1; width: 12px; height: 12px; margin-left: 1px; border: 3px solid var(--et-surface); border-radius: 50%; box-shadow: 0 0 0 2px currentColor; background: currentColor; }
+              ${C} .et-tl li.is-current i { box-shadow: 0 0 0 2px currentColor, 0 0 12px currentColor; }
+              ${C} .et-tl strong { display: block; overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+              ${C} .et-tl small { display: block; overflow: hidden; color: var(--et-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+              ${C} .et-tl-foot { display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 0 4px; padding: 5px 11px; border-radius: 99px; background: color-mix(in srgb, var(--et-ok) 12%, transparent); color: var(--et-ok); font-size: 12px; font-weight: 600; }
+              ${C} .et-tl-foot[hidden] { display: none; }
+              ${C} .et-empty { color: var(--et-muted); }
+
+              /* Timer */
+              ${C} .et-timer { grid-column: span 3; display: flex; flex-direction: column; align-items: center; }
+              ${C} .et-timer .et-label { align-self: stretch; }
+              ${C} .et-seg { display: flex; gap: 2px; width: 100%; box-sizing: border-box; padding: 3px; border-radius: 12px; background: var(--et-surface-2); }
+              ${C} .et-seg button { flex: 1; padding: 6px 0; border: 0; border-radius: 9px; background: none; color: var(--et-muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s; }
+              ${C} .et-seg button:hover { color: var(--et-text); }
+              ${C} .et-seg button.is-on { background: var(--et-surface); color: var(--et-text); box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+              ${C} .et-ring { position: relative; width: 132px; height: 132px; margin: 14px 0; }
+              ${C} .et-ring svg { display: block; transform: rotate(-90deg); overflow: visible; }
+              ${C} .et-ring circle { fill: none; stroke-width: 9; }
+              ${C} .et-ring .et-ring-bg { stroke: var(--et-surface-2); }
+              ${C} .et-ring .et-ring-fg { stroke: url(#et-ring-grad); stroke-linecap: round; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--et-accent) 50%, transparent)); transition: stroke-dashoffset 1s linear; }
+              ${C} .et-ring-text { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+              ${C} .et-ring-text b { font-size: 28px; font-weight: 700; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+              ${C} .et-ring-text small { margin-top: -2px; color: var(--et-muted); font-size: 11.5px; font-weight: 500; }
+              ${C} .et-ring.is-done .et-ring-fg { stroke: var(--et-ok); }
+              ${C} .et-row { display: flex; gap: 8px; width: 100%; }
+              ${C} .et-primary {
+                flex: 1; padding: 10px; border: 0; border-radius: 12px;
+                background: linear-gradient(135deg, var(--et-accent), var(--et-accent-2)); color: #fff;
+                font: inherit; font-weight: 700; cursor: pointer;
+                box-shadow: 0 8px 20px -8px var(--et-accent);
+                transition: transform .15s ease, filter .15s ease;
+              }
+              ${C} .et-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+              ${C} .et-ghost { display: grid; place-items: center; width: 42px; border: 1px solid var(--et-line); border-radius: 12px; background: var(--et-surface-2); color: var(--et-text); cursor: pointer; }
+              ${C} .et-ghost:hover { border-color: color-mix(in srgb, var(--et-text) 20%, transparent); }
+
+              /* Calculator */
+              ${C} .et-calc { grid-column: span 4; display: flex; flex-direction: column; }
+              ${C} .et-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+              ${C} .et-fields label { display: block; color: var(--et-muted); font-size: 12px; font-weight: 500; }
+              ${C} .et-fields input {
+                box-sizing: border-box; width: 100%; margin-top: 5px; padding: 9px 12px;
+                border: 1px solid transparent; border-radius: 11px; outline: none;
+                background: var(--et-surface-2); color: var(--et-text);
+                font: inherit; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
+                transition: border-color .15s, box-shadow .15s;
+              }
+              ${C} .et-fields input:focus { border-color: var(--et-accent); box-shadow: 0 0 0 3px var(--et-accent-soft); }
+              ${C} .et-need {
+                display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto;
+                padding: 12px 16px; border: 1px solid color-mix(in srgb, var(--et-accent) 25%, transparent); border-radius: 14px;
+                background: linear-gradient(120deg, color-mix(in srgb, var(--et-accent) 16%, transparent), color-mix(in srgb, var(--et-accent-2) 12%, transparent));
+              }
+              ${C} .et-need span { color: var(--et-muted); font-weight: 500; }
+              ${C} .et-need b { font-size: 28px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+              ${C} .et-need b.is-bad { background: none; color: #f87171; font-size: 16px; }
+              ${C} .et-need b.is-ok { background: none; color: var(--et-ok); font-size: 16px; }
+
+              /* Instagram */
+              ${C} .et-ig { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 12px; border-radius: 16px; }
+              ${C} .et-ig > span { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, #f58529, #dd2a7b 50%, #8134af); color: #fff; }
+              ${C} .et-ig div { flex: 1; min-width: 0; color: var(--et-muted); font-size: 12.5px; }
+              ${C} .et-ig div b { color: var(--et-text); font-weight: 600; }
+              ${C} .et-ig a { flex: none; padding: 5px 12px; border-radius: 99px; background: var(--et-text); color: var(--et-surface) !important; font-size: 12px; font-weight: 700; text-decoration: none !important; }
+              ${C} .et-ig button { flex: none; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--et-muted); cursor: pointer; }
+              ${C} .et-ig button:hover { background: var(--et-surface-2); color: var(--et-text); }
+
+              ${C} button:focus-visible, ${C} a:focus-visible, ${C} input:focus-visible { outline: 2px solid var(--et-accent); outline-offset: 2px; }
+
               @media (max-width: 1100px) {
-                .et-home-toolbar { grid-template-columns: 1fr; gap: 0; }
-                .et-home-toolbar .et-shortcuts-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-                header.header .header-toolbar:has(.et-home-toolbar) { min-height: 130px !important; }
+                ${C} .et-hello, ${C} .et-now, ${C} .et-today { grid-column: span 12; }
+                ${C} .et-timer, ${C} .et-calc { grid-column: span 6; }
+                ${C} .et-links { grid-template-columns: repeat(4, minmax(0, 1fr)); }
               }
-              @media (max-width: 700px) {
-                .et-home-toolbar .et-shortcuts-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-                .et-home-toolbar .et-shortcut-btn { white-space: normal; }
-              }
-              .et-shortcut-toolbar-label {
-                flex: 0 0 auto;
-                color: var(--color-text-secondary, #e5e7eb);
-                font-size: 12px;
-                font-weight: 700;
-              }
-              .et-shortcuts-list {
-                display: flex;
-                flex: 1 1 auto;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 7px;
-              }
-              .et-shortcut-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                padding: 7px 11px;
-                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 74%, var(--color-text-primary, #fff));
-                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
-                border-radius: 12px;
-                color: var(--color-text-primary, #f9fafb);
-                text-decoration: none;
-                font-size: 13px;
-                font-weight: 500;
-                transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-              }
-              .et-shortcut-btn:hover {
-                background: color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 24%, transparent);
-                border-color: var(--color-bg-fill-action, #3b82f6);
-                box-shadow: 0 2px 6px rgba(0,0,0,.16);
-              }
-
-              /* Pomodoro styling */
-              .et-pomo-display {
-                font-size: 38px;
-                font-weight: 700;
-                text-align: center;
-                margin: 8px 0;
-                letter-spacing: -0.03em;
-                font-variant-numeric: tabular-nums;
-                color: var(--color-text-primary, #f9fafb);
-              }
-              .et-pomo-tabs {
-                display: flex;
-                gap: 6px;
-                margin-bottom: 12px;
-              }
-              .et-pomo-tab {
-                flex: 1;
-                padding: 6px 4px;
-                border: 0;
-                border-radius: 12px 12px 4px 12px;
-                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 78%, var(--color-text-primary, #fff));
-                color: var(--color-text-tertiary, #9ca3af);
-                font-size: 11px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: background-color 0.15s, color 0.15s;
-              }
-              .et-pomo-tab.active {
-                background: var(--color-bg-fill-action, #3b82f6);
-                color: #ffffff;
-              }
-              .et-pomo-controls {
-                display: flex;
-                gap: 8px;
-              }
-              .et-pomo-btn {
-                flex: 1;
-                padding: 8px;
-                border: 0;
-                border-radius: 14px 14px 5px 14px;
-                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 70%, var(--color-text-primary, #fff));
-                color: var(--color-text-primary, #f9fafb);
-                font-weight: 600;
-                font-size: 12px;
-                cursor: pointer;
-                transition: background-color 0.15s ease, color 0.15s ease;
-              }
-              .et-pomo-btn.primary {
-                background: var(--color-bg-fill-action, #3b82f6);
-                color: #ffffff;
-              }
-              .et-pomo-btn:hover {
-                filter: brightness(1.1);
-              }
-
-              /* Quick Calc styling */
-              .et-calc-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-                margin-bottom: 10px;
-              }
-              .et-calc-field label {
-                display: block;
-                font-size: 11px;
-                color: var(--color-text-tertiary, #9ca3af);
-                margin-bottom: 3px;
-              }
-              .et-calc-field input {
-                width: 100%;
-                padding: 6px 10px;
-                font-size: 12px;
-              }
-              .et-calc-result {
-                padding: 10px 12px;
-                border-radius: 16px 16px 6px 16px;
-                background: color-mix(in srgb, var(--color-bg-surface, #1f2937) 76%, var(--color-text-primary, #fff));
-                border: 1px solid color-mix(in srgb, var(--color-border-primary, #374151) 65%, transparent);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-              }
-              .et-calc-result b {
-                font-size: 16px;
-                color: var(--color-bg-fill-action, #3b82f6);
-              }
-
-              @media (max-width: 700px) {
-                .et-shortcut-toolbar { align-items: flex-start; flex-direction: column; gap: 8px; }
-                .et-shortcuts-list { width: 100%; }
-              }
-
-              .et-ig-card {
-                display: flex; align-items: center; gap: 14px;
-                background: linear-gradient(120deg, color-mix(in srgb, var(--color-bg-fill-action, #3b82f6) 30%, var(--color-bg-surface, #1f2937)), color-mix(in srgb, #c13584 28%, var(--color-bg-surface, #1f2937)));
-              }
-              .et-ig-emoji { font-size: 30px; line-height: 1; }
-              .et-ig-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-              .et-ig-text b { font-size: 15px; }
-              .et-ig-text span { font-size: 12.5px; color: var(--color-text-secondary, #e5e7eb); }
-              .et-ig-link {
-                flex: 0 0 auto; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700;
-                text-decoration: none; color: #fff; background: linear-gradient(90deg, #7c3aed, #c13584);
-              }
-              .et-ig-close { flex: 0 0 auto; border: 0; background: transparent; color: inherit; font-size: 18px; cursor: pointer; opacity: .7; padding: 4px 8px; border-radius: 8px; }
-              .et-ig-close:hover { opacity: 1; background: rgba(255,255,255,.1); }
-              @keyframes st-card-in {
-                from { opacity: 0; transform: translateY(6px); }
-                to { opacity: 1; transform: translateY(0); }
+              @media (max-width: 640px) {
+                ${C} .et-timer, ${C} .et-calc { grid-column: span 12; }
+                ${C} .et-links { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+                ${C} .et-hello h2 { font-size: 26px; }
               }
             </style>
 
-            ${settings.eduarteInstagramDismissed ? '' : `
-              <div class="et-card et-ig-card" id="et-ig-card">
-                <span class="et-ig-emoji">📸</span>
-                <div class="et-ig-text"><b>Eduarte Tools heeft nu Instagram!</b><span>Nieuws, tips en updates vind je op @eduartetools.</span></div>
-                <a class="et-ig-link" href="https://www.instagram.com/eduartetools/" target="_blank" rel="noopener noreferrer">Volg ons</a>
-                <button class="et-ig-close" type="button" title="Sluiten" aria-label="Sluiten">✕</button>
+            ${settings.eduarteInstagramDismissed ? "" : `
+              <div class="et-card et-ig" id="et-ig-card">
+                <span>${icon("instagram")}</span>
+                <div><b>Eduarte Tools staat op Instagram</b> · nieuws, tips en updates</div>
+                <a href="https://www.instagram.com/eduartetools/" target="_blank" rel="noopener noreferrer">Volgen</a>
+                <button type="button" title="Sluiten" aria-label="Sluiten">${icon("x")}</button>
               </div>
             `}
 
-            <!-- Bovenste kaart: Weer & Begroeting -->
             ${(showGreeting || showWeather) ? `
-              <div class="et-card et-top-card">
-                ${showGreeting ? `
-                  <div class="et-greeting-section">
-                    <h2 class="et-greeting-title"><span class="et-greeting-emoji">${getGreeting().icon}</span> <span class="et-greeting-text">${getGreeting().text}</span></h2>
-                    <div class="et-greeting-date">${getFormattedDate()}</div>
-                  </div>
-                ` : ''}
-                ${showWeather ? `
-                  <div class="et-weather-section">
-                    <div class="et-weather-icon">⏳</div>
-                    <div class="et-weather-info">
-                      <div class="et-weather-temp"><span class="et-temp-val">—</span></div>
-                      <div class="et-weather-desc">Weerbericht laden...</div>
-                    </div>
-                    <div class="et-weather-chips">
-                      <span class="et-chip et-chip-city">📍 ${settings.eduarteWeatherUseLocation !== false && settings.eduarteWeatherCoordinates ? (settings.eduarteWeatherLocationLabel || "Huidige locatie") : (settings.eduarteWeatherCity || "Utrecht")}</span>
-                      <span class="et-chip et-chip-rain" style="display:none;">💧 <span class="et-rain-val">0</span>%</span>
-                    </div>
-                    <button class="et-weather-refresh" title="Ververs weerbericht">🔄</button>
-                  </div>
-                ` : ''}
-              </div>
-            ` : ''}
+              <section class="et-card et-hello">
+                <div>
+                  <small>${getFormattedDate()}</small>
+                  <h2>${showGreeting ? (name ? `${getGreeting().text}, <span>${escapeHtml(name)}</span>` : getGreeting().text) : "Vandaag"}</h2>
+                </div>
+                <div class="et-chips">
+                  ${showWeather ? `<button type="button" class="et-chip et-weather" title="Ververs weerbericht">${icon("cloud")} <span>Weer laden…</span></button>` : ""}
+                  ${showToday ? `<span class="et-chip et-lesson-count" hidden></span>` : ""}
+                  ${native.tomorrow ? `<span class="et-chip">${icon("sunrise")} ${escapeHtml(native.tomorrow.replace(/\.$/, ""))}</span>` : ""}
+                </div>
+              </section>
+            ` : ""}
+
+            ${showToday ? `
+              <section class="et-card et-now ${native.lesson ? "is-live" : "is-free"}">
+                <span class="et-tag">${native.lesson ? "Nu bezig" : "Vrij"}</span>
+                <h4>${escapeHtml(native.lesson ? native.lesson.title : (native.free || native.tomorrow || "Geen les op dit moment"))}</h4>
+                <div class="et-meta">${escapeHtml(native.lesson ? native.lesson.meta : (native.free && native.tomorrow ? native.tomorrow : ""))}</div>
+                <div class="et-progress" hidden>
+                  <div class="et-bar"><div></div></div>
+                  <div class="et-bar-row"><span class="et-from"></span><span class="et-left"></span><span class="et-to"></span></div>
+                </div>
+              </section>
+            ` : ""}
 
             ${showShortcuts ? `
-              <nav class="et-shortcut-toolbar" aria-label="Eduarte snelkoppelingen">
-                <span class="et-shortcut-toolbar-label">Snel openen</span>
-                <div class="et-shortcuts-list">
-                  <a href="https://teams.microsoft.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>👥</span> Teams</a>
-                  <a href="https://outlook.office.com/mail" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>✉️</span> Outlook</a>
-                  <a href="https://onedrive.live.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>☁️</span> OneDrive</a>
-                  <a href="https://www.office.com" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📄</span> Office 365</a>
-                  <a href="https://mbowebshop.nl/Gebruikers/Licenties/" target="_blank" class="et-shortcut-btn" rel="noreferrer"><span>📚</span> MboWebshop</a>
-                  <a href="/resultaten" class="et-shortcut-btn"><span>📊</span> Cijfers</a>
-                  <a href="/agenda" class="et-shortcut-btn"><span>📅</span> Agenda</a>
-                </div>
+              <nav class="et-card et-links" aria-label="Eduarte snelkoppelingen">
+                <a class="et-link" href="https://teams.microsoft.com" target="_blank" rel="noreferrer"><span style="--tile:#6264a7">${icon("users")}</span><em>Teams</em></a>
+                <a class="et-link" href="https://outlook.office.com/mail" target="_blank" rel="noreferrer"><span style="--tile:#0f6cbd">${icon("mail")}</span><em>Outlook</em></a>
+                <a class="et-link" href="https://onedrive.live.com" target="_blank" rel="noreferrer"><span style="--tile:#0ea5e9">${icon("cloud")}</span><em>OneDrive</em></a>
+                <a class="et-link" href="https://www.office.com" target="_blank" rel="noreferrer"><span style="--tile:#ea580c">${icon("grid")}</span><em>Office 365</em></a>
+                <a class="et-link" href="https://mbowebshop.nl/Gebruikers/Licenties/" target="_blank" rel="noreferrer"><span style="--tile:#d97706">${icon("book")}</span><em>MboWebshop</em></a>
+                <a class="et-link" href="/resultaten"><span style="--tile:#059669">${icon("chart")}</span><em>Cijfers</em></a>
+                <a class="et-link" href="/agenda"><span style="--tile:#db2777">${icon("calendar")}</span><em>Agenda</em></a>
               </nav>
-            ` : ''}
+            ` : ""}
 
-            <!-- Compacte widgetgrid -->
-            ${(showPomodoro || showQuickCalc) ? `
-              <div class="et-grid">
-                ${showPomodoro ? `
-                  <div class="et-card">
-                    <h3 class="et-widget-title">⏱️ Pomodoro Focus Timer</h3>
-                    <div class="et-pomo-tabs">
-                      <button class="et-pomo-tab active" data-time="1500">Focus (25m)</button>
-                      <button class="et-pomo-tab" data-time="300">Pauze (5m)</button>
-                      <button class="et-pomo-tab" data-time="900">Lang (15m)</button>
-                    </div>
-                    <div class="et-pomo-display" id="et-pomo-time">25:00</div>
-                    <div class="et-pomo-controls">
-                      <button class="et-pomo-btn primary" id="et-pomo-toggle">Start</button>
-                      <button class="et-pomo-btn" id="et-pomo-reset">Reset</button>
-                    </div>
-                  </div>
-                ` : ''}
+            ${showToday ? `
+              <section class="et-card et-today">
+                <h3 class="et-label">${icon("list")} Vandaag <a href="/agenda">Hele week ${icon("arrow")}</a></h3>
+                <ul class="et-tl"><li class="et-empty" style="display:block">Lessen laden…</li></ul>
+                <div class="et-tl-foot" hidden></div>
+              </section>
+            ` : ""}
 
-                ${showQuickCalc ? `
-                  <div class="et-card">
-                    <h3 class="et-widget-title">🎯 Snelle Cijfercalculator</h3>
-                    <div class="et-calc-grid">
-                      <div class="et-calc-field"><label>Huidig Gemiddelde</label><input type="number" id="et-calc-avg" min="1" max="10" step=".1" value="6.5"></div>
-                      <div class="et-calc-field"><label>Huidige Weging</label><input type="number" id="et-calc-weights" min="1" step="1" value="3"></div>
-                      <div class="et-calc-field"><label>Streefgemiddelde</label><input type="number" id="et-calc-target" min="1" max="10" step=".1" value="7.0"></div>
-                      <div class="et-calc-field"><label>Weging Toets</label><input type="number" id="et-calc-future" min="1" step="1" value="1"></div>
-                    </div>
-                    <div class="et-calc-result">
-                      <span style="font-size:12px;color:var(--color-text-secondary,#e5e7eb);">Nodig voor streefcijfer:</span>
-                      <b id="et-calc-needed">8,5</b>
-                    </div>
-                  </div>
-                ` : ''}
+            ${showPomodoro ? `
+              <section class="et-card et-timer">
+                <h3 class="et-label">${icon("timer")} Focus</h3>
+                <div class="et-seg" role="group" aria-label="Duur">
+                  <button type="button" class="is-on" data-time="1500">25m</button>
+                  <button type="button" data-time="300">5m</button>
+                  <button type="button" data-time="900">15m</button>
+                </div>
+                <div class="et-ring">
+                  <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
+                    <defs><linearGradient id="et-ring-grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" style="stop-color: var(--et-accent)"></stop>
+                      <stop offset="100%" style="stop-color: var(--et-accent-2)"></stop>
+                    </linearGradient></defs>
+                    <circle class="et-ring-bg" cx="66" cy="66" r="56"></circle>
+                    <circle class="et-ring-fg" cx="66" cy="66" r="56"></circle>
+                  </svg>
+                  <div class="et-ring-text"><b id="et-pomo-time">25:00</b><small class="et-pomo-mode">focus</small></div>
+                </div>
+                <div class="et-row">
+                  <button type="button" class="et-primary" id="et-pomo-toggle">Start</button>
+                  <button type="button" class="et-ghost" id="et-pomo-reset" title="Reset" aria-label="Reset">${icon("reset")}</button>
+                </div>
+              </section>
+            ` : ""}
 
-              </div>
-            ` : ''}
+            ${showQuickCalc ? `
+              <section class="et-card et-calc">
+                <h3 class="et-label">${icon("target")} Wat moet ik halen?</h3>
+                <div class="et-fields">
+                  <label>Huidig gemiddelde<input type="number" id="et-calc-avg" min="1" max="10" step=".1" value="6.5"></label>
+                  <label>Weging tot nu<input type="number" id="et-calc-weights" min="1" step="1" value="3"></label>
+                  <label>Gewenst gemiddelde<input type="number" id="et-calc-target" min="1" max="10" step=".1" value="7.0"></label>
+                  <label>Weging toets<input type="number" id="et-calc-future" min="1" step="1" value="1"></label>
+                </div>
+                <div class="et-need"><span>Je hebt nodig</span><b id="et-calc-needed">8,5</b></div>
+              </section>
+            ` : ""}
           `;
+
+          if (showToday) container.classList.add("et-replaces-native");
 
           if (target.firstChild) {
             target.insertBefore(container, target.firstChild);
@@ -909,25 +868,61 @@
             target.appendChild(container);
           }
 
-          container.querySelector(".et-ig-close")?.addEventListener("click", () => {
+          container.querySelector("#et-ig-card button")?.addEventListener("click", () => {
             container.querySelector("#et-ig-card")?.remove();
             try { chrome.storage.local.set({ eduarteInstagramDismissed: true }); } catch (e) { /* ignore */ }
           });
 
-          if (showShortcuts) {
-            const headerToolbar = document.querySelector("header.header .header-toolbar");
-            if (headerToolbar) {
-              const toolbarItems = [container.querySelector(".et-shortcut-toolbar")].filter(Boolean);
-              if (toolbarItems.length) {
-                const homeToolbar = document.createElement("div");
-                homeToolbar.className = "et-home-toolbar";
-                if (toolbarItems.length === 1) homeToolbar.classList.add("et-home-toolbar-single");
-                toolbarItems.forEach((item) => homeToolbar.appendChild(item));
-                headerToolbar.appendChild(homeToolbar);
-                const title = headerToolbar.querySelector(":scope > h1");
-                if (title && !title.textContent.trim()) title.classList.add("et-home-empty-title");
+          // Lessen van vandaag (uit de agenda) voor de tijdlijn en de voortgang van de huidige les
+          if (showToday && globalThis.EduarteAgenda) {
+            const Agenda = globalThis.EduarteAgenda;
+            const listEl = container.querySelector(".et-tl");
+            const footEl = container.querySelector(".et-tl-foot");
+            const countEl = container.querySelector(".et-lesson-count");
+            const nowCard = container.querySelector(".et-now");
+            const nowHours = () => { const d = new Date(); return d.getHours() + d.getMinutes() / 60; };
+
+            const renderToday = (lessons) => {
+              const now = nowHours();
+              if (!lessons.length) {
+                listEl.innerHTML = `<li class="et-empty" style="display:block">Geen lessen vandaag</li>`;
+                return;
               }
-            }
+              if (countEl) {
+                countEl.hidden = false;
+                countEl.innerHTML = `${icon("book")} <b>${lessons.length}</b> ${lessons.length === 1 ? "les" : "lessen"} vandaag`;
+              }
+              listEl.innerHTML = lessons.map((l) => {
+                const state = l.end <= now ? "is-past" : (l.start <= now ? "is-current" : "");
+                const meta = [l.location, l.participants].filter(Boolean).join(" · ");
+                return `<li class="${state}"><time>${Agenda.formatTime(l.start)}</time><i style="color:${Agenda.courseColor(l.title)}"></i>`
+                  + `<div><strong title="${escapeHtml(l.subject)}">${escapeHtml(l.title)}</strong><small>${escapeHtml(meta)} · tot ${Agenda.formatTime(l.end)}</small></div></li>`;
+              }).join("");
+              const last = lessons[lessons.length - 1];
+              footEl.hidden = false;
+              footEl.innerHTML = last.end <= now ? `${icon("check")} Klaar voor vandaag` : `${icon("check")} Vrij vanaf ${Agenda.formatTime(last.end)}`;
+
+              const current = lessons.find((l) => l.start <= now && l.end > now);
+              const progress = nowCard?.querySelector(".et-progress");
+              if (current && progress && nowCard.classList.contains("is-live")) {
+                const pct = Math.min(100, Math.max(0, ((now - current.start) / (current.end - current.start)) * 100));
+                const left = Math.max(0, Math.round((current.end - now) * 60));
+                progress.hidden = false;
+                progress.querySelector(".et-bar > div").style.width = `${pct}%`;
+                progress.querySelector(".et-from").textContent = Agenda.formatTime(current.start);
+                progress.querySelector(".et-to").textContent = Agenda.formatTime(current.end);
+                progress.querySelector(".et-left").innerHTML = `nog <b>${left >= 60 ? `${Math.floor(left / 60)}u ${left % 60}m` : `${left}m`}</b>`;
+              }
+            };
+
+            let todayLessons = [];
+            Agenda.fetchTodayLessons()
+              .then((lessons) => { todayLessons = lessons; renderToday(lessons); })
+              .catch(() => { listEl.innerHTML = `<li class="et-empty" style="display:block">Kon de agenda niet laden.</li>`; });
+            const refresh = window.setInterval(() => {
+              if (!container.isConnected) return window.clearInterval(refresh);
+              if (todayLessons.length) renderToday(todayLessons);
+            }, 60 * 1000);
           }
 
           // Weer data ophalen
@@ -936,17 +931,11 @@
             const city = settings.eduarteWeatherCity || "Utrecht";
             const coordinates = useLocation ? settings.eduarteWeatherCoordinates : null;
             const locationLabel = settings.eduarteWeatherLocationLabel;
-            const iconEl = container.querySelector(".et-weather-icon");
-            const tempEl = container.querySelector(".et-temp-val");
-            const descEl = container.querySelector(".et-weather-desc");
-            const cityEl = container.querySelector(".et-chip-city");
-            const rainEl = container.querySelector(".et-chip-rain");
-            const rainVal = container.querySelector(".et-rain-val");
+            const weatherEl = container.querySelector(".et-weather");
 
             function fetchWeatherData() {
-              if (!iconEl) return;
-              iconEl.textContent = "⏳";
-              descEl.textContent = "Weer laden...";
+              if (!weatherEl) return;
+              weatherEl.innerHTML = `${icon("cloud")} <span>Weer laden…</span>`;
 
               chrome.runtime.sendMessage({
                 type: "FETCH_WEATHER",
@@ -955,27 +944,17 @@
                 locationLabel,
               }, (res) => {
                 if (chrome.runtime.lastError || !res || !res.success) {
-                  iconEl.textContent = "⛅";
-                  tempEl.textContent = "—";
-                  descEl.textContent = res?.error || "Weer niet beschikbaar";
+                  weatherEl.innerHTML = `⛅ <span>${escapeHtml(res?.error || "Weer niet beschikbaar")}</span>`;
                   return;
                 }
                 const info = WEATHER_CODES[res.weathercode] || { text: "Onbekend", icon: "⛅" };
-                const currentIcon = res.is_day ? info.icon : (info.iconNight || info.icon);
-                iconEl.textContent = currentIcon;
-                tempEl.textContent = `${Math.round(res.temp)}°C`;
-                descEl.textContent = info.text;
-                cityEl.textContent = `📍 ${res.city}`;
-                if (res.precipitation > 0) {
-                  rainEl.style.display = "inline-flex";
-                  rainVal.textContent = res.precipitation;
-                } else {
-                  rainEl.style.display = "none";
-                }
+                const icon = res.is_day ? info.icon : (info.iconNight || info.icon);
+                const rain = res.precipitation > 0 ? ` · 💧 ${res.precipitation}%` : "";
+                weatherEl.innerHTML = `${icon} <b>${Math.round(res.temp)}°</b> ${escapeHtml(info.text)} · ${escapeHtml(res.city || cityLabel)}${rain}`;
               });
             }
 
-            container.querySelector(".et-weather-refresh")?.addEventListener("click", fetchWeatherData);
+            weatherEl?.addEventListener("click", fetchWeatherData);
             fetchWeatherData();
             window.setInterval(fetchWeatherData, 15 * 60 * 1000);
             chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -988,13 +967,19 @@
           // Pomodoro Focus Timer logica
           if (showPomodoro) {
             const displayEl = container.querySelector("#et-pomo-time");
+            const modeEl = container.querySelector(".et-pomo-mode");
+            const ringEl = container.querySelector(".et-ring");
+            const arcEl = container.querySelector(".et-ring-fg");
             const toggleBtn = container.querySelector("#et-pomo-toggle");
             const resetBtn = container.querySelector("#et-pomo-reset");
-            const tabs = container.querySelectorAll(".et-pomo-tab");
+            const tabs = container.querySelectorAll(".et-seg button");
+            const circumference = 2 * Math.PI * 54;
+            const modes = { 1500: "focus", 300: "pauze", 900: "lange pauze" };
 
             let currentDuration = 1500;
             let timeLeft = 1500;
             let timerId = null;
+            arcEl.style.strokeDasharray = String(circumference);
 
             function formatPomo(seconds) {
               const m = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -1003,50 +988,45 @@
             }
 
             function updateDisplay() {
-              if (displayEl) displayEl.textContent = formatPomo(timeLeft);
+              displayEl.textContent = timeLeft > 0 ? formatPomo(timeLeft) : "Klaar!";
+              modeEl.textContent = modes[currentDuration] || "focus";
+              ringEl.classList.toggle("is-done", timeLeft === 0);
+              arcEl.style.strokeDashoffset = String(circumference * (1 - timeLeft / currentDuration));
+            }
+
+            function stop(label) {
+              clearInterval(timerId);
+              timerId = null;
+              toggleBtn.textContent = label;
             }
 
             tabs.forEach((tab) => {
               tab.addEventListener("click", () => {
-                tabs.forEach((t) => t.classList.remove("active"));
-                tab.classList.add("active");
-                clearInterval(timerId);
-                timerId = null;
-                if (toggleBtn) toggleBtn.textContent = "Start";
+                tabs.forEach((t) => t.classList.toggle("is-on", t === tab));
+                stop("Start");
                 currentDuration = Number(tab.dataset.time);
                 timeLeft = currentDuration;
                 updateDisplay();
               });
             });
 
-            toggleBtn?.addEventListener("click", () => {
-              if (timerId) {
-                clearInterval(timerId);
-                timerId = null;
-                toggleBtn.textContent = "Hervat";
-              } else {
-                toggleBtn.textContent = "Pauze";
-                timerId = setInterval(() => {
-                  if (timeLeft > 0) {
-                    timeLeft--;
-                    updateDisplay();
-                  } else {
-                    clearInterval(timerId);
-                    timerId = null;
-                    toggleBtn.textContent = "Start";
-                    displayEl.textContent = "00:00 - Klaar!";
-                  }
-                }, 1000);
-              }
+            toggleBtn.addEventListener("click", () => {
+              if (timerId) return stop("Hervat");
+              if (timeLeft === 0) timeLeft = currentDuration;
+              toggleBtn.textContent = "Pauze";
+              timerId = setInterval(() => {
+                if (timeLeft > 0) timeLeft--;
+                if (timeLeft === 0) stop("Opnieuw");
+                updateDisplay();
+              }, 1000);
             });
 
-            resetBtn?.addEventListener("click", () => {
-              clearInterval(timerId);
-              timerId = null;
-              if (toggleBtn) toggleBtn.textContent = "Start";
+            resetBtn.addEventListener("click", () => {
+              stop("Start");
               timeLeft = currentDuration;
               updateDisplay();
             });
+            updateDisplay();
           }
 
           // Snelle Cijfercalculator logica
@@ -1058,37 +1038,30 @@
             const neededOutput = container.querySelector("#et-calc-needed");
 
             function calcNeeded() {
-              const curAvg = parseFloat(avgInput?.value || 0);
-              const curWeights = parseFloat(weightsInput?.value || 1);
-              const target = parseFloat(targetInput?.value || 0);
-              const futureWeight = parseFloat(futureInput?.value || 1);
+              const curAvg = parseFloat(avgInput.value);
+              const curWeights = parseFloat(weightsInput.value);
+              const target = parseFloat(targetInput.value);
+              const futureWeight = parseFloat(futureInput.value);
+              neededOutput.className = "";
 
-              if (isNaN(curAvg) || isNaN(curWeights) || isNaN(target) || isNaN(futureWeight) || futureWeight <= 0) {
-                if (neededOutput) neededOutput.textContent = "—";
+              if ([curAvg, curWeights, target, futureWeight].some(isNaN) || futureWeight <= 0) {
+                neededOutput.textContent = "—";
                 return;
               }
 
-              const totalCurrent = curAvg * curWeights;
-              const totalNewWeight = curWeights + futureWeight;
-              const needed = (target * totalNewWeight - totalCurrent) / futureWeight;
-
-              if (neededOutput) {
-                if (needed > 10) {
-                  neededOutput.textContent = `${needed.toFixed(1)} (Onhaalbaar)`;
-                  neededOutput.style.color = "#ef4444";
-                } else if (needed < 1) {
-                  neededOutput.textContent = `≤ 1,0 (Al gehaald!)`;
-                  neededOutput.style.color = "#10b981";
-                } else {
-                  neededOutput.textContent = needed.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-                  neededOutput.style.color = "var(--color-bg-fill-action, #3b82f6)";
-                }
+              const needed = (target * (curWeights + futureWeight) - curAvg * curWeights) / futureWeight;
+              if (needed > 10) {
+                neededOutput.textContent = `${needed.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} · onhaalbaar`;
+                neededOutput.className = "is-bad";
+              } else if (needed < 1) {
+                neededOutput.textContent = "Al gehaald!";
+                neededOutput.className = "is-ok";
+              } else {
+                neededOutput.textContent = needed.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
               }
             }
 
-            [avgInput, weightsInput, targetInput, futureInput].forEach((inp) => {
-              inp?.addEventListener("input", calcNeeded);
-            });
+            [avgInput, weightsInput, targetInput, futureInput].forEach((inp) => inp.addEventListener("input", calcNeeded));
             calcNeeded();
           }
         }
@@ -1143,7 +1116,7 @@
           .toggle {
             position: fixed; z-index: 2147483646; right: 18px; bottom: 20px;
             display: grid; place-items: center;
-            width: 56px; height: 56px; border: 0; border-radius: 50%;
+            width: 48px; height: 48px; border: 0; border-radius: 14px;
             color: var(--grade-on-primary); background: var(--grade-primary);
             box-shadow: 0 3px 10px rgba(0,0,0,.2); cursor: pointer;
             transition: box-shadow .18s ease, background-color .18s ease, transform .18s ease;
