@@ -8,6 +8,7 @@ import LoginPanel from "./panels/LoginPanel.vue";
 import SidebarPanel from "./panels/SidebarPanel.vue";
 import StartPanel from "./panels/StartPanel.vue";
 import GradesPanel from "./panels/GradesPanel.vue";
+import RoosterPanel from "./panels/RoosterPanel.vue";
 import ShortcutsPanel from "./panels/ShortcutsPanel.vue";
 import IdeasPanel from "./panels/IdeasPanel.vue";
 import AboutPanel from "./panels/AboutPanel.vue";
@@ -17,7 +18,7 @@ const tab = ref("theme");
 
 const panels = {
   theme: ThemePanel, login: LoginPanel, sidebar: SidebarPanel, start: StartPanel,
-  grades: GradesPanel, shortcuts: ShortcutsPanel, ideas: IdeasPanel, about: AboutPanel,
+  grades: GradesPanel, rooster: RoosterPanel, shortcuts: ShortcutsPanel, ideas: IdeasPanel, about: AboutPanel,
 };
 
 onMounted(load);

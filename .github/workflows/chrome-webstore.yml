@@ -11,6 +11,7 @@ on:
       - "content.js"
       - "eduarte-api.js"
       - "grade-calculator.js"
+      - "rooster-sync.js"
       - "overlay.js"
       - "location-tracker.html"
       - "location-tracker.js"
@@ -64,7 +65,7 @@ jobs:
           set -euo pipefail
           rm -rf extension-package extension.zip
           mkdir -p extension-package
-          cp manifest.json background.js badge-logic.js badge.js content.js eduarte-api.js grade-calculator.js overlay.js theme.js location-tracker.html location-tracker.js extension-package/
+          cp manifest.json background.js badge-logic.js badge.js content.js eduarte-api.js grade-calculator.js rooster-sync.js overlay.js theme.js location-tracker.html location-tracker.js extension-package/
           cp -R icons assets popup-dist extension-package/
           python3 - <<'PY'
           import json

@@ -14,6 +14,13 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 - **Automatisch inloggen** op Eduarte/ADFS- en Microsoft-inlogpagina's van
   verschillende Eduarte- en Educus-omgevingen, met optioneel automatisch
   verzenden (geen klik nodig).
+- **Agenda-sync naar Outlook / Google Agenda** — zet je Eduarte-rooster
+  automatisch in je agenda. Als je Eduarte opent (hooguit één keer per uur)
+  leest de extensie de agenda-lijstweergave (2 weken terug, 16 vooruit), maakt
+  er een `.ics`-bestand van en zet dat in een geheime GitHub Gist met je eigen
+  token (alleen `gist`-rechten). Abonneer je in Outlook via *Agenda toevoegen →
+  Abonneren vanaf internet* op de vaste link; wijzigingen in je rooster komen
+  vanzelf door. Zonder token kun je het `.ics`-bestand ook downloaden.
 - **Cijfertools** — calculator met geselecteerde Eduarte-cijfers, gewogen
   gemiddelde en voorspelling, statistieken met cijferverdeling, een sorteerbare
   lijst en lokale JSON-back-up/import. De ingebouwde `EduarteApi`-adapter leest

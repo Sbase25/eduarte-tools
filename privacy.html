@@ -31,6 +31,14 @@
   functie Mijn team. Dit gebeurt alleen op jouw apparaat, wordt nergens heen
   gestuurd en je kunt het op elk moment verwijderen op de Team-pagina.</p>
 
+  <p>Als je de agenda-sync gebruikt, leest de extensie je rooster (tijden,
+  vakcodes, docentcodes en lokalen) uit de Eduarte-agenda en bewaart het als
+  agendabestand lokaal. Alleen als je zelf een GitHub-token invult, wordt dat
+  bestand met jouw token naar een geheime Gist op jouw GitHub-account
+  (<code>api.github.com</code>) gestuurd, zodat je agenda-app zich erop kan
+  abonneren. Een geheime Gist is niet vindbaar, maar wel leesbaar voor iedereen
+  die de link heeft. Je kunt de Gist op elk moment op GitHub verwijderen.</p>
+
   <h2>Opslag en delen</h2>
   <p>Voorkeuren en eventuele logingegevens worden uitsluitend opgeslagen in
   <code>chrome.storage.local</code> (in Firefox: <code>browser.storage.local</code>) op je eigen apparaat. Eduarte Tools verkoopt,
@@ -55,7 +63,9 @@
   <p>Alleen als je locatiegebruik aanzet voor het weer, communiceert de extensie
   met <code>api.open-meteo.com</code>, <code>geocoding-api.open-meteo.com</code>
   en <code>nominatim.openstreetmap.org</code>. Daarbij worden alleen coördinaten
-  of een plaatsnaam verstuurd, nooit logingegevens of cijfers. Andere externe
+  of een plaatsnaam verstuurd, nooit logingegevens of cijfers. Alleen als je de
+  agenda-sync met een GitHub-token instelt, wordt je rooster naar
+  <code>api.github.com</code> gestuurd (zie hierboven). Andere externe
   verbindingen worden niet gemaakt.</p>
 
   <h2>Contact</h2>

@@ -32,6 +32,7 @@ const tabs = [
   { id: "sidebar", name: "Menubalk", icon: "thumbnail_bar" },
   { id: "start", name: "Start", icon: "home" },
   { id: "grades", name: "Cijfers", icon: "workspace_premium" },
+  { id: "rooster", name: "Agenda", icon: "calendar_month" },
   { id: "shortcuts", name: "Sneltoetsen", icon: "keyboard" },
   { id: "packs", name: "Packs", icon: "redeem" },
   { id: "team", name: "Team", icon: "groups" },

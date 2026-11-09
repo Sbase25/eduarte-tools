@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Eduarte Tools",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Automatisch inloggen, donkere modus, thema's en een cijfercalculator voor Eduarte-portalen. Geïnspireerd door Study Tools.",
   "icons": {
     "16": "icons/icon16.png",
@@ -47,6 +47,9 @@
     "https://login.microsoft.com/*",
     "https://login.live.com/*"
   ],
+  "optional_host_permissions": [
+    "https://api.github.com/*"
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -58,6 +61,7 @@
       ],
       "js": [
         "eduarte-api.js",
+        "rooster-sync.js",
         "grade-calculator.js",
         "overlay.js",
         "badge-logic.js",

@@ -281,3 +281,134 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; // Asynchrone respons behouden
   }
 });
+
+// ---- Agenda-sync ----
+// rooster-sync.js (content script) maakt een .ics van het Eduarte-rooster. Hier
+// wordt dat bestand opgeslagen en, als er een GitHub-token is ingesteld, naar
+// een geheime Gist geüpload. Outlook/Google Agenda abonneert zich op de vaste
+// "raw"-link van die Gist en ververst zelf periodiek.
+const ROOSTER_FILE_NAME = "eduarte-rooster.ics";
+const ROOSTER_TAB_PATTERNS = ["https://*.educus.nl/*", "https://*.eduarte.nl/*"];
+
+function githubRequest(token, path, options = {}) {
+  return fetch(`https://api.github.com${path}`, {
+    ...options,
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+    },
+  });
+}
+
+async function githubError(response) {
+  let message = "";
+  try {
+    message = (await response.json()).message || "";
+  } catch { /* geen JSON */ }
+  if (response.status === 401) return "GitHub-token is ongeldig of verlopen.";
+  if (response.status === 403 || response.status === 404) {
+    return `GitHub weigert de toegang (${response.status}). Heeft het token de 'gist'-rechten?`;
+  }
+  return `GitHub-fout ${response.status}${message ? `: ${message}` : ""}`;
+}
+
+async function uploadRoosterGist(token, gistId, ics) {
+  const body = JSON.stringify({
+    description: "Eduarte rooster (automatisch bijgewerkt door Eduarte Tools)",
+    files: { [ROOSTER_FILE_NAME]: { content: ics } },
+  });
+  let response = gistId
+    ? await githubRequest(token, `/gists/${encodeURIComponent(gistId)}`, { method: "PATCH", body })
+    : null;
+  if (!response || response.status === 404) {
+    // Nog geen Gist, of de oude is verwijderd: maak een nieuwe geheime Gist.
+    response = await githubRequest(token, "/gists", {
+      method: "POST",
+      body: JSON.stringify({ ...JSON.parse(body), public: false }),
+    });
+  }
+  if (!response.ok) throw new Error(await githubError(response));
+  const gist = await response.json();
+  return {
+    gistId: gist.id,
+    url: `https://gist.githubusercontent.com/${gist.owner?.login}/${gist.id}/raw/${ROOSTER_FILE_NAME}`,
+  };
+}
+
+async function handleRoosterUpload(request) {
+  const ics = String(request.ics || "");
+  if (!ics.startsWith("BEGIN:VCALENDAR") || ics.length > 900000) {
+    throw new Error("Ongeldig agendabestand.");
+  }
+  const settings = await chrome.storage.local.get([
+    "eduarteRoosterGithubToken", "eduarteRoosterGistId", "eduarteRoosterHash", "eduarteRoosterUrl",
+  ]);
+  const now = Date.now();
+  const update = {
+    eduarteRoosterIcs: ics,
+    eduarteRoosterCount: Number(request.count) || 0,
+    eduarteRoosterLastRun: now,
+    eduarteRoosterLastError: "",
+  };
+
+  const token = String(settings.eduarteRoosterGithubToken || "").trim();
+  const unchanged = request.hash && request.hash === settings.eduarteRoosterHash && settings.eduarteRoosterUrl;
+  if (token && (!unchanged || request.force)) {
+    const { gistId, url } = await uploadRoosterGist(token, settings.eduarteRoosterGistId, ics);
+    Object.assign(update, {
+      eduarteRoosterGistId: gistId,
+      eduarteRoosterUrl: url,
+      eduarteRoosterHash: request.hash || "",
+      eduarteRoosterLastUpload: now,
+    });
+  }
+  await chrome.storage.local.set(update);
+  return { success: true, count: update.eduarteRoosterCount, uploaded: Boolean(update.eduarteRoosterLastUpload), url: update.eduarteRoosterUrl || settings.eduarteRoosterUrl || "" };
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request?.type === "ROOSTER_SYNC_UPLOAD") {
+    if (!sender.tab || !isEduarteTab(sender.tab)) {
+      sendResponse({ success: false, error: "Het rooster kan alleen vanaf een Eduarte-pagina worden gesynchroniseerd." });
+      return;
+    }
+    handleRoosterUpload(request).then(sendResponse).catch(async (error) => {
+      await chrome.storage.local.set({ eduarteRoosterLastError: error.message, eduarteRoosterLastRun: Date.now() });
+      sendResponse({ success: false, error: error.message });
+    });
+    return true;
+  }
+
+  if (request?.type === "ROOSTER_SYNC_NOW") {
+    // Vanuit de popup: laat een open Eduarte-tab het rooster ophalen.
+    const isExtensionPage = sender.url?.startsWith(chrome.runtime.getURL(""));
+    if (sender.tab && !isExtensionPage) {
+      sendResponse({ success: false, error: "Deze actie is alleen beschikbaar vanuit Eduarte Tools." });
+      return;
+    }
+    chrome.tabs.query({ url: ROOSTER_TAB_PATTERNS }).then((tabs) => {
+      const tab = tabs.find((candidate) => isEduarteTab(candidate));
+      if (!tab) {
+        sendResponse({ success: false, error: "Open Eduarte in een tabblad en log in, en probeer het dan opnieuw." });
+        return;
+      }
+      chrome.tabs.sendMessage(tab.id, { type: "ROOSTER_SYNC_RUN" }, (response) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: "Herlaad het Eduarte-tabblad en probeer het opnieuw." });
+          return;
+        }
+        sendResponse(response || { success: false, error: "Geen antwoord van het Eduarte-tabblad." });
+      });
+    }).catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+});
+
+// Als de popup sluit tijdens de toestemmingsvraag, zet de sync hier alsnog aan.
+chrome.permissions?.onAdded?.addListener((permissions) => {
+  if (permissions.origins?.some((origin) => origin.startsWith("https://api.github.com/"))) {
+    chrome.storage.local.set({ eduarteRoosterSyncEnabled: true });
+  }
+});
