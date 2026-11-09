@@ -3,11 +3,14 @@
 
 # Eduarte Tools
 
-Een Chrome-extensie die het Eduarte-studentenportaal 
-fijner maakt om te gebruiken:
-automatisch inloggen op meerdere Eduarte-omgevingen, donkere modus, een
-eigen kleurenthema, een cijfercalculator en een glasmorfisme-preset. Geïnspireerd door [Study Tools voor
+Een browserextensie die het Eduarte-studentenportaal fijner maakt om te
+gebruiken: automatisch inloggen op meerdere Eduarte-omgevingen, donkere modus,
+thema's, widgets op de startpagina, een cijfercalculator en je rooster in je
+eigen agenda. Geïnspireerd door [Study Tools voor
 Magister](https://github.com/QkeleQ10/Study-Tools).
+
+**[Installeer Eduarte Tools in de Chrome Web Store](https://chromewebstore.google.com/search/Eduarte%20Tools)**
+(werkt ook in Edge) · Volg [@eduartetools](https://www.instagram.com/eduartetools/) op Instagram
 
 ## Functies
 
@@ -59,6 +62,10 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   (`--color-bg`, `--color-text-primary`, ...) met dynamische accenten en custom CSS ondersteuning.
 - **Eigen thema** — kies 4 basiskleuren (achtergrond, oppervlak, tekst,
   randen); de rest wordt automatisch afgeleid.
+- **Rooster in je agenda** — zet je Eduarte-rooster in Outlook, Google Agenda
+  of de agenda van je telefoon via een persoonlijke agenda-link. Je agenda-app
+  haalt wijzigingen zelf op. Alleen lesnaam, tijden, lokaal en docentcode gaan
+  naar de agendaserver; zie het [privacybeleid](privacy.html).
 - **Huiswerk & Deadlines Widget** — houd zelf je huiswerk en deadlines bij
   (vak, omschrijving, datum) met kleurcodering naar urgentie, direct op het
   dashboard.
@@ -95,6 +102,12 @@ Eduarte-site (Add-ons → Eduarte Tools → Machtigingen), anders draait hij daa
 
 ## Installatie
 
+De makkelijkste manier: installeer Eduarte Tools via de
+[Chrome Web Store](https://chromewebstore.google.com/search/Eduarte%20Tools).
+Je krijgt dan ook automatisch updates.
+
+### Zelf laden (voor ontwikkelaars)
+
 1. Download of clone deze repository.
 2. Open `chrome://extensions` in Chrome of Edge.
 3. Zet **Ontwikkelaarsmodus** aan (rechtsboven).
@@ -102,8 +115,10 @@ Eduarte-site (Add-ons → Eduarte Tools → Machtigingen), anders draait hij daa
 5. Klik op het extensie-icoon, vul je gegevens in bij **Inloggen**, en
    stel je uiterlijk in bij **Uiterlijk** / **Eigen thema**.
 
-Gegevens worden alleen lokaal in je browser opgeslagen
-(`chrome.storage.local`) en nergens naartoe verzonden.
+Instellingen, inloggegevens en cijfers worden alleen lokaal in je browser
+opgeslagen (`chrome.storage.local`) en nergens naartoe verzonden. Alleen als je
+zelf een agenda-link maakt, gaat je rooster naar de agendaserver van Eduarte
+Tools (zie het [privacybeleid](privacy.html)).
 
 Voor het weer kan de extensie, na jouw toestemming, je huidige locatie
 gebruiken. De coördinaten worden lokaal bewaard en alleen naar Open-Meteo
