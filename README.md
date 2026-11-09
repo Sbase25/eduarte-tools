@@ -9,7 +9,7 @@ thema's, widgets op de startpagina, een cijfercalculator en je rooster in je
 eigen agenda. Geïnspireerd door [Study Tools voor
 Magister](https://github.com/QkeleQ10/Study-Tools).
 
-**[Installeer Eduarte Tools in de Chrome Web Store](https://chromewebstore.google.com/search/Eduarte%20Tools)**
+**[Installeer Eduarte Tools in de Chrome Web Store](https://chromewebstore.google.com/detail/mmjkngjpdflanccahmndkofkpgnkbcnm)**
 (werkt ook in Edge) · Volg [@eduartetools](https://www.instagram.com/eduartetools/) op Instagram
 
 ## Functies
@@ -103,7 +103,7 @@ Eduarte-site (Add-ons → Eduarte Tools → Machtigingen), anders draait hij daa
 ## Installatie
 
 De makkelijkste manier: installeer Eduarte Tools via de
-[Chrome Web Store](https://chromewebstore.google.com/search/Eduarte%20Tools).
+[Chrome Web Store](https://chromewebstore.google.com/detail/mmjkngjpdflanccahmndkofkpgnkbcnm).
 Je krijgt dan ook automatisch updates.
 
 ### Zelf laden (voor ontwikkelaars)
