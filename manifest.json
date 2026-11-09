@@ -46,7 +46,7 @@
     "https://*.microsoftonline.com/*",
     "https://login.microsoft.com/*",
     "https://login.live.com/*",
-    "https://eduarte-agenda.workers.dev/*"
+    "https://eduarte-agenda.sbaselmans1.workers.dev/*"
   ],
   "content_scripts": [
     {

@@ -8,7 +8,7 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.EduarteCalendar = api;
 })(globalThis, function () {
-  const SERVER = "https://eduarte-agenda.workers.dev";
+  const SERVER = "https://eduarte-agenda.sbaselmans1.workers.dev";
   const FEED_KEY = "eduarteCalendarFeed";
 
   function storageGet(keys) {

@@ -3,7 +3,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 
 const hasChrome = typeof chrome !== "undefined" && chrome.runtime?.sendMessage;
 // Moet gelijk zijn aan SERVER in calendar-feed.js
-const SERVER = "https://eduarte-agenda.workers.dev";
+const SERVER = "https://eduarte-agenda.sbaselmans1.workers.dev";
 
 const feed = ref(null);
 const lastSync = ref(0);
