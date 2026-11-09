@@ -19,8 +19,7 @@
   "permissions": [
     "storage",
     "geolocation",
-    "offscreen",
-    "identity"
+    "offscreen"
   ],
   "background": {
     "service_worker": "background.js"
@@ -47,7 +46,7 @@
     "https://*.microsoftonline.com/*",
     "https://login.microsoft.com/*",
     "https://login.live.com/*",
-    "https://graph.microsoft.com/*"
+    "https://eduarte-agenda.workers.dev/*"
   ],
   "content_scripts": [
     {

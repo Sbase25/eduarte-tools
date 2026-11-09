@@ -3,7 +3,7 @@ import { ref } from "vue";
 import SwitchInput from "../components/SwitchInput.vue";
 import MaterialTextField from "../components/MaterialTextField.vue";
 import MaterialSlider from "../components/MaterialSlider.vue";
-import OutlookSync from "../components/OutlookSync.vue";
+import CalendarLink from "../components/CalendarLink.vue";
 
 const props = defineProps(["state"]);
 const s = props.state;
@@ -71,7 +71,7 @@ function useCurrentLocation() {
     <MaterialSlider v-model="s.eduarteAnimationSpeed" min="0" max="100" label="Animatie-snelheid" />
     <div class="range-value">Animatie-snelheid</div>
   </div>
-  <OutlookSync :state="s" />
+  <CalendarLink />
 </template>
 
 <style scoped>

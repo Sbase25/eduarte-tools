@@ -192,8 +192,8 @@
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
 
-  // Stuurt een week naar de achtergrond, die hem (als Outlook gekoppeld is) in je agenda zet
-  function sendWeekToOutlook(week) {
+  // Stuurt een week naar de achtergrond, die hem in je persoonlijke agenda-link zet
+  function sendWeekToCalendar(week) {
     if (!week.from || typeof chrome === "undefined" || !chrome.runtime?.sendMessage) return Promise.resolve(null);
     const payload = {
       from: lessonDate(week.from, 0).toISOString(),
@@ -208,14 +208,14 @@
       })),
     };
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({ type: "OUTLOOK_SYNC_WEEK", week: payload }, (res) => {
+      chrome.runtime.sendMessage({ type: "CALENDAR_SYNC_WEEK", week: payload }, (res) => {
         if (chrome.runtime.lastError) resolve({ success: false, error: chrome.runtime.lastError.message });
         else resolve(res);
       });
     });
   }
 
-  // Knoppen "Download .ics" en "Sync met Outlook" in de filterbalk van de agenda
+  // Knoppen "Download .ics" en "Sync agenda" in de filterbalk van de agenda
   function addCalendarButtons(doc) {
     const bar = doc.querySelector(".agenda-filter .filter--inner");
     if (!bar || bar.querySelector(".et-cal-actions")) return;
@@ -239,25 +239,25 @@
       <button type="button" class="et-cal-ics" title="Download deze week als .ics voor Outlook, Google of Apple Agenda">
         <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>.ics
       </button>
-      <button type="button" class="et-cal-sync is-primary" title="Zet deze week in je Outlook-agenda">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Sync met Outlook
+      <button type="button" class="et-cal-sync is-primary" title="Zet deze week in je agenda-link (Outlook, Google, Apple)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Sync agenda
       </button>`;
     bar.appendChild(wrap);
     const status = wrap.querySelector(".et-cal-status");
     wrap.querySelector(".et-cal-ics").addEventListener("click", () => downloadIcs(doc, getWeekLessons(doc)));
     wrap.querySelector(".et-cal-sync").addEventListener("click", async () => {
       status.textContent = "Synchroniseren…";
-      const res = await sendWeekToOutlook(getWeekLessons(doc));
+      const res = await sendWeekToCalendar(getWeekLessons(doc));
       status.textContent = res?.success
-        ? `In Outlook gezet (${res.created} nieuw, ${res.removed} weg)`
+        ? `${res.lessons} lessen in je agenda gezet`
         : (res?.error || "Sync mislukt");
     });
   }
 
   // Automatisch bijwerken: elke keer dat je Eduarte opent (hooguit eens per uur) en bij elke week die je in de agenda bekijkt
   function autoSync(doc) {
-    chrome.storage.local.get(["eduarteOutlookSync", "eduarteOutlookLastSync"], (s) => {
-      if (!s.eduarteOutlookSync) return;
+    chrome.storage.local.get(["eduarteCalendarFeed", "eduarteCalendarLastSync"], (s) => {
+      if (!s.eduarteCalendarFeed) return;
       if (/^\/agenda/i.test(location.pathname)) {
         let lastSignature = "";
         const syncVisibleWeek = () => {
@@ -265,13 +265,13 @@
           const signature = JSON.stringify(week);
           if (!week.from || signature === lastSignature) return;
           lastSignature = signature;
-          sendWeekToOutlook(week);
+          sendWeekToCalendar(week);
         };
         syncVisibleWeek();
         new doc.defaultView.MutationObserver(() => setTimeout(syncVisibleWeek, 500))
           .observe(doc.querySelector(".agenda") || doc.body, { childList: true, subtree: true });
-      } else if (Date.now() - (s.eduarteOutlookLastSync || 0) > 60 * 60 * 1000) {
-        fetchAgendaDocument().then((agendaDoc) => sendWeekToOutlook(getWeekLessons(agendaDoc))).catch(() => {});
+      } else if (Date.now() - (s.eduarteCalendarLastSync || 0) > 60 * 60 * 1000) {
+        fetchAgendaDocument().then((agendaDoc) => sendWeekToCalendar(getWeekLessons(agendaDoc))).catch(() => {});
       }
     });
   }

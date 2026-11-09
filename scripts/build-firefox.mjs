@@ -13,7 +13,7 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 for (const entry of [
   "background.js", "badge-logic.js", "badge.js", "content.js", "eduarte-api.js",
-  "grade-calculator.js", "agenda.js", "outlook-sync.js", "overlay.js", "theme.js", "privacy.html",
+  "grade-calculator.js", "agenda.js", "calendar-feed.js", "overlay.js", "theme.js", "privacy.html",
   "popup-dist", "icons", "assets", "LICENSE", "THIRD_PARTY_NOTICES.txt",
 ]) {
   cpSync(join(root, entry), join(out, entry), { recursive: true });
@@ -23,7 +23,7 @@ for (const entry of [
 // terug op navigator.geolocation in de achtergrondpagina).
 const firefox = { ...manifest };
 firefox.permissions = manifest.permissions.filter((permission) => permission !== "offscreen");
-firefox.background = { scripts: ["outlook-sync.js", "background.js"] };
+firefox.background = { scripts: ["calendar-feed.js", "background.js"] };
 firefox.browser_specific_settings = {
   gecko: {
     id: "eduarte-tools@sbase25.github.io",
