@@ -13,7 +13,7 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 for (const entry of [
   "background.js", "badge-logic.js", "badge.js", "content.js", "eduarte-api.js",
-  "grade-calculator.js", "overlay.js", "theme.js", "privacy.html",
+  "grade-calculator.js", "agenda.js", "overlay.js", "theme.js", "privacy.html",
   "popup-dist", "icons", "assets", "LICENSE", "THIRD_PARTY_NOTICES.txt",
 ]) {
   cpSync(join(root, entry), join(out, entry), { recursive: true });

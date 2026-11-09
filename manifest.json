@@ -59,6 +59,7 @@
       "js": [
         "eduarte-api.js",
         "grade-calculator.js",
+        "agenda.js",
         "overlay.js",
         "badge-logic.js",
         "badge.js",
