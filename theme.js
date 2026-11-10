@@ -1432,6 +1432,11 @@
     }
 
     /* ---- Platte interface: vaste zijbalk, slanke bovenbalk, rustige kaarten ---- */
+    /* Pagina minstens schermhoog, anders tekent de browser het zwevende menu in twee tinten */
+    html, body {
+      min-height: 100vh !important;
+    }
+
     /* Menu links als zwevend paneel, in de stijl van een modern contextmenu */
     nav.navigation,
     nav.navigation.navigation--student,
@@ -1441,10 +1446,10 @@
       margin: 10px 0 10px 10px !important;
       border: 1px solid color-mix(in srgb, ${text} 9%, transparent) !important;
       border-radius: 18px !important;
-      background: color-mix(in srgb, ${surface} 92%, ${text} 2%) !important;
+      background: color-mix(in srgb, ${surface} 97%, ${text} 3%) !important;
       box-shadow: 0 1px 0 color-mix(in srgb, ${text} 6%, transparent) inset, 0 16px 40px -12px rgba(0,0,0,.55) !important;
-      backdrop-filter: blur(16px) saturate(140%) !important;
-      -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
 
     nav.navigation.navigation--student .navigation-header {
@@ -1474,12 +1479,15 @@
     nav.navigation.navigation--student .navigation-footer ul::before { content: "Account" !important; }
 
     nav.navigation.navigation--student .navigation-footer {
-      margin: 0 10px !important;
+      width: auto !important;
+      margin: auto 10px 0 !important;
       padding: 4px 0 6px !important;
       border-top: 1px solid color-mix(in srgb, ${text} 8%, transparent) !important;
     }
 
     nav.navigation.navigation--student .navigation-footer ul {
+      width: 100% !important;
+      box-sizing: border-box !important;
       padding-inline: 0 !important;
     }
 
