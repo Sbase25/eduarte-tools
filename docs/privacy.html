@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacybeleid Eduarte Tools</title>
+  <style>
+    body { font: 16px/1.6 system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; color: #202124; }
+    h1 { line-height: 1.2; }
+  </style>
+</head>
+<body>
+  <h1>Privacybeleid Eduarte Tools</h1>
+  <p><strong>Laatst bijgewerkt: 9 november 2026</strong></p>
+
+  <p>Eduarte Tools is een onafhankelijke browserextensie die de gebruikerservaring
+  van Eduarte-portalen verbetert met lokale loginassistentie, thema's, navigatie
+  en een cijfercalculator.</p>
+
+  <h2>Welke gegevens worden gebruikt?</h2>
+  <p>Als je de loginassistentie inschakelt, kan de extensie een gebruikersnaam en
+  wachtwoord lokaal in je browser (Chrome, Edge of Firefox) opslaan. Deze gegevens worden niet door Eduarte
+  Tools naar een eigen server gestuurd.</p>
+  <p>Als je de weerwidget instelt op je huidige locatie, vraagt de browser om
+  toestemming voor locatiegebruik. De extensie bewaart de coördinaten lokaal,
+  werkt ze bij wanneer je locatie verandert en stuurt ze alleen naar Open-Meteo
+  voor het weerbericht en OpenStreetMap Nominatim voor de plaatsnaam.</p>
+
+  <p>Als je een pack opent, bewaart de extensie de onthulde kaarten (vaknaam,
+  cijfer, weging en een daaruit afgeleide rating) lokaal op je apparaat voor de
+  functie Mijn team. Dit gebeurt alleen op jouw apparaat, wordt nergens heen
+  gestuurd en je kunt het op elk moment verwijderen op de Team-pagina.</p>
+
+  <p>Alleen als je zelf een agenda-link maakt (Startpagina → Rooster in je agenda),
+  stuurt de extensie de lessen uit je Eduarte-agenda naar de agenda-server van
+  Eduarte Tools (<code>eduarte-agenda.sbaselmans1.workers.dev</code>, gehost bij Cloudflare).
+  Dat zijn per les: de lesnaam, begin- en eindtijd, het lokaal en de docentcode.
+  Je naam, studentnummer, cijfers en logingegevens worden niet verstuurd. De server
+  maakt daar een agenda-bestand van dat alleen bereikbaar is via jouw persoonlijke,
+  willekeurige link, zodat Outlook, Google of Apple Agenda het kan ophalen. Lessen
+  ouder dan 60 dagen worden verwijderd; een link die 4 maanden niet is bijgewerkt
+  wordt in zijn geheel verwijderd. Met de knop <em>Verwijderen</em> in de extensie
+  wis je je agenda-link en de bijbehorende lessen direct van de server.</p>
+
+  <h2>Opslag en delen</h2>
+  <p>Voorkeuren en eventuele logingegevens worden uitsluitend opgeslagen in
+  <code>chrome.storage.local</code> (in Firefox: <code>browser.storage.local</code>) op je eigen apparaat. Eduarte Tools verkoopt,
+  deelt of gebruikt deze gegevens niet voor advertenties of profilering.</p>
+
+  <h2>Toegang tot websites</h2>
+  <p>De extensie werkt alleen op ondersteunde Eduarte- en aanmeldpagina's. Dat
+  zijn Eduarte- en Educus-portalen (<code>*.educus.nl</code>, <code>*.eduarte.nl</code>),
+  de Microsoft-inlogpagina's (<code>login.microsoftonline.com</code>,
+  <code>login.microsoft.com</code>, <code>login.live.com</code>) en de
+  ADFS-inlogpagina van Onderwijsgroep Tilburg. De
+  website-inhoud wordt gebruikt om de interface aan te passen, de loginassistentie
+  uit te voeren en cijfers voor de calculator te lezen. Er worden geen
+  analysetools of trackingdiensten gebruikt.</p>
+
+  <h2>Je keuzes</h2>
+  <p>Je kunt opgeslagen gegevens via de instellingen van de extensie verwijderen.
+  Bij het verwijderen van de extensie worden de lokaal opgeslagen gegevens door
+  je browser verwijderd.</p>
+
+  <h2>Externe diensten</h2>
+  <p>Alleen als je locatiegebruik aanzet voor het weer, communiceert de extensie
+  met <code>api.open-meteo.com</code>, <code>geocoding-api.open-meteo.com</code>
+  en <code>nominatim.openstreetmap.org</code>. Daarbij worden alleen coördinaten
+  of een plaatsnaam verstuurd, nooit logingegevens of cijfers. Alleen als je een
+  agenda-link maakt, communiceert de extensie met <code>eduarte-agenda.sbaselmans1.workers.dev</code>
+  zoals hierboven beschreven. Andere externe verbindingen worden niet gemaakt.</p>
+
+  <h2>Contact</h2>
+  <p>Eduarte Tools is een onafhankelijk, niet-officieel project en is niet
+  verbonden aan of goedgekeurd door een onderwijsinstelling of Eduarte.
+  Vragen? Open een issue op
+  <a href="https://github.com/Sbase25/eduarte-tools">github.com/Sbase25/eduarte-tools</a>
+  of stuur een bericht via Instagram: <a href="https://www.instagram.com/eduartetools/">@eduartetools</a>.</p>
+</body>
+</html>

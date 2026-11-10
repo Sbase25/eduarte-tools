@@ -10,7 +10,7 @@ eigen agenda. Geïnspireerd door [Study Tools voor
 Magister](https://github.com/QkeleQ10/Study-Tools).
 
 **[Installeer Eduarte Tools in de Chrome Web Store](https://chromewebstore.google.com/detail/mmjkngjpdflanccahmndkofkpgnkbcnm)**
-(werkt ook in Edge) · Volg [@eduartetools](https://www.instagram.com/eduartetools/) op Instagram
+(werkt ook in Edge) · [Website](https://sbase25.github.io/eduarte-tools/) · Volg [@eduartetools](https://www.instagram.com/eduartetools/) op Instagram
 
 ## Functies
 
