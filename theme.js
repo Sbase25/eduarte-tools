@@ -5,6 +5,14 @@
   const STYLE_ID = "eduarte-tools-theme-style";
 
   const PRESETS = {
+    aurora: {
+      dark: true,
+      accent: "#a78bfa",
+      bg: "#0b0716",
+      surface: "#1a1430",
+      text: "#f5f3ff",
+      border: "#3b2f5c",
+    },
     graphite: {
       dark: true,
       accent: "#ff7a59",
@@ -1156,11 +1164,7 @@
     }
 
     body:has(.agenda) .agenda--day li.agenda--course .is-subject {
-      display: -webkit-box !important;
-      -webkit-line-clamp: 1 !important;
-      -webkit-box-orient: vertical !important;
       overflow: hidden !important;
-      margin-bottom: 2px !important;
       font-weight: 700 !important;
     }
 
@@ -1172,6 +1176,161 @@
       font-size: 12px !important;
       white-space: nowrap !important;
       text-overflow: ellipsis !important;
+    }
+
+    /* agenda.js zet de les in twee regels: "VAK  08:45 – 10:15" en "lokaal · docent" */
+    body:has(.agenda) .agenda--day li.agenda--course > div:has(.et-lesson-head) {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1px !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course:has(.et-lesson-meta) :is(.is-location, .is-participant) {
+      display: none !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span.et-lesson-head {
+      display: flex !important;
+      align-items: baseline !important;
+      gap: 6px !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      white-space: nowrap !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span.et-lesson-head > span {
+      flex: none !important;
+      white-space: nowrap !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span.et-lesson-head > span.et-agenda-time {
+      flex: 0 1 auto !important;
+      overflow: hidden !important;
+      font-size: 11.5px !important;
+      font-weight: 500 !important;
+      opacity: .7 !important;
+      text-overflow: ellipsis !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span.et-lesson-meta {
+      display: block !important;
+      overflow: hidden !important;
+      font-size: 12px !important;
+      opacity: .75 !important;
+      white-space: nowrap !important;
+      text-overflow: ellipsis !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course.et-short-lesson span.et-lesson-meta {
+      display: none !important;
+    }
+
+    /* Aanwezigheidsicoon klein rechtsboven in plaats van over de tekst */
+    body:has(.agenda) .agenda--day li.agenda--course p.agenda-icons {
+      position: absolute !important;
+      top: 6px !important;
+      right: 8px !important;
+      bottom: auto !important;
+      left: auto !important;
+      width: auto !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      line-height: 0 !important;
+      opacity: .75 !important;
+      pointer-events: none !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course p.agenda-icons svg {
+      width: 13px !important;
+      height: 13px !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course:has(p.agenda-icons) span.et-lesson-head {
+      padding-right: 16px !important;
+    }
+
+    html.et-compact-agenda body:has(.agenda) .agenda {
+      padding-top: 0 !important;
+    }
+
+    /* Overzicht: voorbije lessen vager, de les van nu met een rand */
+    body:has(.agenda) .agenda--day li.et-past {
+      opacity: .45 !important;
+      filter: saturate(.6) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.et-past:hover {
+      opacity: .85 !important;
+    }
+
+    body:has(.agenda) .agenda--day li.et-now > div {
+      box-shadow: 0 0 0 2px var(--et-course, ${accent}), 0 8px 24px -8px var(--et-course, ${accent}) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course > div {
+      background: color-mix(in srgb, var(--et-course, ${accent}) 13%, ${surface}) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course .is-subject {
+      color: color-mix(in srgb, var(--et-course, ${accent}) 55%, ${text}) !important;
+    }
+
+    /* Dagkop: kleine weekdag, groot datumnummer; vandaag in een gekleurd rondje */
+    body:has(.agenda) .agenda--day > .lead[data-et-day] {
+      gap: 6px !important;
+      text-transform: none !important;
+    }
+
+    body:has(.agenda) .agenda--day > .lead .et-dow {
+      color: color-mix(in srgb, ${text} 55%, transparent) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      letter-spacing: .08em !important;
+      text-transform: uppercase !important;
+    }
+
+    body:has(.agenda) .agenda--day > .lead .et-dnum {
+      display: inline-grid !important;
+      place-items: center !important;
+      min-width: 28px !important;
+      height: 28px !important;
+      border-radius: 99px !important;
+      color: ${text} !important;
+      font-size: 17px !important;
+      font-weight: 800 !important;
+    }
+
+    body:has(.agenda) .agenda--day > .lead .et-dmon {
+      color: color-mix(in srgb, ${text} 55%, transparent) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+    }
+
+    body:has(.agenda) .agenda--day.is-today > .lead .et-dnum {
+      background: ${accent} !important;
+      color: #fff !important;
+    }
+
+    body:has(.agenda) .agenda--day.is-today > .lead {
+      background: ${surface} !important;
+      box-shadow: inset 0 -2px ${accent} !important;
+    }
+
+    /* Ook een fijne lijn per half uur */
+    html.et-compact-agenda body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
+      background:
+        repeating-linear-gradient(to bottom,
+          transparent 0, transparent 63px,
+          color-mix(in srgb, ${border} 60%, transparent) 63px, color-mix(in srgb, ${border} 60%, transparent) 64px),
+        repeating-linear-gradient(to bottom,
+          transparent 0, transparent 31px,
+          color-mix(in srgb, ${border} 25%, transparent) 31px, color-mix(in srgb, ${border} 25%, transparent) 32px, transparent 32px, transparent 64px) !important;
+    }
+
+    body:has(.agenda) .agenda--day {
+      border-top: 0 !important;
     }
 
     body:has(.agenda) .agenda--day li.agenda--course span,
@@ -1214,25 +1373,8 @@
       height: 64px !important;
     }
 
-    html.et-compact-agenda body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
-      background: repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent 63px,
-        color-mix(in srgb, ${border} 55%, transparent) 63px,
-        color-mix(in srgb, ${border} 55%, transparent) 64px
-      ) !important;
-    }
-
     html.et-compact-agenda body:has(.agenda) .agenda--day li.agenda--course > div {
       padding: 5px 8px !important;
-    }
-
-    body:has(.agenda) .agenda--day li .et-agenda-time {
-      display: block !important;
-      font-size: 11.5px !important;
-      opacity: .7 !important;
-      font-variant-numeric: tabular-nums !important;
     }
 
     body:has(.agenda) .agenda--day.is-today {
@@ -1362,32 +1504,63 @@
     }
 
     /* ---- Platte interface: vaste zijbalk, slanke bovenbalk, rustige kaarten ---- */
+    /* Pagina minstens schermhoog, anders tekent de browser het zwevende menu in twee tinten */
+    html, body {
+      min-height: 100vh !important;
+    }
+
+    /* Menu links als zwevend paneel, in de stijl van een modern contextmenu */
     nav.navigation,
     nav.navigation.navigation--student,
     .sidebar {
-      height: 100vh !important;
-      margin: 0 !important;
-      border: 0 !important;
-      border-right: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
-      border-radius: 0 !important;
-      background: color-mix(in srgb, ${surface} 55%, ${bg}) !important;
-      box-shadow: none !important;
+      box-sizing: border-box !important;
+      height: calc(100vh - 20px) !important;
+      margin: 10px 0 10px 10px !important;
+      border: 1px solid color-mix(in srgb, ${text} 9%, transparent) !important;
+      border-radius: 18px !important;
+      background: color-mix(in srgb, ${surface} 97%, ${text} 3%) !important;
+      box-shadow: 0 1px 0 color-mix(in srgb, ${text} 6%, transparent) inset, 0 16px 40px -12px rgba(0,0,0,.55) !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
+    }
+
+    nav.navigation.navigation--student .navigation-header {
+      border-bottom: 0 !important;
     }
 
     nav.navigation.navigation--student .navigation-items--main,
     nav.navigation.navigation--student .navigation-footer ul {
       display: flex !important;
       flex-direction: column !important;
-      gap: 2px !important;
+      gap: 1px !important;
       margin: 0 !important;
-      padding: 10px !important;
+      padding: 6px 8px !important;
     }
 
+    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul)::before {
+      display: block !important;
+      padding: 6px 12px 6px !important;
+      color: color-mix(in srgb, ${text} 42%, transparent) !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      letter-spacing: .08em !important;
+      text-transform: uppercase !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main::before { content: "Menu" !important; }
+    nav.navigation.navigation--student .navigation-footer ul::before { content: "Account" !important; }
+
     nav.navigation.navigation--student .navigation-footer {
-      padding: 0 !important;
-      border-top: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      width: auto !important;
+      margin: auto 10px 0 !important;
+      padding: 4px 0 6px !important;
+      border-top: 1px solid color-mix(in srgb, ${text} 8%, transparent) !important;
+    }
+
+    nav.navigation.navigation--student .navigation-footer ul {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      padding-inline: 0 !important;
     }
 
     /* Eduarte zet lege <li>'s tussen de items; die gaven ongelijke tussenruimtes */
@@ -1406,9 +1579,11 @@
       gap: 12px !important;
       box-sizing: border-box !important;
       width: 100% !important;
-      min-height: 40px !important;
-      height: 40px !important;
-      padding: 0 12px !important;
+      min-height: 36px !important;
+      height: 36px !important;
+      padding: 0 10px !important;
+      font-size: 13.5px !important;
+      transition: background-color 120ms ease, color 120ms ease !important;
     }
 
     nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li > a > svg {
@@ -1417,15 +1592,16 @@
       height: 24px !important;
       margin: 0 !important;
       overflow: visible !important;
+      transform: scale(.84) !important;
     }
 
     nav.navigation.navigation--student a,
     nav.navigation.navigation--student .navigation-items--main > li > a {
-      min-height: 40px !important;
+      min-height: 36px !important;
       margin: 0 !important;
-      padding-inline: 12px !important;
+      padding-inline: 10px !important;
       border: 0 !important;
-      border-radius: 10px !important;
+      border-radius: 9px !important;
       color: color-mix(in srgb, ${text} 66%, transparent) !important;
       font-weight: 600 !important;
     }
@@ -1441,7 +1617,7 @@
     nav.navigation.navigation--student .navigation-items--main > li > a:hover {
       transform: none !important;
       border: 0 !important;
-      background: color-mix(in srgb, ${surface} 85%, ${text} 15%) !important;
+      background: color-mix(in srgb, ${text} 8%, transparent) !important;
       color: ${text} !important;
     }
 
@@ -1486,7 +1662,7 @@
 
     @media (min-width: 960px) {
       header.header {
-        left: var(--navigation-width) !important;
+        left: calc(var(--navigation-width) + 10px) !important;
       }
     }
 
@@ -1579,6 +1755,66 @@
     `;
   }
 
+  // Aurora: gekleurd licht op de achtergrond met glazen menu, kaarten en agenda
+  function buildAuroraCSS(accent) {
+    const glass = "background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.13) !important; backdrop-filter: blur(24px) saturate(160%) !important; -webkit-backdrop-filter: blur(24px) saturate(160%) !important;";
+    return `
+    html:root:root, html:root body {
+      background-color: #0b0716 !important;
+      background-image:
+        radial-gradient(60% 50% at 15% 10%, rgba(168,85,247,.45), transparent 70%),
+        radial-gradient(50% 50% at 90% 20%, rgba(236,72,153,.35), transparent 70%),
+        radial-gradient(60% 60% at 60% 100%, rgba(59,130,246,.35), transparent 70%) !important;
+      background-attachment: fixed !important;
+    }
+
+    .l-container, .l-flex-content, .content-wrapper, .content, main, body:has(.agenda) .content-wrapper {
+      background: transparent !important;
+    }
+
+    html body nav.navigation.navigation--student {
+      ${glass}
+      box-shadow: 0 20px 40px -20px rgba(0,0,0,.6) !important;
+    }
+
+    html body nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a {
+      background: color-mix(in srgb, ${accent} 24%, transparent) !important;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, ${accent} 35%, transparent) !important;
+    }
+
+    header.header, header.header:has(> .header-tabs) {
+      background: transparent !important;
+      border-bottom: 0 !important;
+      backdrop-filter: none !important;
+    }
+
+    #eduarte-tools-portal-actions .et-portal-action {
+      ${glass}
+    }
+
+    #eduarte-tools-widgets-container {
+      --et-accent-2: #f472b6;
+    }
+
+    #eduarte-tools-widgets-container .et-card,
+    .card, .container-card, .container-studiewijzer, .result-overview, .panel, .box, .result-overview--table,
+    body:has(.agenda) .agenda, body:has(.agenda) .agenda-filter {
+      ${glass}
+      box-shadow: 0 20px 40px -20px rgba(0,0,0,.6) !important;
+    }
+
+    body:has(.agenda) .agenda--day > .lead, body:has(.agenda) .agenda--day.is-today > .lead {
+      background: transparent !important;
+    }
+
+    .result-overview--table > thead > tr > th,
+    .result-overview--table > tbody > tr > td,
+    .result-overview--table > tbody > tr:nth-child(even) > td {
+      background: transparent !important;
+    }
+    `;
+  }
+
   function buildPortalGlowCSS() {
     return `
     html {
@@ -1664,6 +1900,10 @@
 
     if (presetKey === "portal" && !useCustom && !hasWallpaper) {
       css += buildPortalGlowCSS();
+    }
+
+    if (presetKey === "aurora" && !useCustom && !hasWallpaper) {
+      css += buildAuroraCSS(effectiveAccent);
     }
 
     return css;

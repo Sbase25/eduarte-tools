@@ -294,34 +294,51 @@
           color: #bac9ed;
           font: 400 12px/1.5 system-ui, sans-serif;
         }
+        /* Zoekvenster midden in beeld, boven alles (ook boven de filterbalk van de agenda) */
         #${TOOLBAR_ID} .et-portal-search {
           display: none;
-          position: absolute;
-          z-index: 2147483645;
-          top: calc(100% + 10px);
-          right: 8px;
-          width: min(360px, calc(100vw - 32px));
-          padding: 8px;
-          border: 1px solid rgba(139,169,255,.3);
+          position: fixed;
+          z-index: 2147483647;
+          top: 12vh;
+          left: 50%;
+          width: min(560px, calc(100vw - 32px));
+          box-sizing: border-box;
+          padding: 10px;
+          transform: translateX(-50%);
+          border: 1px solid color-mix(in srgb, var(--color-text-primary, #eceef3) 12%, transparent);
           border-radius: 18px;
-          background: linear-gradient(145deg, rgba(18,30,76,.97), rgba(9,15,43,.98));
-          box-shadow: 0 18px 48px rgba(1,5,24,.5);
+          background: var(--color-bg-surface, #14171f);
+          color: var(--color-text-primary, #eceef3);
+          box-shadow: 0 0 0 100vmax rgba(0,0,0,.45), 0 24px 60px rgba(0,0,0,.5);
+          font: 500 13px system-ui, sans-serif;
         }
-        #${TOOLBAR_ID} .et-portal-search.open { display: block; animation: et-portal-pop-in 150ms ease both; }
+        #${TOOLBAR_ID} .et-portal-search.open { display: block; animation: et-portal-search-in 160ms ease both; }
+        @keyframes et-portal-search-in { from { opacity: 0; transform: translate(-50%, -6px) scale(.98); } }
         #${TOOLBAR_ID} .et-portal-search input {
           box-sizing: border-box;
           width: 100%;
-          min-height: 42px;
-          padding: 0 13px;
-          border: 1px solid rgba(153,180,255,.25);
+          min-height: 46px;
+          padding: 0 14px 0 40px;
+          border: 1px solid transparent;
           border-radius: 12px;
           outline: 0;
-          background: rgba(5,12,39,.7);
-          color: #f3f6ff;
-          font: 500 13px system-ui, sans-serif;
+          background: color-mix(in srgb, var(--color-bg-surface, #14171f) 90%, var(--color-text-primary, #eceef3)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a92a6' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 13px 50% / 17px;
+          color: inherit;
+          font: 500 15px system-ui, sans-serif;
         }
-        #${TOOLBAR_ID} .et-portal-search input:focus { border-color: #75a3ff; box-shadow: 0 0 0 3px rgba(70,123,255,.2); }
-        #${TOOLBAR_ID} .et-portal-search input::placeholder { color: #9cadd4; }
+        #${TOOLBAR_ID} .et-portal-search input:focus { border-color: var(--color-bg-fill-action, #ff7a59); }
+        #${TOOLBAR_ID} .et-portal-search input::placeholder { color: color-mix(in srgb, currentColor 50%, transparent); }
+        #${TOOLBAR_ID} .et-search-results { display: grid; gap: 2px; max-height: 50vh; margin: 8px 0 0; padding: 0; overflow-y: auto; list-style: none; }
+        #${TOOLBAR_ID} .et-search-results:empty { display: none; }
+        #${TOOLBAR_ID} .et-search-group { padding: 8px 10px 4px; color: color-mix(in srgb, currentColor 50%, transparent); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+        #${TOOLBAR_ID} .et-search-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+        #${TOOLBAR_ID} .et-search-item.is-active { background: color-mix(in srgb, var(--color-bg-fill-action, #ff7a59) 16%, transparent); }
+        #${TOOLBAR_ID} .et-search-item i { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: color-mix(in srgb, currentColor 8%, transparent); font-style: normal; font-size: 14px; }
+        #${TOOLBAR_ID} .et-search-item b { display: block; font-weight: 600; }
+        #${TOOLBAR_ID} .et-search-item small { display: block; overflow: hidden; color: color-mix(in srgb, currentColor 55%, transparent); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+        #${TOOLBAR_ID} .et-search-item span { min-width: 0; }
+        #${TOOLBAR_ID} .et-search-hint { display: flex; justify-content: flex-end; gap: 12px; padding: 8px 6px 0; color: color-mix(in srgb, currentColor 45%, transparent); font-size: 11px; }
+        #${TOOLBAR_ID} .et-search-hint kbd { padding: 1px 5px; border-radius: 4px; background: color-mix(in srgb, currentColor 10%, transparent); font: inherit; }
         #${TOOLBAR_ID} .et-portal-message-link {
           display: inline-flex;
           margin-top: 12px;
@@ -367,8 +384,10 @@
           <span class="et-portal-count" aria-hidden="true"></span>
         </button>
         <a class="et-portal-action et-portal-avatar" aria-label="Profiel" title="Profiel"></a>
-        <form class="et-portal-search" role="search" aria-label="Zoeken op deze pagina">
-          <input type="search" placeholder="Zoek op deze pagina…" aria-label="Zoekterm">
+        <form class="et-portal-search" role="search" aria-label="Zoeken in Eduarte">
+          <input type="search" placeholder="Zoek een pagina, les, docent of tekst…" aria-label="Zoekterm" autocomplete="off">
+          <ul class="et-search-results" role="listbox"></ul>
+          <div class="et-search-hint"><span><kbd>↑</kbd><kbd>↓</kbd> kiezen</span><span><kbd>Enter</kbd> openen</span><span><kbd>Ctrl</kbd>+<kbd>K</kbd> zoeken</span></div>
         </form>
         <section class="et-portal-popover" aria-label="Meldingen" aria-live="polite">
           <h2>Meldingen</h2>
@@ -422,20 +441,118 @@
           : "Er zijn geen ongelezen meldingen gevonden.";
       };
 
-      searchButton.addEventListener("click", () => {
-        const open = searchForm.classList.toggle("open");
+      // Zoeken: pagina's uit het menu, lessen van deze week en tekst op de huidige pagina
+      const resultsEl = searchForm.querySelector(".et-search-results");
+      let results = [];
+      let active = 0;
+      let lessons = null;
+
+      const pages = () => Array.from(document.querySelectorAll("nav.navigation a[href]"))
+        .map((a) => ({ label: a.textContent.trim(), href: a.href }))
+        .filter((p) => p.label && !/uitloggen|studentenportaal/i.test(p.label));
+
+      const loadLessons = () => {
+        const Agenda = globalThis.EduarteAgenda;
+        if (lessons || !Agenda) return;
+        lessons = [];
+        const fromDoc = (doc) => { lessons = Agenda.getWeekLessons(doc).lessons; renderResults(); };
+        if (document.querySelector(".agenda")) fromDoc(document);
+        else Agenda.fetchAgendaDocument().then(fromDoc).catch(() => {});
+      };
+
+      const days = ["zo", "ma", "di", "wo", "do", "vr", "za"];
+      const renderResults = () => {
+        const term = searchInput.value.trim().toLowerCase();
+        const matches = (...texts) => texts.some((t) => (t || "").toLowerCase().includes(term));
+        const pageHits = pages().filter((p) => !term || matches(p.label)).slice(0, term ? 5 : 8)
+          .map((p) => ({ group: "Pagina's", icon: "→", label: p.label, sub: "", run: () => { location.href = p.href; } }));
+        const lessonHits = term ? (lessons || []).filter((l) => matches(l.title, l.subject, l.location, l.participants)).slice(0, 6)
+          .map((l) => {
+            const Agenda = globalThis.EduarteAgenda;
+            const day = days[new Date(`${l.date}T12:00`).getDay()];
+            return {
+              group: "Lessen deze week",
+              icon: "📅",
+              label: l.title,
+              sub: `${day} ${Agenda.formatTime(l.start)}–${Agenda.formatTime(l.end)} · ${[l.location, l.participants].filter(Boolean).join(" · ")}`,
+              run: () => { location.href = "/agenda"; },
+            };
+          }) : [];
+        const findHit = term ? [{
+          group: "Op deze pagina",
+          icon: "🔍",
+          label: `Zoek "${searchInput.value.trim()}"`,
+          sub: "Volgende treffer op deze pagina",
+          keepOpen: true,
+          run: () => window.find?.(searchInput.value.trim(), false, false, true, false, true, false),
+        }] : [];
+        // Zonder pagina- of lestreffer zoekt Enter meteen op de pagina
+        results = [...findHit.filter(() => !pageHits.length && !lessonHits.length), ...pageHits, ...lessonHits, ...findHit.filter(() => pageHits.length || lessonHits.length)];
+        active = Math.min(active, Math.max(results.length - 1, 0));
+        let lastGroup = "";
+        resultsEl.innerHTML = results.map((r, i) => {
+          const header = r.group !== lastGroup ? `<li class="et-search-group" role="presentation">${escapeHtml(r.group)}</li>` : "";
+          lastGroup = r.group;
+          return `${header}<li class="et-search-item${i === active ? " is-active" : ""}" role="option" data-index="${i}"><i>${r.icon}</i><span><b>${escapeHtml(r.label)}</b>${r.sub ? `<small>${escapeHtml(r.sub)}</small>` : ""}</span></li>`;
+        }).join("");
+      };
+
+      const runResult = (index) => {
+        const result = results[index];
+        if (!result) return;
+        if (!result.keepOpen) closeSearch();
+        result.run();
+      };
+
+      const openSearch = () => {
+        searchForm.classList.add("open");
         notificationPanel.classList.remove("open");
-        searchButton.setAttribute("aria-expanded", String(open));
+        searchButton.setAttribute("aria-expanded", "true");
         notificationButton.setAttribute("aria-expanded", "false");
-        if (open) searchInput.focus();
+        active = 0;
+        renderResults();
+        loadLessons();
+        searchInput.focus();
+        searchInput.select();
+      };
+
+      const closeSearch = () => {
+        searchForm.classList.remove("open");
+        searchButton.setAttribute("aria-expanded", "false");
+      };
+
+      searchButton.addEventListener("click", () => {
+        if (searchForm.classList.contains("open")) closeSearch();
+        else openSearch();
+      });
+      searchInput.addEventListener("input", () => { active = 0; renderResults(); });
+      searchInput.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+        event.preventDefault();
+        if (!results.length) return;
+        active = (active + (event.key === "ArrowDown" ? 1 : -1) + results.length) % results.length;
+        renderResults();
+        resultsEl.querySelector(".is-active")?.scrollIntoView({ block: "nearest" });
+      });
+      resultsEl.addEventListener("click", (event) => {
+        const item = event.target.closest(".et-search-item");
+        if (item) runResult(Number(item.dataset.index));
       });
       searchForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const term = searchInput.value.trim();
-        if (!term) return;
-        searchForm.classList.remove("open");
-        searchButton.setAttribute("aria-expanded", "false");
-        window.find?.(term, false, false, true, false, true, false);
+        if (!searchInput.value.trim()) return;
+        renderResults();
+        runResult(active);
+      });
+      document.addEventListener("keydown", (event) => {
+        const typing = event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable]");
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+          event.preventDefault();
+          openSearch();
+        } else if (event.key === "/" && !typing) {
+          event.preventDefault();
+          openSearch();
+        }
       });
       notificationButton.addEventListener("click", () => {
         const open = notificationPanel.classList.toggle("open");
