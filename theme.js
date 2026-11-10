@@ -1156,11 +1156,7 @@
     }
 
     body:has(.agenda) .agenda--day li.agenda--course .is-subject {
-      display: -webkit-box !important;
-      -webkit-line-clamp: 1 !important;
-      -webkit-box-orient: vertical !important;
       overflow: hidden !important;
-      margin-bottom: 2px !important;
       font-weight: 700 !important;
     }
 
@@ -1172,6 +1168,87 @@
       font-size: 12px !important;
       white-space: nowrap !important;
       text-overflow: ellipsis !important;
+    }
+
+    /* agenda.js zet de les in twee regels: "VAK  08:45 – 10:15" en "lokaal · docent" */
+    body:has(.agenda) .agenda--day li.agenda--course > div:has(.et-lesson-head) {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1px !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course:has(.et-lesson-meta) :is(.is-location, .is-participant) {
+      display: none !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span.et-lesson-head {
+      display: flex !important;
+      align-items: baseline !important;
+      gap: 6px !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      white-space: nowrap !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span.et-lesson-head > span {
+      flex: none !important;
+      white-space: nowrap !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span.et-lesson-head > span.et-agenda-time {
+      flex: 0 1 auto !important;
+      overflow: hidden !important;
+      font-size: 11.5px !important;
+      font-weight: 500 !important;
+      opacity: .7 !important;
+      text-overflow: ellipsis !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course span.et-lesson-meta {
+      display: block !important;
+      overflow: hidden !important;
+      font-size: 12px !important;
+      opacity: .75 !important;
+      white-space: nowrap !important;
+      text-overflow: ellipsis !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course.et-short-lesson span.et-lesson-meta {
+      display: none !important;
+    }
+
+    /* Aanwezigheidsicoon klein rechtsboven in plaats van over de tekst */
+    body:has(.agenda) .agenda--day li.agenda--course p.agenda-icons {
+      position: absolute !important;
+      top: 6px !important;
+      right: 8px !important;
+      bottom: auto !important;
+      left: auto !important;
+      width: auto !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      line-height: 0 !important;
+      opacity: .75 !important;
+      pointer-events: none !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course p.agenda-icons svg {
+      width: 13px !important;
+      height: 13px !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course:has(p.agenda-icons) span.et-lesson-head {
+      padding-right: 16px !important;
+    }
+
+    html.et-compact-agenda body:has(.agenda) .agenda {
+      padding-top: 0 !important;
+    }
+
+    body:has(.agenda) .agenda--day {
+      border-top: 0 !important;
     }
 
     body:has(.agenda) .agenda--day li.agenda--course span,
@@ -1226,13 +1303,6 @@
 
     html.et-compact-agenda body:has(.agenda) .agenda--day li.agenda--course > div {
       padding: 5px 8px !important;
-    }
-
-    body:has(.agenda) .agenda--day li .et-agenda-time {
-      display: block !important;
-      font-size: 11.5px !important;
-      opacity: .7 !important;
-      font-variant-numeric: tabular-nums !important;
     }
 
     body:has(.agenda) .agenda--day.is-today {
@@ -1362,32 +1432,55 @@
     }
 
     /* ---- Platte interface: vaste zijbalk, slanke bovenbalk, rustige kaarten ---- */
+    /* Menu links als zwevend paneel, in de stijl van een modern contextmenu */
     nav.navigation,
     nav.navigation.navigation--student,
     .sidebar {
-      height: 100vh !important;
-      margin: 0 !important;
-      border: 0 !important;
-      border-right: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
-      border-radius: 0 !important;
-      background: color-mix(in srgb, ${surface} 55%, ${bg}) !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
+      box-sizing: border-box !important;
+      height: calc(100vh - 20px) !important;
+      margin: 10px 0 10px 10px !important;
+      border: 1px solid color-mix(in srgb, ${text} 9%, transparent) !important;
+      border-radius: 18px !important;
+      background: color-mix(in srgb, ${surface} 92%, ${text} 2%) !important;
+      box-shadow: 0 1px 0 color-mix(in srgb, ${text} 6%, transparent) inset, 0 16px 40px -12px rgba(0,0,0,.55) !important;
+      backdrop-filter: blur(16px) saturate(140%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+    }
+
+    nav.navigation.navigation--student .navigation-header {
+      border-bottom: 0 !important;
     }
 
     nav.navigation.navigation--student .navigation-items--main,
     nav.navigation.navigation--student .navigation-footer ul {
       display: flex !important;
       flex-direction: column !important;
-      gap: 2px !important;
+      gap: 1px !important;
       margin: 0 !important;
-      padding: 10px !important;
+      padding: 6px 8px !important;
     }
 
+    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul)::before {
+      display: block !important;
+      padding: 6px 12px 6px !important;
+      color: color-mix(in srgb, ${text} 42%, transparent) !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      letter-spacing: .08em !important;
+      text-transform: uppercase !important;
+    }
+
+    nav.navigation.navigation--student .navigation-items--main::before { content: "Menu" !important; }
+    nav.navigation.navigation--student .navigation-footer ul::before { content: "Account" !important; }
+
     nav.navigation.navigation--student .navigation-footer {
-      padding: 0 !important;
-      border-top: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      margin: 0 10px !important;
+      padding: 4px 0 6px !important;
+      border-top: 1px solid color-mix(in srgb, ${text} 8%, transparent) !important;
+    }
+
+    nav.navigation.navigation--student .navigation-footer ul {
+      padding-inline: 0 !important;
     }
 
     /* Eduarte zet lege <li>'s tussen de items; die gaven ongelijke tussenruimtes */
@@ -1406,9 +1499,11 @@
       gap: 12px !important;
       box-sizing: border-box !important;
       width: 100% !important;
-      min-height: 40px !important;
-      height: 40px !important;
-      padding: 0 12px !important;
+      min-height: 36px !important;
+      height: 36px !important;
+      padding: 0 10px !important;
+      font-size: 13.5px !important;
+      transition: background-color 120ms ease, color 120ms ease !important;
     }
 
     nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li > a > svg {
@@ -1417,15 +1512,16 @@
       height: 24px !important;
       margin: 0 !important;
       overflow: visible !important;
+      transform: scale(.84) !important;
     }
 
     nav.navigation.navigation--student a,
     nav.navigation.navigation--student .navigation-items--main > li > a {
-      min-height: 40px !important;
+      min-height: 36px !important;
       margin: 0 !important;
-      padding-inline: 12px !important;
+      padding-inline: 10px !important;
       border: 0 !important;
-      border-radius: 10px !important;
+      border-radius: 9px !important;
       color: color-mix(in srgb, ${text} 66%, transparent) !important;
       font-weight: 600 !important;
     }
@@ -1441,7 +1537,7 @@
     nav.navigation.navigation--student .navigation-items--main > li > a:hover {
       transform: none !important;
       border: 0 !important;
-      background: color-mix(in srgb, ${surface} 85%, ${text} 15%) !important;
+      background: color-mix(in srgb, ${text} 8%, transparent) !important;
       color: ${text} !important;
     }
 
@@ -1486,7 +1582,7 @@
 
     @media (min-width: 960px) {
       header.header {
-        left: var(--navigation-width) !important;
+        left: calc(var(--navigation-width) + 10px) !important;
       }
     }
 

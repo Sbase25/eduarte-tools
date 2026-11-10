@@ -294,7 +294,7 @@
     const scale = COMPACT_HOUR_PX / SOURCE_HOUR_PX;
     const startHour = parseHour(agenda.querySelector(".agenda--time li")?.textContent);
 
-    agenda.querySelectorAll(".agenda--day li.agenda--course, .agenda--day li.agenda--appointment, .agenda--day li.agenda--bpv, .agenda--present-time").forEach((el) => {
+    agenda.querySelectorAll(".agenda--day li.agenda--course, .agenda--day li.agenda--appointment, .agenda--day li.agenda--bpv").forEach((el) => {
       if (!el.dataset.etTop) {
         const cs = view.getComputedStyle(el);
         const top = parseFloat(cs.top);
@@ -303,11 +303,10 @@
         el.dataset.etHeight = String(parseFloat(cs.height) || 0);
       }
       el.style.setProperty("top", `${Number(el.dataset.etTop) * scale}px`, "important");
-      if (!el.matches("hr")) {
-        el.style.setProperty("height", `${Number(el.dataset.etHeight) * scale}px`, "important");
-      }
+      el.style.setProperty("height", `${Number(el.dataset.etHeight) * scale}px`, "important");
+      el.classList.toggle("et-short-lesson", Number(el.dataset.etHeight) * scale < 56);
 
-      if (el.matches("li") && !el.dataset.etShort) {
+      if (!el.dataset.etShort) {
         const subjectEl = el.querySelector(".is-subject");
         if (!subjectEl) return;
         const lesson = lessonFromElement(el, startHour, "");
@@ -315,12 +314,24 @@
         subjectEl.title = lesson.subject;
         subjectEl.textContent = lesson.title;
         el.style.setProperty("--et-course", courseColor(lesson.title));
+
+        // Twee regels: "BUCO 08:45 – 10:15" en "ka210 · cschm", zodat ook korte lessen leesbaar blijven
+        const head = doc.createElement("span");
+        head.className = "et-lesson-head";
+        subjectEl.before(head);
+        head.appendChild(subjectEl);
         if (lesson.start != null && lesson.end != null) {
           const time = doc.createElement("span");
           time.className = "et-agenda-time";
           time.textContent = `${formatTime(lesson.start)} – ${formatTime(lesson.end)}`;
-          subjectEl.after(time);
+          head.appendChild(time);
         }
+        const meta = doc.createElement("span");
+        meta.className = "et-lesson-meta";
+        meta.textContent = [lesson.location, lesson.participants].filter(Boolean).join(" · ");
+        meta.title = meta.textContent;
+        head.after(meta);
+        el.title = [lesson.subject, `${formatTime(lesson.start)} – ${formatTime(lesson.end)}`, meta.textContent].join("\n");
       }
     });
 
@@ -328,6 +339,26 @@
       if (!ul.dataset.etHeight) ul.dataset.etHeight = String(ul.getBoundingClientRect().height || parseFloat(view.getComputedStyle(ul).height) || 0);
       ul.style.setProperty("height", `${Number(ul.dataset.etHeight) * scale}px`, "important");
     });
+
+    placeNowLine(doc, startHour);
+  }
+
+  // De rode "nu"-lijn zelf neerzetten: Eduarte rekent met 108px per uur en zijn eigen kopruimte
+  function placeNowLine(doc, startHour) {
+    const hr = doc.querySelector(".agenda--present-time");
+    const ul = doc.querySelector(".agenda--day.is-today > ul") || doc.querySelector(".agenda--day > ul");
+    if (!hr || !ul) return;
+    const parent = hr.offsetParent || hr.parentElement;
+    const now = new Date();
+    const hours = now.getHours() + now.getMinutes() / 60 - startHour;
+    const maxHours = (parseFloat(ul.style.height) || ul.getBoundingClientRect().height) / COMPACT_HOUR_PX;
+    if (hours < 0 || hours > maxHours) {
+      hr.style.setProperty("display", "none", "important");
+      return;
+    }
+    const offset = ul.getBoundingClientRect().top - parent.getBoundingClientRect().top - parent.clientTop;
+    hr.style.removeProperty("display");
+    hr.style.setProperty("top", `${offset + hours * COMPACT_HOUR_PX}px`, "important");
   }
 
   function watchAgenda(doc) {
@@ -344,6 +375,10 @@
       doc.defaultView.requestAnimationFrame(run);
     });
     run();
+    doc.defaultView.setInterval(() => {
+      const agenda = doc.querySelector(".agenda");
+      if (agenda) placeNowLine(doc, parseHour(agenda.querySelector(".agenda--time li")?.textContent));
+    }, 60 * 1000);
   }
 
   if (typeof document !== "undefined" && typeof chrome !== "undefined" && chrome.storage?.local) {
@@ -368,6 +403,7 @@
     parseDayLabel,
     getTodayLessons,
     getWeekLessons,
+    fetchAgendaDocument,
     fetchTodayLessons,
     lessonDate,
     lessonKey,
