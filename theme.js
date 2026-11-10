@@ -1247,6 +1247,80 @@
       padding-top: 0 !important;
     }
 
+    /* Overzicht: voorbije lessen vager, de les van nu met een rand */
+    body:has(.agenda) .agenda--day li.et-past {
+      opacity: .45 !important;
+      filter: saturate(.6) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.et-past:hover {
+      opacity: .85 !important;
+    }
+
+    body:has(.agenda) .agenda--day li.et-now > div {
+      box-shadow: 0 0 0 2px var(--et-course, ${accent}), 0 8px 24px -8px var(--et-course, ${accent}) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course > div {
+      background: color-mix(in srgb, var(--et-course, ${accent}) 13%, ${surface}) !important;
+    }
+
+    body:has(.agenda) .agenda--day li.agenda--course .is-subject {
+      color: color-mix(in srgb, var(--et-course, ${accent}) 55%, ${text}) !important;
+    }
+
+    /* Dagkop: kleine weekdag, groot datumnummer; vandaag in een gekleurd rondje */
+    body:has(.agenda) .agenda--day > .lead[data-et-day] {
+      gap: 6px !important;
+      text-transform: none !important;
+    }
+
+    body:has(.agenda) .agenda--day > .lead .et-dow {
+      color: color-mix(in srgb, ${text} 55%, transparent) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      letter-spacing: .08em !important;
+      text-transform: uppercase !important;
+    }
+
+    body:has(.agenda) .agenda--day > .lead .et-dnum {
+      display: inline-grid !important;
+      place-items: center !important;
+      min-width: 28px !important;
+      height: 28px !important;
+      border-radius: 99px !important;
+      color: ${text} !important;
+      font-size: 17px !important;
+      font-weight: 800 !important;
+    }
+
+    body:has(.agenda) .agenda--day > .lead .et-dmon {
+      color: color-mix(in srgb, ${text} 55%, transparent) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+    }
+
+    body:has(.agenda) .agenda--day.is-today > .lead .et-dnum {
+      background: ${accent} !important;
+      color: #fff !important;
+    }
+
+    body:has(.agenda) .agenda--day.is-today > .lead {
+      background: ${surface} !important;
+      box-shadow: inset 0 -2px ${accent} !important;
+    }
+
+    /* Ook een fijne lijn per half uur */
+    html.et-compact-agenda body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
+      background:
+        repeating-linear-gradient(to bottom,
+          transparent 0, transparent 63px,
+          color-mix(in srgb, ${border} 60%, transparent) 63px, color-mix(in srgb, ${border} 60%, transparent) 64px),
+        repeating-linear-gradient(to bottom,
+          transparent 0, transparent 31px,
+          color-mix(in srgb, ${border} 25%, transparent) 31px, color-mix(in srgb, ${border} 25%, transparent) 32px, transparent 32px, transparent 64px) !important;
+    }
+
     body:has(.agenda) .agenda--day {
       border-top: 0 !important;
     }
@@ -1289,16 +1363,6 @@
     /* Compacte agenda (agenda.js schaalt de lesblokken naar 64px per uur) */
     html.et-compact-agenda body:has(.agenda) .agenda--time li {
       height: 64px !important;
-    }
-
-    html.et-compact-agenda body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
-      background: repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent 63px,
-        color-mix(in srgb, ${border} 55%, transparent) 63px,
-        color-mix(in srgb, ${border} 55%, transparent) 64px
-      ) !important;
     }
 
     html.et-compact-agenda body:has(.agenda) .agenda--day li.agenda--course > div {

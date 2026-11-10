@@ -340,7 +340,34 @@
       ul.style.setProperty("height", `${Number(ul.dataset.etHeight) * scale}px`, "important");
     });
 
+    // Dagkop als "DI / 10 / nov"; de spaties blijven staan zodat parseDayLabel blijft werken
+    agenda.querySelectorAll(".agenda--day > .lead").forEach((lead) => {
+      if (lead.dataset.etDay) return;
+      const parts = lead.textContent.trim().split(/\s+/);
+      if (parts.length < 3) return;
+      lead.dataset.etDay = "1";
+      lead.innerHTML = `<span class="et-dow">${parts[0]}</span> <span class="et-dnum">${parts[1]}</span> <span class="et-dmon">${parts.slice(2).join(" ")}</span>`;
+    });
+
+    markLessonTimes(doc, startHour);
     placeNowLine(doc, startHour);
+  }
+
+  // Voorbije lessen vager, de les van nu met een rand
+  function markLessonTimes(doc, startHour) {
+    const now = Date.now();
+    doc.querySelectorAll(".agenda--day").forEach((day) => {
+      const date = parseDayLabel(day.querySelector(".lead")?.textContent);
+      if (!date) return;
+      day.querySelectorAll("li.agenda--course, li.agenda--appointment, li.agenda--bpv").forEach((li) => {
+        const lesson = lessonFromElement(li, startHour, "");
+        if (lesson.start == null || lesson.end == null) return;
+        const start = lessonDate(date, lesson.start).getTime();
+        const end = lessonDate(date, lesson.end).getTime();
+        li.classList.toggle("et-past", end <= now);
+        li.classList.toggle("et-now", start <= now && now < end);
+      });
+    });
   }
 
   // De rode "nu"-lijn zelf neerzetten: Eduarte rekent met 108px per uur en zijn eigen kopruimte
@@ -377,7 +404,10 @@
     run();
     doc.defaultView.setInterval(() => {
       const agenda = doc.querySelector(".agenda");
-      if (agenda) placeNowLine(doc, parseHour(agenda.querySelector(".agenda--time li")?.textContent));
+      if (!agenda) return;
+      const startHour = parseHour(agenda.querySelector(".agenda--time li")?.textContent);
+      markLessonTimes(doc, startHour);
+      placeNowLine(doc, startHour);
     }, 60 * 1000);
   }
 
