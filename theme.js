@@ -5,6 +5,14 @@
   const STYLE_ID = "eduarte-tools-theme-style";
 
   const PRESETS = {
+    aurora: {
+      dark: true,
+      accent: "#a78bfa",
+      bg: "#0b0716",
+      surface: "#1a1430",
+      text: "#f5f3ff",
+      border: "#3b2f5c",
+    },
     graphite: {
       dark: true,
       accent: "#ff7a59",
@@ -1747,6 +1755,66 @@
     `;
   }
 
+  // Aurora: gekleurd licht op de achtergrond met glazen menu, kaarten en agenda
+  function buildAuroraCSS(accent) {
+    const glass = "background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.13) !important; backdrop-filter: blur(24px) saturate(160%) !important; -webkit-backdrop-filter: blur(24px) saturate(160%) !important;";
+    return `
+    html:root:root, html:root body {
+      background-color: #0b0716 !important;
+      background-image:
+        radial-gradient(60% 50% at 15% 10%, rgba(168,85,247,.45), transparent 70%),
+        radial-gradient(50% 50% at 90% 20%, rgba(236,72,153,.35), transparent 70%),
+        radial-gradient(60% 60% at 60% 100%, rgba(59,130,246,.35), transparent 70%) !important;
+      background-attachment: fixed !important;
+    }
+
+    .l-container, .l-flex-content, .content-wrapper, .content, main, body:has(.agenda) .content-wrapper {
+      background: transparent !important;
+    }
+
+    html body nav.navigation.navigation--student {
+      ${glass}
+      box-shadow: 0 20px 40px -20px rgba(0,0,0,.6) !important;
+    }
+
+    html body nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a {
+      background: color-mix(in srgb, ${accent} 24%, transparent) !important;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, ${accent} 35%, transparent) !important;
+    }
+
+    header.header, header.header:has(> .header-tabs) {
+      background: transparent !important;
+      border-bottom: 0 !important;
+      backdrop-filter: none !important;
+    }
+
+    #eduarte-tools-portal-actions .et-portal-action {
+      ${glass}
+    }
+
+    #eduarte-tools-widgets-container {
+      --et-accent-2: #f472b6;
+    }
+
+    #eduarte-tools-widgets-container .et-card,
+    .card, .container-card, .container-studiewijzer, .result-overview, .panel, .box, .result-overview--table,
+    body:has(.agenda) .agenda, body:has(.agenda) .agenda-filter {
+      ${glass}
+      box-shadow: 0 20px 40px -20px rgba(0,0,0,.6) !important;
+    }
+
+    body:has(.agenda) .agenda--day > .lead, body:has(.agenda) .agenda--day.is-today > .lead {
+      background: transparent !important;
+    }
+
+    .result-overview--table > thead > tr > th,
+    .result-overview--table > tbody > tr > td,
+    .result-overview--table > tbody > tr:nth-child(even) > td {
+      background: transparent !important;
+    }
+    `;
+  }
+
   function buildPortalGlowCSS() {
     return `
     html {
@@ -1832,6 +1900,10 @@
 
     if (presetKey === "portal" && !useCustom && !hasWallpaper) {
       css += buildPortalGlowCSS();
+    }
+
+    if (presetKey === "aurora" && !useCustom && !hasWallpaper) {
+      css += buildAuroraCSS(effectiveAccent);
     }
 
     return css;
