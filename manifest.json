@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Eduarte Tools",
-  "version": "2.5.0",
-  "description": "Automatisch inloggen, donkere modus, thema's en een cijfercalculator voor Eduarte-portalen. Geïnspireerd door Study Tools.",
+  "version": "2.5.1",
+  "description": "Automatisch inloggen, thema's, weer en widgets, cijfercalculator en je rooster in je agenda voor het Eduarte-studentenportaal.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
