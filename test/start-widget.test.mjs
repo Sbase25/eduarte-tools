@@ -115,3 +115,49 @@ describe("startpagina: nu bezig / volgende les", () => {
     expect([...root.querySelectorAll(".et-tl li")].map((li) => li.className)).toEqual(["is-past", "is-past", "", ""]);
   });
 });
+
+describe("startpagina: wat moet ik halen?", () => {
+  async function calc(values) {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    const event = new dom.window.Event("input", { bubbles: true });
+    Object.entries(values).forEach(([id, value]) => {
+      const input = root.querySelector(`#et-calc-${id}`);
+      input.value = value;
+      input.dispatchEvent(event);
+    });
+    return { root, needed: text("#et-calc-needed"), hint: text("#et-calc-hint") };
+  }
+
+  it("rekent met komma's én punten", async () => {
+    expect((await calc({ avg: "6,5", weights: "3", target: "7,0", future: "1" })).needed).toBe("8,5");
+    expect((await calc({ avg: "6.5", weights: "3", target: "7.0", future: "1" })).needed).toBe("8,5");
+  });
+
+  it("rondt naar boven af, zodat het cijfer ook echt genoeg is", async () => {
+    // (5,5 × 4 − 6,1 × 3) / 1 = 3,7 ; (7 × 7 − 6,8 × 6) / 1 = 8,2 ; (6 × 3 − 5,7 × 2,5) / 0,5 = 7,5
+    expect((await calc({ avg: "6,13", weights: "3", target: "5,5", future: "1" })).needed).toBe("3,7");
+    expect((await calc({ avg: "6,81", weights: "6", target: "7", future: "1" })).needed).toBe("8,2");
+  });
+
+  it("zegt het erbij als het doel niet haalbaar is", async () => {
+    const { root, needed, hint } = await calc({ avg: "5", weights: "10", target: "8", future: "1" });
+    expect(needed).toBe("38,0");
+    expect(root.querySelector("#et-calc-needed").className).toBe("is-bad");
+    expect(hint).toBe("niet haalbaar met één toets · met een 10 kom je op 5,4");
+  });
+
+  it("zegt het erbij als elk cijfer genoeg is", async () => {
+    const { needed, hint } = await calc({ avg: "9", weights: "10", target: "5,5", future: "1" });
+    expect(needed).toBe("1,0");
+    expect(hint).toBe("elk cijfer is genoeg voor een 5,5 gemiddeld");
+  });
+
+  it("markeert ongeldige invoer in plaats van onzin te rekenen", async () => {
+    const { root, needed, hint } = await calc({ avg: "12", weights: "3", target: "7", future: "1" });
+    expect(needed).toBe("—");
+    expect(hint).toBe("vul cijfers tussen 1 en 10 in");
+    expect(root.querySelector("#et-calc-avg").classList.contains("is-invalid")).toBe(true);
+    expect((await calc({ avg: "6", weights: "3", target: "7", future: "0" })).hint).toBe("vul een weging groter dan 0 in");
+    expect((await calc({ avg: "abc", weights: "3", target: "7", future: "1" })).needed).toBe("—");
+  });
+});

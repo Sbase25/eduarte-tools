@@ -953,8 +953,12 @@
               ${C} .et-need span { color: var(--et-text); font-weight: 600; }
               ${C} .et-need span small { display: block; margin-top: 1px; color: var(--et-muted); font-size: 12px; font-weight: 500; }
               ${C} .et-need b { font-size: 32px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-              ${C} .et-need b.is-bad { background: none; color: #f87171; font-size: 16px; }
-              ${C} .et-need b.is-ok { background: none; color: var(--et-ok); font-size: 16px; }
+              ${C} .et-need b { flex: none; white-space: nowrap; }
+              ${C} .et-need span { min-width: 0; }
+              ${C} .et-need b.is-bad { background: none; color: #f87171; }
+              ${C} .et-need b.is-ok { background: none; color: var(--et-ok); }
+              ${C} .et-need b.is-empty { background: none; color: var(--et-muted); }
+              ${C} .et-fields input.is-invalid { border-color: #f87171; box-shadow: 0 0 0 3px color-mix(in srgb, #f87171 22%, transparent); }
 
               /* Instagram */
               ${C} .et-ig { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 10px; border-radius: 24px; }
@@ -1066,12 +1070,12 @@
               <section class="et-card et-calc">
                 <h3 class="et-label">${icon("target")} Wat moet ik halen?</h3>
                 <div class="et-fields">
-                  <label>Huidig gemiddelde<input type="number" id="et-calc-avg" min="1" max="10" step=".1" value="6.5"></label>
-                  <label>Weging tot nu<input type="number" id="et-calc-weights" min="1" step="1" value="3"></label>
-                  <label>Gewenst gemiddelde<input type="number" id="et-calc-target" min="1" max="10" step=".1" value="7.0"></label>
-                  <label>Weging toets<input type="number" id="et-calc-future" min="1" step="1" value="1"></label>
+                  <label>Huidig gemiddelde<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-avg" value="6,5"></label>
+                  <label title="Alle wegingen van je cijfers tot nu toe bij elkaar opgeteld">Totale weging tot nu<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-weights" value="3"></label>
+                  <label>Gewenst gemiddelde<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-target" value="7,0"></label>
+                  <label>Weging volgende toets<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-future" value="1"></label>
                 </div>
-                <div class="et-need"><span>Je hebt nodig<small id="et-calc-hint"></small></span><b id="et-calc-needed">8,5</b></div>
+                <div class="et-need"><span>Je hebt nodig<small id="et-calc-hint"></small></span><b id="et-calc-needed" aria-live="polite">8,5</b></div>
               </section>
             ` : ""}
           `;
@@ -1323,28 +1327,62 @@
             const neededOutput = container.querySelector("#et-calc-needed");
             const hintOutput = container.querySelector("#et-calc-hint");
 
-            function calcNeeded() {
-              const curAvg = parseFloat(avgInput.value);
-              const curWeights = parseFloat(weightsInput.value);
-              const target = parseFloat(targetInput.value);
-              const futureWeight = parseFloat(futureInput.value);
-              neededOutput.className = "";
-              hintOutput.textContent = isNaN(target) ? "" : `voor een ${target.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gemiddeld`;
+            // Komma en punt werken allebei ("6,5" en "6.5")
+            const readNumber = (input) => {
+              const raw = input.value.trim().replace(",", ".");
+              return /^\d+(\.\d*)?$|^\.\d+$/.test(raw) ? Number(raw) : NaN;
+            };
+            const nl = (value, digits = 1) => value.toLocaleString("nl-NL", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+            const STORE_KEY = "eduarteToolsQuickCalc";
+            const fields = { avg: avgInput, weights: weightsInput, target: targetInput, future: futureInput };
 
-              if ([curAvg, curWeights, target, futureWeight].some(isNaN) || futureWeight <= 0) {
+            // Onthoud wat je invulde tot je volgende bezoek
+            try {
+              const saved = JSON.parse(window.localStorage.getItem(STORE_KEY) || "null");
+              if (saved) Object.entries(fields).forEach(([key, input]) => { if (typeof saved[key] === "string" && saved[key]) input.value = saved[key]; });
+            } catch { /* opslag niet beschikbaar: standaardwaarden blijven staan */ }
+
+            function calcNeeded() {
+              const curAvg = readNumber(avgInput);
+              const curWeights = readNumber(weightsInput);
+              const target = readNumber(targetInput);
+              const futureWeight = readNumber(futureInput);
+              const valid = {
+                avg: curAvg >= 1 && curAvg <= 10,
+                weights: curWeights > 0,
+                target: target >= 1 && target <= 10,
+                future: futureWeight > 0,
+              };
+              Object.entries(fields).forEach(([key, input]) => input.classList.toggle("is-invalid", input.value.trim() !== "" && !valid[key]));
+              neededOutput.className = "";
+
+              if (!Object.values(valid).every(Boolean)) {
                 neededOutput.textContent = "—";
+                neededOutput.className = "is-empty";
+                hintOutput.textContent = !valid.avg || !valid.target ? "vul cijfers tussen 1 en 10 in" : "vul een weging groter dan 0 in";
                 return;
               }
 
+              try {
+                window.localStorage.setItem(STORE_KEY, JSON.stringify(Object.fromEntries(Object.entries(fields).map(([key, input]) => [key, input.value.trim()]))));
+              } catch { /* niet erg */ }
+
               const needed = (target * (curWeights + futureWeight) - curAvg * curWeights) / futureWeight;
-              if (needed > 10) {
-                neededOutput.textContent = `${needed.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} · onhaalbaar`;
+              // Naar boven afronden op één decimaal: met een 8,4 haal je een benodigde 8,41 net niet
+              const rounded = Math.ceil((needed - 1e-9) * 10) / 10;
+              const goal = `voor een ${nl(target)} gemiddeld`;
+              if (rounded > 10) {
+                const best = (curAvg * curWeights + 10 * futureWeight) / (curWeights + futureWeight);
+                neededOutput.textContent = nl(rounded);
                 neededOutput.className = "is-bad";
-              } else if (needed < 1) {
-                neededOutput.textContent = "Al gehaald!";
+                hintOutput.textContent = `niet haalbaar met één toets · met een 10 kom je op ${nl(Math.floor(best * 10 + 1e-9) / 10)}`;
+              } else if (rounded <= 1) {
+                neededOutput.textContent = nl(1);
                 neededOutput.className = "is-ok";
+                hintOutput.textContent = `elk cijfer is genoeg ${goal}`;
               } else {
-                neededOutput.textContent = needed.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                neededOutput.textContent = nl(rounded);
+                hintOutput.textContent = goal;
               }
             }
 
