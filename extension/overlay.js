@@ -980,6 +980,7 @@
         "eduarteTodayEnabled",
         "eduarteInstagramDismissed",
         "eduarteBookmarks",
+        "eduarteHiddenShortcuts",
         "eduarteTodoEnabled",
         "eduarteTodos",
       ],
@@ -1169,6 +1170,9 @@
               ${C} .et-bm.is-editing { box-shadow: inset 0 0 0 2px var(--et-accent); }
               ${C} .et-bm-hint { margin: 8px 2px 0; color: var(--et-muted); font-size: 12.5px; }
               ${C} .et-bm-hint[hidden] { display: none; }
+              ${C} .et-bm-restore { margin: 10px 0 0; height: 34px; padding: 0 14px; border: 1px solid transparent; border-radius: 999px; background: var(--et-surface); color: var(--et-text); font: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; }
+              ${C} .et-bm-restore:hover { border-color: var(--et-accent); color: var(--et-accent); }
+              ${C} .et-bm-restore[hidden], ${C} .et-custom[hidden], ${C} .et-bm-menu button[hidden] { display: none; }
               ${C} .et-custom { position: relative; display: grid; min-width: 0; }
               ${C} .et-custom.is-editing .et-link { background: var(--et-accent-soft); box-shadow: inset 0 0 0 2px var(--et-accent); }
               ${C} .et-more { position: absolute; top: 4px; right: 4px; display: flex; align-items: center; justify-content: center; gap: 2.5px; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: var(--et-surface-2); color: var(--et-text); cursor: pointer; opacity: 0; transform: scale(.8); transition: opacity .15s ease, transform .2s cubic-bezier(.34, 1.56, .64, 1), background .15s ease; }
@@ -1392,6 +1396,7 @@
                   </form>
                   <p class="et-bm-error" role="alert" hidden></p>
                   <p class="et-bm-hint" hidden></p>
+                  <button class="et-bm-restore" type="button" hidden></button>
                 </div>
               </nav>
             ` : ""}
@@ -1806,19 +1811,24 @@
               <button type="button" role="menuitem" data-action="remove" class="is-danger">${icon("trash")}<span>Verwijderen</span></button>`;
             container.append(menu);
             let menuIndex = -1;
+            let menuDefault = null; // standaardsnelkoppeling waarvoor het menu openstaat
             let menuOpener = null;
             const closeMenu = (refocus = false) => {
               if (menu.hidden) return;
               menu.hidden = true;
               menuIndex = -1;
+              menuDefault = null;
               nav.querySelectorAll('.et-more[aria-expanded="true"]').forEach((el) => el.setAttribute("aria-expanded", "false"));
               if (refocus && menuOpener?.isConnected) menuOpener.focus();
               menuOpener = null;
             };
-            const openMenu = (index, x, y, opener) => {
-              const item = bookmarks[index];
+            const openMenu = (target, x, y, opener) => {
+              const isDefault = typeof target !== "number";
+              const item = isDefault ? target : bookmarks[target];
               if (!item) return;
-              menuIndex = index;
+              menuIndex = isDefault ? -1 : target;
+              menuDefault = isDefault ? target : null;
+              menu.querySelector('[data-action="edit"]').hidden = isDefault;
               menuOpener = opener || null;
               nav.querySelectorAll(".et-more").forEach((el) => el.setAttribute("aria-expanded", String(el === opener)));
               menu.querySelector(".et-bm-menu-title").textContent = item.name;
@@ -1829,8 +1839,52 @@
               const maxY = Math.max(8, (window.innerHeight || 0) - height - 8);
               menu.style.left = `${Math.round(Math.max(8, Math.min(x, maxX)))}px`;
               menu.style.top = `${Math.round(Math.max(8, Math.min(y, maxY)))}px`;
-              menu.querySelector("button").focus({ preventScroll: true });
+              menu.querySelector("button:not([hidden])").focus({ preventScroll: true });
             };
+
+            // Ook de standaardsnelkoppelingen kun je weghalen (en later terugzetten)
+            let hiddenDefaults = (Array.isArray(settings.eduarteHiddenShortcuts) ? settings.eduarteHiddenShortcuts : []).map(String);
+            const defaults = [...nav.querySelectorAll(":scope > a.et-link")].map((link) => {
+              const name = link.querySelector("em").textContent.trim();
+              const wrap = document.createElement("div");
+              wrap.className = "et-custom is-default";
+              link.before(wrap);
+              const more = document.createElement("button");
+              more.type = "button";
+              more.className = "et-more";
+              more.title = `${name} verwijderen`;
+              more.setAttribute("aria-label", more.title);
+              more.setAttribute("aria-haspopup", "menu");
+              more.innerHTML = "<i></i><i></i><i></i>";
+              const entry = { name, url: link.href, wrap };
+              more.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!menu.hidden && menuDefault === entry) return closeMenu();
+                const rect = more.getBoundingClientRect();
+                openMenu(entry, rect.left, rect.bottom + 6, more);
+              });
+              wrap.addEventListener("contextmenu", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                openMenu(entry, event.clientX, event.clientY, more);
+              });
+              wrap.append(link, more);
+              return entry;
+            });
+            const restoreButton = box.querySelector(".et-bm-restore");
+            const renderDefaults = () => {
+              defaults.forEach((entry) => { entry.wrap.hidden = hiddenDefaults.includes(entry.name); });
+              const count = defaults.filter((entry) => entry.wrap.hidden).length;
+              restoreButton.hidden = count === 0;
+              restoreButton.textContent = count === 1 ? "1 verwijderde standaardsnelkoppeling terugzetten" : `${count} verwijderde standaardsnelkoppelingen terugzetten`;
+            };
+            const saveDefaults = () => {
+              chrome.storage.local.set({ eduarteHiddenShortcuts: hiddenDefaults });
+              renderDefaults();
+            };
+            restoreButton.addEventListener("click", () => { hiddenDefaults = []; saveDefaults(); });
+            renderDefaults();
             const openForm = (index = -1) => {
               editIndex = index;
               const item = bookmarks[index];
@@ -1843,7 +1897,7 @@
               cancelButton.hidden = !item;
               hintEl.textContent = item
                 ? `Je wijzigt “${item.name}”.`
-                : (bookmarks.length ? "Tip: klik met rechts op een eigen snelkoppeling (of op ⋯) om hem te wijzigen of te verwijderen." : "");
+                : "Tip: klik met rechts op een snelkoppeling (of op ⋯) om hem te wijzigen of te verwijderen.";
               hintEl.hidden = !hintEl.textContent;
               showError("");
               nameInput.focus({ preventScroll: true });
@@ -1858,7 +1912,7 @@
             };
 
             const renderBookmarks = () => {
-              nav.querySelectorAll(".et-custom").forEach((el) => el.remove());
+              nav.querySelectorAll(".et-custom:not(.is-default)").forEach((el) => el.remove());
               bookmarks.forEach((item, index) => {
                 const wrap = document.createElement("div");
                 wrap.className = "et-custom";
@@ -1908,9 +1962,18 @@
             menu.addEventListener("click", (event) => {
               const action = event.target.closest("button")?.dataset.action;
               const index = menuIndex;
-              const item = bookmarks[index];
+              const standard = menuDefault;
+              const item = standard || bookmarks[index];
               if (!action || !item) return;
               closeMenu();
+              if (standard) {
+                if (action === "open") window.open(standard.url, "_blank", "noopener,noreferrer");
+                else if (action === "remove") {
+                  hiddenDefaults = [...new Set([...hiddenDefaults, standard.name])];
+                  saveDefaults();
+                }
+                return;
+              }
               if (action === "edit") {
                 openForm(index);
                 renderBookmarks();
@@ -1925,7 +1988,7 @@
             });
             menu.addEventListener("contextmenu", (event) => { event.preventDefault(); event.stopPropagation(); });
             menu.addEventListener("keydown", (event) => {
-              const items = [...menu.querySelectorAll("button")];
+              const items = [...menu.querySelectorAll("button:not([hidden])")];
               const at = items.indexOf(document.activeElement);
               if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                 event.preventDefault();

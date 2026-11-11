@@ -183,7 +183,7 @@ describe("startpagina: eigen snelkoppelingen", () => {
     expect(saved.at(-1)).toEqual({ eduarteBookmarks: [{ name: "itslearning", url: "https://tilburg.itslearning.com/" }] });
 
     // Via het eigen menu (⋯ of rechtsklik) weer verwijderen
-    root.querySelector(".et-custom .et-more").click();
+    root.querySelector(".et-custom:not(.is-default) .et-more").click();
     const menu = root.querySelector(".et-bm-menu");
     expect(menu.hidden).toBe(false);
     expect(menu.querySelector(".et-bm-menu-title").textContent).toBe("itslearning");
@@ -203,7 +203,7 @@ describe("startpagina: eigen snelkoppelingen", () => {
 
     // Rechtsklik opent ons eigen menu in plaats van dat van de browser
     const event = new dom.window.MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 40, clientY: 40 });
-    root.querySelectorAll(".et-custom")[0].querySelector("a").dispatchEvent(event);
+    root.querySelectorAll(".et-custom:not(.is-default)")[0].querySelector("a").dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
     const menu = root.querySelector(".et-bm-menu");
     expect(menu.hidden).toBe(false);
@@ -234,12 +234,34 @@ describe("startpagina: eigen snelkoppelingen", () => {
     const { root } = await mountHome({ hour: 12, minute: 0 });
     root.querySelector(".et-link.is-add").click();
     await add(root, "Its", "tilburg.itslearning.com");
-    root.querySelector(".et-custom .et-more").click();
+    root.querySelector(".et-custom:not(.is-default) .et-more").click();
     root.querySelector('.et-bm-menu [data-action="edit"]').click();
     root.querySelector(".et-bm-name").value = "Anders";
     root.querySelector(".et-bm-cancel").click();
     expect(root.querySelector(".et-bm").hidden).toBe(true);
     expect(root.querySelector(".et-link.is-custom em").textContent).toBe("Its");
+  });
+
+  it("verwijdert een standaardsnelkoppeling en zet hem weer terug", async () => {
+    const { root } = await mountHome({ hour: 12, minute: 0 });
+    const saved = [];
+    dom.window.chrome.storage.local.set = (value) => saved.push(value);
+    const teams = [...root.querySelectorAll(".et-custom.is-default")].find((el) => el.textContent.includes("Teams"));
+    teams.querySelector(".et-more").click();
+    const menu = root.querySelector(".et-bm-menu");
+    expect(menu.querySelector('[data-action="edit"]').hidden).toBe(true);
+    menu.querySelector('[data-action="remove"]').click();
+    expect(teams.hidden).toBe(true);
+    expect(saved.at(-1)).toEqual({ eduarteHiddenShortcuts: ["Teams"] });
+
+    root.querySelector(".et-link.is-add").click();
+    const restore = root.querySelector(".et-bm-restore");
+    expect(restore.hidden).toBe(false);
+    expect(restore.textContent).toBe("1 verwijderde standaardsnelkoppeling terugzetten");
+    restore.click();
+    expect(teams.hidden).toBe(false);
+    expect(restore.hidden).toBe(true);
+    expect(saved.at(-1)).toEqual({ eduarteHiddenShortcuts: [] });
   });
 
   it("weigert links die geen gewone webpagina zijn", async () => {
