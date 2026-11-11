@@ -1460,6 +1460,17 @@
           .grade-list-item span { min-width:0; overflow:hidden; color:var(--grade-on-surface-variant); text-overflow:ellipsis; white-space:nowrap; }
           .grade-list-item b { color:var(--grade-on-surface); font-variant-numeric:tabular-nums; }
           .sort { min-height:38px; padding:0 12px; border:1px solid var(--grade-outline); border-radius:999px; color:var(--grade-on-surface); background:var(--grade-surface-high); font:inherit; }
+          .prediction { margin-top: 14px; }
+          .prediction[hidden] { display: none; }
+          .advice { margin: 0 0 10px; color: var(--grade-on-surface); font-size: 13px; line-height: 1.45; text-wrap: balance; }
+          .advice.is-warn { color: #f87171; }
+          .chart { position: relative; height: 150px; overflow: hidden; border: 1px solid var(--grade-outline); border-radius: 22px; background: var(--grade-surface-high); cursor: crosshair; touch-action: none; }
+          .chart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+          .chart-dot { position: absolute; z-index: 1; display: none; width: 10px; height: 10px; border-radius: 50%; background: var(--grade-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--grade-primary) 30%, transparent); transform: translate(-50%, -50%); pointer-events: none; }
+          .chart-tip { position: absolute; z-index: 2; display: none; padding: 3px 8px; border-radius: 999px; background: var(--grade-surface); color: var(--grade-on-surface); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
+          .chart-tip.is-ok { color: #34d399; }
+          .chart-tip.is-warn { color: #f87171; }
+          .chart-axis { display: flex; justify-content: space-between; gap: 8px; margin-top: 5px; color: var(--grade-on-surface-variant); font-size: 10px; font-variant-numeric: tabular-nums; }
           .backup-description { color:var(--grade-on-surface-variant); font-size:12px; line-height:1.5; }
           .message { min-height: 36px; margin: 13px 0 0; }
           @keyframes enter { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
@@ -1482,6 +1493,14 @@
             <div class="actions"><button class="action" data-action="add">+ Cijfer</button><button class="action primary" data-action="scan">Scannen</button></div>
             <div class="settings"><label>Doelgemiddelde<input class="target" type="number" min="${gradeMinimum}" max="${gradeMaximum}" step=".1" value="${passThreshold}"></label><label>Weging volgend cijfer<input class="future" type="number" min=".1" step=".1" placeholder="Auto"></label></div>
             <div class="metrics"><div class="metric"><b class="average">—</b><span>Gewogen gemiddelde</span></div><div class="metric"><b class="median">—</b><span>Mediaan</span></div><div class="metric"><b class="total-weight">—</b><span>Totale weging</span></div><div class="metric"><b class="needed">—</b><span>Benodigd cijfer</span></div><div class="metric"><b class="result">—</b><span>Nieuw gemiddelde</span></div></div>
+            <div class="prediction" hidden>
+              <p class="advice"></p>
+              <div class="chart" role="img" aria-label="Grafiek: cijfer voor je volgende toets tegen je nieuwe gemiddelde">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+                <i class="chart-dot"></i><span class="chart-tip"></span>
+              </div>
+              <div class="chart-axis"><span class="axis-min"></span><span>volgend cijfer → nieuw gemiddelde</span><span class="axis-max"></span></div>
+            </div>
             <div class="actions"><button class="action" data-action="export">CSV exporteren</button></div>
           </section>
           <section class="view" data-view="statistics" hidden>
@@ -1556,6 +1575,7 @@
         if (!validValues.length) {
           ["average", "median", "total-weight", "needed", "result"].forEach((name) => input(name).textContent = "—");
           message.textContent = "Voeg cijfers toe of scan je cijferlijst.";
+          renderPrediction(null, 0, passThreshold);
           return;
         }
         const target = Number(input("target").value);
@@ -1567,6 +1587,11 @@
         input("average").textContent = format(summary.weightedAverage);
         input("median").textContent = format(summary.median);
         input("total-weight").textContent = `${format(summary.totalWeight)}×`;
+        renderPrediction(
+          summary,
+          Number.isFinite(future) && future > 0 ? future : 0,
+          Number.isFinite(target) && target >= gradeMinimum && target <= gradeMaximum ? target : passThreshold
+        );
         if (summary.needed === undefined) {
           input("needed").textContent = "—";
           input("result").textContent = "—";
@@ -1583,6 +1608,92 @@
             ? `Je ligt op koers voor een gemiddelde van ${format(target)}; een ${format(gradeMinimum)} is voldoende.`
             : `${summary.currentlyPassing ? "Je staat voldoende. " : ""}Je hebt minimaal een ${format(summary.roundedNeeded)} nodig voor ${format(target)}.`;
       }
+
+      // Voorspelling met grafiek, overgenomen van de cijfercalculator van Study Tools (MIT, Quinten Althues):
+      // nieuw gemiddelde = helling × volgend cijfer + snijpunt
+      const chart = shadow.querySelector(".chart");
+      let line = null;
+      function renderPrediction(summary, future, goal) {
+        const box = shadow.querySelector(".prediction");
+        const advice = shadow.querySelector(".advice");
+        if (!summary || !(future > 0)) {
+          box.hidden = true;
+          line = null;
+          return;
+        }
+        const weightedTotal = summary.weightedAverage * summary.totalWeight;
+        const slope = future / (summary.totalWeight + future);
+        const intercept = weightedTotal / (summary.totalWeight + future);
+        const span = gradeMaximum - gradeMinimum;
+        const norm = (value) => ((value - gradeMinimum) / span) * 100;
+        line = { slope, intercept };
+        box.hidden = false;
+
+        const one = (value) => value.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        const weight = future.toLocaleString("nl-NL", { maximumFractionDigits: 2 });
+        const needed = (goal * (summary.totalWeight + future) - weightedTotal) / future;
+        const goalText = goal === passThreshold ? "voldoende" : `op een ${one(goal)}`;
+        advice.className = "advice";
+        if (needed > gradeMaximum) {
+          advice.textContent = `Met een cijfer dat ${weight}× meetelt, kun je niet hoger dan een ${format(slope * gradeMaximum + intercept)} komen te staan.`;
+          advice.classList.add("is-warn");
+        } else if (needed < gradeMinimum) {
+          advice.textContent = `Met een cijfer dat ${weight}× meetelt, kun je niet lager dan een ${format(slope * gradeMinimum + intercept)} komen te staan.`;
+        } else {
+          const atLeast = one(Math.ceil((needed - 1e-9) * 10) / 10);
+          advice.textContent = `Haal ten minste een ${atLeast} die ${weight}× meetelt om ${goalText} ${summary.weightedAverage < goal ? "te komen" : "te blijven"} staan.`;
+        }
+
+        const grid = Array.from({ length: Math.max(0, Math.round(span) - 1) }, (_, index) => {
+          const at = ((index + 1) / Math.round(span)) * 100;
+          return `<line x1="${at}" y1="0" x2="${at}" y2="100"/><line x1="0" y1="${at}" x2="100" y2="${at}"/>`;
+        }).join("");
+        const threshold = norm(goal);
+        line.goal = goal;
+        chart.querySelector("svg").innerHTML = `
+          <g stroke="var(--grade-outline)" stroke-width=".5" vector-effect="non-scaling-stroke" opacity=".6">${grid}</g>
+          <rect x="0" y="0" width="${threshold}" height="100" fill="#f87171" fill-opacity=".07"/>
+          <rect x="0" y="${100 - threshold}" width="100" height="${threshold}" fill="#f87171" fill-opacity=".07"/>
+          <line x1="0" y1="${100 - norm(slope * gradeMinimum + intercept)}" x2="100" y2="${100 - norm(slope * gradeMaximum + intercept)}"
+            stroke="var(--grade-primary)" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+        shadow.querySelector(".axis-min").textContent = one(gradeMinimum);
+        shadow.querySelector(".axis-max").textContent = one(gradeMaximum);
+        hideChartTip();
+      }
+
+      function hideChartTip() {
+        chart.querySelector(".chart-dot").style.display = "none";
+        chart.querySelector(".chart-tip").style.display = "none";
+      }
+
+      function showChartTip(clientX) {
+        if (!line) return;
+        const rect = chart.getBoundingClientRect();
+        if (!rect.width) return;
+        const span = gradeMaximum - gradeMinimum;
+        // Op tienden van een cijfer vastklikken
+        const raw = gradeMinimum + Math.min(1, Math.max(0, (clientX - rect.left) / rect.width)) * span;
+        const grade = Math.round(raw * 10) / 10;
+        const average = line.slope * grade + line.intercept;
+        const x = ((grade - gradeMinimum) / span) * 100;
+        const y = 100 - ((average - gradeMinimum) / span) * 100;
+        const dot = chart.querySelector(".chart-dot");
+        const tip = chart.querySelector(".chart-tip");
+        dot.style.display = "block";
+        dot.style.left = `${x}%`;
+        dot.style.top = `${y}%`;
+        tip.style.display = "block";
+        tip.textContent = `${grade.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ➜ ${format(average)}`;
+        tip.className = `chart-tip ${average >= line.goal - 1e-9 ? "is-ok" : "is-warn"}`;
+        const half = (tip.offsetWidth / 2 / rect.width) * 100;
+        tip.style.left = `${Math.min(100 - half, Math.max(half, x))}%`;
+        tip.style.top = `${y}%`;
+        tip.style.transform = (y / 100) * rect.height - tip.offsetHeight - 12 < 0 ? "translate(-50%, 40%)" : "translate(-50%, -140%)";
+      }
+
+      chart.addEventListener("pointermove", (event) => showChartTip(event.clientX));
+      chart.addEventListener("pointerdown", (event) => showChartTip(event.clientX));
+      chart.addEventListener("pointerleave", hideChartTip);
 
       function renderStatistics(entries) {
         const statistics = globalThis.EduarteGradeCalculator.calculateGradeStatistics(
