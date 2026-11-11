@@ -100,22 +100,6 @@ describe("portal action toolbar", () => {
     unreadObserver.callback([{ target: count }]);
     expect(window.requestAnimationFrame).not.toHaveBeenCalled();
 
-    // Spatie opent het zoeken (niet terwijl je typt); daarna opent een cijfer die pagina
-    const press = (target, key) => {
-      const event = new window.KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
-      target.dispatchEvent(event);
-      return event;
-    };
-    notificationButton.click();
-    searchForm.classList.remove("open");
-    expect(press(searchInput, " ").defaultPrevented).toBe(false);
-    expect(searchForm.classList.contains("open")).toBe(false);
-    expect(press(window.document.body, " ").defaultPrevented).toBe(true);
-    expect(searchForm.classList.contains("open")).toBe(true);
-    searchInput.value = "";
-    searchInput.dispatchEvent(new window.Event("input", { bubbles: true }));
-    expect(press(searchInput, "9").defaultPrevented).toBe(false); // geen negende pagina
-
     window.close();
   });
 });

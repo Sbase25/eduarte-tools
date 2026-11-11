@@ -475,8 +475,7 @@
         #${TOOLBAR_ID} .et-search-item i { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: color-mix(in srgb, currentColor 8%, transparent); font-style: normal; font-size: 14px; }
         #${TOOLBAR_ID} .et-search-item b { display: block; font-weight: 600; }
         #${TOOLBAR_ID} .et-search-item small { display: block; overflow: hidden; color: color-mix(in srgb, currentColor 55%, transparent); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-        #${TOOLBAR_ID} .et-search-item span { min-width: 0; flex: 1; }
-        #${TOOLBAR_ID} .et-search-item kbd { flex: none; min-width: 22px; padding: 2px 6px; border-radius: 7px; background: color-mix(in srgb, currentColor 10%, transparent); color: color-mix(in srgb, currentColor 70%, transparent); font: 600 11.5px/1.5 system-ui, sans-serif; text-align: center; }
+        #${TOOLBAR_ID} .et-search-item span { min-width: 0; }
         #${TOOLBAR_ID} .et-search-hint { display: flex; justify-content: flex-end; gap: 12px; padding: 8px 6px 0; color: color-mix(in srgb, currentColor 45%, transparent); font-size: 11px; }
         #${TOOLBAR_ID} .et-search-hint kbd { padding: 1px 5px; border-radius: 4px; background: color-mix(in srgb, currentColor 10%, transparent); font: inherit; }
         #${TOOLBAR_ID} .et-portal-message-link {
@@ -537,7 +536,7 @@
         <form class="et-portal-search" role="search" aria-label="Zoeken in Eduarte">
           <input type="search" placeholder="Zoek een pagina, les, docent of tekst…" aria-label="Zoekterm" autocomplete="off">
           <ul class="et-search-results" role="listbox"></ul>
-          <div class="et-search-hint"><span><kbd>↑</kbd><kbd>↓</kbd> kiezen</span><span><kbd>Enter</kbd> openen</span><span><kbd>Spatie</kbd> zoeken</span><span><kbd>1</kbd>–<kbd>9</kbd> direct openen</span></div>
+          <div class="et-search-hint"><span><kbd>↑</kbd><kbd>↓</kbd> kiezen</span><span><kbd>Enter</kbd> openen</span><span><kbd>Ctrl</kbd>+<kbd>K</kbd> zoeken</span></div>
         </form>
         <section class="et-portal-popover" aria-label="Meldingen" aria-live="polite">
           <div class="et-notif-head"><h2>Meldingen</h2><button class="et-notif-read" type="button" hidden>Alles gelezen</button></div>
@@ -800,9 +799,8 @@
       let lessons = null;
 
       const pages = () => Array.from(document.querySelectorAll("nav.navigation a[href]"))
-        .filter((a) => !a.closest(".navigation-header"))
         .map((a) => ({ label: a.textContent.trim(), href: a.href }))
-        .filter((p) => p.label.length > 1 && !/uitloggen|studentenportaal/i.test(p.label));
+        .filter((p) => p.label && !/uitloggen|studentenportaal/i.test(p.label));
 
       const loadLessons = () => {
         const Agenda = globalThis.EduarteAgenda;
@@ -846,7 +844,7 @@
         resultsEl.innerHTML = results.map((r, i) => {
           const header = r.group !== lastGroup ? `<li class="et-search-group" role="presentation">${escapeHtml(r.group)}</li>` : "";
           lastGroup = r.group;
-          return `${header}<li class="et-search-item${i === active ? " is-active" : ""}" role="option" data-index="${i}"><i>${r.icon}</i><span><b>${escapeHtml(r.label)}</b>${r.sub ? `<small>${escapeHtml(r.sub)}</small>` : ""}</span>${!term && i < 9 ? `<kbd>${i + 1}</kbd>` : ""}</li>`;
+          return `${header}<li class="et-search-item${i === active ? " is-active" : ""}" role="option" data-index="${i}"><i>${r.icon}</i><span><b>${escapeHtml(r.label)}</b>${r.sub ? `<small>${escapeHtml(r.sub)}</small>` : ""}</span></li>`;
         }).join("");
       };
 
@@ -880,12 +878,6 @@
       });
       searchInput.addEventListener("input", () => { active = 0; renderResults(); });
       searchInput.addEventListener("keydown", (event) => {
-        // Leeg zoekveld: een cijfer opent meteen die pagina (Spatie, dan 1 = de eerste)
-        if (/^[1-9]$/.test(event.key) && !searchInput.value && !event.ctrlKey && !event.metaKey && !event.altKey) {
-          const index = Number(event.key) - 1;
-          if (results[index]) { event.preventDefault(); runResult(index); }
-          return;
-        }
         if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
         event.preventDefault();
         if (!results.length) return;
@@ -909,11 +901,6 @@
           event.preventDefault();
           openSearch();
         } else if (event.key === "/" && !typing) {
-          event.preventDefault();
-          openSearch();
-        } else if (event.key === " " && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && !event.repeat && !typing
-          && !(event.target instanceof Element && event.target.closest("a[href], button, summary, [role='button'], [role='menuitem'], [role='option'], [tabindex]:not([tabindex='-1'])"))) {
-          // Spatie (als je niet aan het typen bent en geen knop vasthebt) opent het zoeken
           event.preventDefault();
           openSearch();
         }
