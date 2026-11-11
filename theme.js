@@ -1571,6 +1571,106 @@
       width: 46px !important;
     }
 
+    /* ---- Agenda: dagkaarten ---- */
+    /* Elke dag is een eigen kaart; het rooster zelf heeft geen omlijsting meer */
+    body:has(.agenda) .agenda {
+      overflow: visible !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    body:has(.agenda) .agenda--time {
+      flex-basis: 52px !important;
+      width: 52px !important;
+      padding-top: 64px !important;
+      border: 0 !important;
+    }
+    body:has(.agenda) .agenda--time li span {
+      color: color-mix(in srgb, ${text} 50%, transparent) !important;
+      font-size: 11.5px !important;
+    }
+    body:has(.agenda) .agenda--days {
+      gap: 10px !important;
+      padding: 0 2px 4px 0 !important;
+    }
+    body:has(.agenda) .agenda--day {
+      overflow: hidden !important;
+      border: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+      border-radius: 26px !important;
+      background: ${surface} !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,.14) !important;
+    }
+    body:has(.agenda) .agenda--day ul:not(.dropdown--list),
+    body:has(.agenda) .agenda--day:first-child ul:not(.dropdown--list) {
+      margin: 0 6px 8px !important;
+      border: 0 !important;
+    }
+    html.et-compact-agenda body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
+      background: repeating-linear-gradient(to bottom,
+        transparent 0, transparent 63px,
+        color-mix(in srgb, ${border} 45%, transparent) 63px, color-mix(in srgb, ${border} 45%, transparent) 64px) !important;
+    }
+    /* Dagkop: weekdag klein, datum groot */
+    body:has(.agenda) .agenda--day > .lead,
+    body:has(.agenda) .agenda--day > .lead[data-et-day] {
+      height: 64px !important;
+      flex-direction: column !important;
+      gap: 1px !important;
+      border: 0 !important;
+    }
+    body:has(.agenda) .agenda--day > .lead .et-dnum {
+      min-width: 34px !important;
+      height: 30px !important;
+      font-size: 20px !important;
+      letter-spacing: -.02em !important;
+    }
+    body:has(.agenda) .agenda--day > .lead .et-dmon {
+      display: none !important;
+    }
+    body:has(.agenda) .agenda--day.is-today {
+      border-color: color-mix(in srgb, ${accent} 55%, transparent) !important;
+      background: color-mix(in srgb, ${accent} 7%, ${surface}) !important;
+    }
+    body:has(.agenda) .agenda--day.is-today > .lead .et-dow {
+      color: ${accent} !important;
+    }
+    body:has(.agenda) .agenda--day.is-today > .lead .et-dnum {
+      padding: 0 10px !important;
+      border-radius: 12px !important;
+    }
+    /* Lesblokken: vol tonaal vlak in de vakkleur, rondom afgerond */
+    body:has(.agenda) .agenda--day li.agenda--course > div {
+      margin: 1px 0 0 !important;
+      padding: 8px 12px !important;
+      border: 0 !important;
+      border-radius: 16px !important;
+      background: color-mix(in srgb, var(--et-course, ${accent}) 30%, ${surface}) !important;
+    }
+    body:has(.agenda) .agenda--day li.agenda--course:hover > div {
+      border-radius: 22px !important;
+      background: color-mix(in srgb, var(--et-course, ${accent}) 42%, ${surface}) !important;
+    }
+    html.et-compact-agenda body:has(.agenda) .agenda--day li.agenda--course > div {
+      padding: 6px 12px !important;
+    }
+    body:has(.agenda) .agenda--day li.agenda--course.et-short-lesson > div {
+      border-radius: 12px !important;
+    }
+    body:has(.agenda) .agenda--day li.agenda--course .is-subject {
+      color: color-mix(in srgb, var(--et-course, ${accent}) 45%, ${text}) !important;
+      font-size: 14px !important;
+      font-weight: 800 !important;
+    }
+    body:has(.agenda) .agenda--day li.et-past {
+      opacity: .5 !important;
+    }
+    body:has(.agenda) .agenda--day ul:not(.dropdown--list) > li.et-now-line::before {
+      left: -2px !important;
+    }
+
     @media (max-width: 700px) {
       body:has(.agenda) header.header:not(:has(> .header-tabs)) > .header-toolbar {
         min-height: 58px !important;
