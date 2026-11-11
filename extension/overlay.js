@@ -99,6 +99,9 @@
     book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
     chart: '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',
     calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    open: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+    trash: '<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>',
     list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
     arrow: '<path d="M5 12h14M12 5l7 7-7 7"/>',
     timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/>',
@@ -1159,13 +1162,32 @@
               ${C} .et-bm button[type="submit"] { height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--et-accent); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
               ${C} .et-bm-error { margin: 8px 2px 0; color: #f87171; font-size: 12.5px; }
               ${C} .et-bm-error[hidden] { display: none; }
-              ${C} .et-bm-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
-              ${C} .et-bm-list:empty { display: none; }
-              ${C} .et-bm-list li { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 5px 6px 5px 12px; border-radius: 999px; background: var(--et-surface); color: var(--et-text); font-size: 12.5px; font-weight: 600; }
-              ${C} .et-bm-list li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-              ${C} .et-bm-list button { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--et-muted); font: inherit; font-size: 16px; line-height: 1; cursor: pointer; }
-              ${C} .et-bm-list button:hover { background: color-mix(in srgb, #f87171 22%, transparent); color: #f87171; }
-              @media (max-width: 640px) { ${C} .et-bm form { grid-template-columns: 1fr; } }
+              ${C} .et-bm.is-editing form { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto auto; }
+              ${C} .et-bm-cancel { height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--et-muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+              ${C} .et-bm-cancel:hover { background: color-mix(in srgb, var(--et-text) 10%, transparent); color: var(--et-text); }
+              ${C} .et-bm-cancel[hidden] { display: none; }
+              ${C} .et-bm.is-editing { box-shadow: inset 0 0 0 2px var(--et-accent); }
+              ${C} .et-bm-hint { margin: 8px 2px 0; color: var(--et-muted); font-size: 12.5px; }
+              ${C} .et-bm-hint[hidden] { display: none; }
+              ${C} .et-custom { position: relative; display: grid; min-width: 0; }
+              ${C} .et-custom.is-editing .et-link { background: var(--et-accent-soft); box-shadow: inset 0 0 0 2px var(--et-accent); }
+              ${C} .et-more { position: absolute; top: 4px; right: 4px; display: flex; align-items: center; justify-content: center; gap: 2.5px; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: var(--et-surface-2); color: var(--et-text); cursor: pointer; opacity: 0; transform: scale(.8); transition: opacity .15s ease, transform .2s cubic-bezier(.34, 1.56, .64, 1), background .15s ease; }
+              ${C} .et-more i { width: 3.5px; height: 3.5px; border-radius: 50%; background: currentColor; }
+              ${C} .et-custom:hover .et-more, ${C} .et-custom:focus-within .et-more, ${C} .et-more[aria-expanded="true"] { opacity: 1; transform: none; }
+              ${C} .et-more:hover { background: var(--et-accent); color: #fff; }
+              ${C} .et-more:focus-visible { outline: 2px solid var(--et-accent); outline-offset: 2px; }
+              @media (hover: none) { ${C} .et-more { opacity: .85; transform: none; } }
+              ${C} .et-bm-menu { position: fixed; z-index: 2147483000; min-width: 230px; max-width: calc(100vw - 16px); padding: 6px; border: 1px solid var(--et-border); border-radius: 20px; background: var(--et-surface); color: var(--et-text); box-shadow: 0 18px 44px rgba(0, 0, 0, .34), 0 2px 8px rgba(0, 0, 0, .18); animation: et-bm-pop .18s cubic-bezier(.34, 1.4, .64, 1); transform-origin: top left; }
+              ${C} .et-bm-menu[hidden] { display: none; }
+              ${C} .et-bm-menu-title { margin: 0; padding: 8px 12px 6px; overflow: hidden; color: var(--et-muted); font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+              ${C} .et-bm-menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 42px; padding: 0 14px 0 12px; border: 0; border-radius: 14px; background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+              ${C} .et-bm-menu button svg { flex: none; width: 18px; height: 18px; opacity: .8; }
+              ${C} .et-bm-menu button:hover, ${C} .et-bm-menu button:focus-visible { outline: 0; background: var(--et-accent-soft); }
+              ${C} .et-bm-menu button.is-danger { color: #f87171; }
+              ${C} .et-bm-menu button.is-danger:hover, ${C} .et-bm-menu button.is-danger:focus-visible { background: color-mix(in srgb, #f87171 16%, transparent); }
+              @keyframes et-bm-pop { from { opacity: 0; transform: scale(.92); } }
+              @media (prefers-reduced-motion: reduce) { ${C} .et-bm-menu { animation: none; } ${C} .et-more { transition: none; } }
+              @media (max-width: 640px) { ${C} .et-bm form, ${C} .et-bm.is-editing form { grid-template-columns: 1fr; } }
               ${C} .et-link {
                 display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0;
                 padding: 12px 6px 10px; border-radius: 20px;
@@ -1360,15 +1382,16 @@
                 <a class="et-link" href="https://mbowebshop.nl/Gebruikers/Licenties/" target="_blank" rel="noreferrer"><span style="--tile:#d97706">${icon("book")}</span><em>MboWebshop</em></a>
                 <a class="et-link" href="/resultaten"><span style="--tile:#059669">${icon("chart")}</span><em>Cijfers</em></a>
                 <a class="et-link" href="/agenda"><span style="--tile:#db2777">${icon("calendar")}</span><em>Agenda</em></a>
-                <button class="et-link is-add" type="button" aria-expanded="false" title="Eigen snelkoppeling toevoegen of verwijderen"><span>+</span><em>Toevoegen</em></button>
+                <button class="et-link is-add" type="button" aria-expanded="false" title="Eigen snelkoppeling toevoegen"><span>+</span><em>Toevoegen</em></button>
                 <div class="et-bm" hidden>
                   <form novalidate>
                     <input class="et-bm-name" type="text" maxlength="24" placeholder="Naam" aria-label="Naam" autocomplete="off">
                     <input class="et-bm-url" type="text" inputmode="url" maxlength="500" placeholder="Link, bv. itslearning.com" aria-label="Link" autocomplete="off">
                     <button type="submit">Toevoegen</button>
+                    <button class="et-bm-cancel" type="button" hidden>Annuleren</button>
                   </form>
                   <p class="et-bm-error" role="alert" hidden></p>
-                  <ul class="et-bm-list" aria-label="Eigen snelkoppelingen"></ul>
+                  <p class="et-bm-hint" hidden></p>
                 </div>
               </nav>
             ` : ""}
@@ -1747,7 +1770,6 @@
             const box = nav.querySelector(".et-bm");
             const form = box.querySelector("form");
             const errorEl = box.querySelector(".et-bm-error");
-            const listEl = box.querySelector(".et-bm-list");
             const MAX_BOOKMARKS = 12;
             const TILE_COLORS = ["#6366f1", "#0891b2", "#16a34a", "#ca8a04", "#dc2626", "#9333ea", "#0d9488", "#e11d48"];
             // Alleen gewone weblinks: geen javascript:, data: en dergelijke
@@ -1764,9 +1786,83 @@
               .filter((item) => item.name && item.url)
               .slice(0, MAX_BOOKMARKS);
 
+            let editIndex = -1; // -1 = nieuwe snelkoppeling, anders de plek van degene die je wijzigt
+            const nameInput = form.querySelector(".et-bm-name");
+            const urlInput = form.querySelector(".et-bm-url");
+            const submitButton = form.querySelector('button[type="submit"]');
+            const cancelButton = form.querySelector(".et-bm-cancel");
+            const hintEl = box.querySelector(".et-bm-hint");
+            const showError = (text) => { errorEl.textContent = text; errorEl.hidden = !text; };
+
+            // Eigen menu per snelkoppeling: wijzigen of verwijderen
+            const menu = document.createElement("div");
+            menu.className = "et-bm-menu";
+            menu.setAttribute("role", "menu");
+            menu.hidden = true;
+            menu.innerHTML = `
+              <p class="et-bm-menu-title"></p>
+              <button type="button" role="menuitem" data-action="edit">${icon("edit")}<span>Naam of link wijzigen</span></button>
+              <button type="button" role="menuitem" data-action="open">${icon("open")}<span>Openen in nieuw tabblad</span></button>
+              <button type="button" role="menuitem" data-action="remove" class="is-danger">${icon("trash")}<span>Verwijderen</span></button>`;
+            container.append(menu);
+            let menuIndex = -1;
+            let menuOpener = null;
+            const closeMenu = (refocus = false) => {
+              if (menu.hidden) return;
+              menu.hidden = true;
+              menuIndex = -1;
+              nav.querySelectorAll('.et-more[aria-expanded="true"]').forEach((el) => el.setAttribute("aria-expanded", "false"));
+              if (refocus && menuOpener?.isConnected) menuOpener.focus();
+              menuOpener = null;
+            };
+            const openMenu = (index, x, y, opener) => {
+              const item = bookmarks[index];
+              if (!item) return;
+              menuIndex = index;
+              menuOpener = opener || null;
+              nav.querySelectorAll(".et-more").forEach((el) => el.setAttribute("aria-expanded", String(el === opener)));
+              menu.querySelector(".et-bm-menu-title").textContent = item.name;
+              menu.hidden = false;
+              const width = menu.offsetWidth || 230;
+              const height = menu.offsetHeight || 170;
+              const maxX = Math.max(8, (window.innerWidth || 0) - width - 8);
+              const maxY = Math.max(8, (window.innerHeight || 0) - height - 8);
+              menu.style.left = `${Math.round(Math.max(8, Math.min(x, maxX)))}px`;
+              menu.style.top = `${Math.round(Math.max(8, Math.min(y, maxY)))}px`;
+              menu.querySelector("button").focus({ preventScroll: true });
+            };
+            const openForm = (index = -1) => {
+              editIndex = index;
+              const item = bookmarks[index];
+              box.hidden = false;
+              box.classList.toggle("is-editing", Boolean(item));
+              addButton.setAttribute("aria-expanded", String(!item));
+              nameInput.value = item ? item.name : "";
+              urlInput.value = item ? item.url : "";
+              submitButton.textContent = item ? "Opslaan" : "Toevoegen";
+              cancelButton.hidden = !item;
+              hintEl.textContent = item
+                ? `Je wijzigt “${item.name}”.`
+                : (bookmarks.length ? "Tip: klik met rechts op een eigen snelkoppeling (of op ⋯) om hem te wijzigen of te verwijderen." : "");
+              hintEl.hidden = !hintEl.textContent;
+              showError("");
+              nameInput.focus({ preventScroll: true });
+              if (item) nameInput.select();
+            };
+            const closeForm = () => {
+              editIndex = -1;
+              box.hidden = true;
+              box.classList.remove("is-editing");
+              addButton.setAttribute("aria-expanded", "false");
+              showError("");
+            };
+
             const renderBookmarks = () => {
-              nav.querySelectorAll(".et-link.is-custom").forEach((el) => el.remove());
+              nav.querySelectorAll(".et-custom").forEach((el) => el.remove());
               bookmarks.forEach((item, index) => {
+                const wrap = document.createElement("div");
+                wrap.className = "et-custom";
+                wrap.classList.toggle("is-editing", index === editIndex);
                 const link = document.createElement("a");
                 link.className = "et-link is-custom";
                 link.href = item.url;
@@ -1780,53 +1876,101 @@
                 const label = document.createElement("em");
                 label.textContent = item.name;
                 link.append(tile, label);
-                addButton.before(link);
-              });
-              listEl.replaceChildren(...bookmarks.map((item, index) => {
-                const li = document.createElement("li");
-                const name = document.createElement("span");
-                name.textContent = item.name;
-                const remove = document.createElement("button");
-                remove.type = "button";
-                remove.textContent = "×";
-                remove.title = `${item.name} verwijderen`;
-                remove.setAttribute("aria-label", remove.title);
-                remove.addEventListener("click", () => {
-                  bookmarks = bookmarks.filter((_, i) => i !== index);
-                  saveBookmarks();
+                const more = document.createElement("button");
+                more.type = "button";
+                more.className = "et-more";
+                more.title = `${item.name} wijzigen of verwijderen`;
+                more.setAttribute("aria-label", more.title);
+                more.setAttribute("aria-haspopup", "menu");
+                more.innerHTML = "<i></i><i></i><i></i>";
+                more.addEventListener("click", (event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (!menu.hidden && menuIndex === index) return closeMenu();
+                  const rect = more.getBoundingClientRect();
+                  openMenu(index, rect.left, rect.bottom + 6, more);
                 });
-                li.append(name, remove);
-                return li;
-              }));
+                // Rechtsklik (en lang indrukken op een telefoon) opent hetzelfde menu
+                wrap.addEventListener("contextmenu", (event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  openMenu(index, event.clientX, event.clientY, more);
+                });
+                wrap.append(link, more);
+                addButton.before(wrap);
+              });
             };
             const saveBookmarks = () => {
               chrome.storage.local.set({ eduarteBookmarks: bookmarks });
               renderBookmarks();
             };
-            const showError = (text) => { errorEl.textContent = text; errorEl.hidden = !text; };
+
+            menu.addEventListener("click", (event) => {
+              const action = event.target.closest("button")?.dataset.action;
+              const index = menuIndex;
+              const item = bookmarks[index];
+              if (!action || !item) return;
+              closeMenu();
+              if (action === "edit") {
+                openForm(index);
+                renderBookmarks();
+              } else if (action === "open") {
+                window.open(item.url, "_blank", "noopener,noreferrer");
+              } else if (action === "remove") {
+                bookmarks = bookmarks.filter((_, i) => i !== index);
+                if (editIndex === index) closeForm();
+                else if (editIndex > index) editIndex -= 1;
+                saveBookmarks();
+              }
+            });
+            menu.addEventListener("contextmenu", (event) => { event.preventDefault(); event.stopPropagation(); });
+            menu.addEventListener("keydown", (event) => {
+              const items = [...menu.querySelectorAll("button")];
+              const at = items.indexOf(document.activeElement);
+              if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                items[(at + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus();
+              } else if (event.key === "Escape") {
+                event.preventDefault();
+                event.stopPropagation();
+                closeMenu(true);
+              } else if (event.key === "Tab") {
+                closeMenu();
+              }
+            });
+            document.addEventListener("pointerdown", (event) => {
+              if (!menu.hidden && !menu.contains(event.target) && !event.target.closest?.(".et-more")) closeMenu();
+            }, true);
+            window.addEventListener("scroll", () => closeMenu(), { passive: true, capture: true });
+            window.addEventListener("resize", () => closeMenu());
 
             addButton.addEventListener("click", () => {
-              box.hidden = !box.hidden;
-              addButton.setAttribute("aria-expanded", String(!box.hidden));
-              showError("");
-              if (!box.hidden) form.querySelector(".et-bm-name").focus();
+              if (!box.hidden && editIndex === -1) closeForm();
+              else openForm(-1);
+              renderBookmarks();
+            });
+            cancelButton.addEventListener("click", () => { closeForm(); renderBookmarks(); });
+            form.addEventListener("keydown", (event) => {
+              if (event.key === "Escape" && editIndex !== -1) { closeForm(); renderBookmarks(); }
             });
             form.addEventListener("submit", (event) => {
               event.preventDefault();
-              const nameInput = form.querySelector(".et-bm-name");
-              const urlInput = form.querySelector(".et-bm-url");
               const url = cleanUrl(urlInput.value);
               if (!url) return showError("Vul een geldige link in, bijvoorbeeld itslearning.com.");
               let name = nameInput.value.trim().slice(0, 24);
               if (!name) name = new URL(url).hostname.replace(/^www\./, "").split(".")[0];
-              if (bookmarks.length >= MAX_BOOKMARKS) return showError(`Je kunt maximaal ${MAX_BOOKMARKS} eigen snelkoppelingen toevoegen.`);
-              if (bookmarks.some((item) => item.url === url)) return showError("Deze link staat er al tussen.");
+              const editing = editIndex !== -1 && Boolean(bookmarks[editIndex]);
+              if (!editing && bookmarks.length >= MAX_BOOKMARKS) return showError(`Je kunt maximaal ${MAX_BOOKMARKS} eigen snelkoppelingen toevoegen.`);
+              if (bookmarks.some((item, i) => item.url === url && i !== editIndex)) return showError("Deze link staat er al tussen.");
+              if (editing) {
+                bookmarks = bookmarks.map((item, i) => (i === editIndex ? { name, url } : item));
+                closeForm();
+                saveBookmarks();
+                return;
+              }
               bookmarks = [...bookmarks, { name, url }];
-              nameInput.value = "";
-              urlInput.value = "";
-              showError("");
               saveBookmarks();
-              nameInput.focus();
+              openForm(-1);
             });
             renderBookmarks();
           }
