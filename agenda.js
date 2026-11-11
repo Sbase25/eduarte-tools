@@ -373,8 +373,13 @@
   // De rode "nu"-lijn zelf neerzetten: Eduarte rekent met 108px per uur en zijn eigen kopruimte
   function placeNowLine(doc, startHour) {
     const hr = doc.querySelector(".agenda--present-time");
-    const ul = doc.querySelector(".agenda--day.is-today > ul") || doc.querySelector(".agenda--day > ul");
-    if (!hr || !ul) return;
+    if (!hr) return;
+    // Alleen in de week van vandaag: in een andere week zegt de lijn niets
+    const ul = doc.querySelector(".agenda--day.is-today > ul");
+    if (!ul) {
+      hr.style.setProperty("display", "none", "important");
+      return;
+    }
     const parent = hr.offsetParent || hr.parentElement;
     const now = new Date();
     const hours = now.getHours() + now.getMinutes() / 60 - startHour;
@@ -386,6 +391,11 @@
     const offset = ul.getBoundingClientRect().top - parent.getBoundingClientRect().top - parent.clientTop;
     hr.style.removeProperty("display");
     hr.style.setProperty("top", `${offset + hours * COMPACT_HOUR_PX}px`, "important");
+    // De lijn loopt alleen door de kolom van vandaag
+    const box = ul.getBoundingClientRect();
+    hr.style.setProperty("left", `${box.left - parent.getBoundingClientRect().left - parent.clientLeft + (parent.scrollLeft || 0)}px`, "important");
+    hr.style.setProperty("right", "auto", "important");
+    hr.style.setProperty("width", `${box.width}px`, "important");
   }
 
   function watchAgenda(doc) {
