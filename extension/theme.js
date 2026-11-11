@@ -2063,6 +2063,17 @@
         -webkit-backdrop-filter: none !important;
       }
 
+      /* Agenda: de knoppenbalk hangt onder de (nu 10px lagere) bovenbalk, niet er half overheen */
+      html body:has(.agenda) .agenda-filter {
+        top: 84px !important;
+      }
+      html body:has(.agenda) .content:has(> .agenda-filter) {
+        padding-top: 97px !important;
+      }
+      html body:has(.agenda) .s5-filterbar-toggle {
+        margin-top: 15px !important;
+      }
+
       /* Wat onder de balk door schuift vervaagt in de smalle strook erboven */
       header.header::before {
         content: "" !important;
