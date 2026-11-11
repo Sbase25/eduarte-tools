@@ -277,7 +277,7 @@
           outline-offset: 3px;
         }
         #${TOOLBAR_ID} .et-portal-action svg { width: 20px; height: 20px; fill: currentColor; }
-        #${TOOLBAR_ID} .et-portal-bell::after {
+        #${TOOLBAR_ID} .et-portal-bell.has-unread::after {
           position: absolute;
           top: 8px;
           right: 9px;
@@ -394,6 +394,42 @@
           color: color-mix(in srgb, var(--et-tb-text) 68%, transparent);
           font: 400 12px/1.5 system-ui, sans-serif;
         }
+        #${TOOLBAR_ID} .et-portal-popover { width: min(360px, calc(100vw - 24px)); padding: 16px 14px 14px; }
+        #${TOOLBAR_ID} .et-notif-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 6px 8px; }
+        #${TOOLBAR_ID} .et-notif-head h2 { margin: 0; }
+        #${TOOLBAR_ID} .et-notif-read {
+          padding: 6px 12px; border: 0; border-radius: 999px; background: color-mix(in srgb, var(--et-tb-text) 10%, transparent);
+          color: var(--et-tb-text); font: 600 12px/1 system-ui, sans-serif; cursor: pointer;
+        }
+        #${TOOLBAR_ID} .et-notif-read[hidden] { display: none; }
+        #${TOOLBAR_ID} .et-notif-list { display: grid; gap: 2px; max-height: min(60vh, 420px); margin: 0; padding: 0; overflow: auto; list-style: none; }
+        #${TOOLBAR_ID} .et-notif-list:empty { display: none; }
+        #${TOOLBAR_ID} .et-notif-list a {
+          display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 10px; align-items: start;
+          padding: 10px; border-radius: 16px; color: inherit; text-decoration: none;
+        }
+        #${TOOLBAR_ID} .et-notif-list a:hover { background: color-mix(in srgb, var(--et-tb-text) 8%, transparent); }
+        #${TOOLBAR_ID} .et-notif-list i { width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--et-tb-accent); }
+        #${TOOLBAR_ID} .et-notif-list li.is-ok i { background: #34d399; }
+        #${TOOLBAR_ID} .et-notif-list li.is-warn i { background: #f87171; }
+        #${TOOLBAR_ID} .et-notif-list li.is-read i { background: color-mix(in srgb, var(--et-tb-text) 22%, transparent); }
+        #${TOOLBAR_ID} .et-notif-list strong { display: block; color: var(--et-tb-text); font: 650 13.5px/1.35 system-ui, sans-serif; overflow-wrap: anywhere; }
+        #${TOOLBAR_ID} .et-notif-list li.is-read strong { font-weight: 500; color: color-mix(in srgb, var(--et-tb-text) 78%, transparent); }
+        #${TOOLBAR_ID} .et-notif-list span { display: block; margin-top: 1px; color: color-mix(in srgb, var(--et-tb-text) 62%, transparent); font: 400 12px/1.4 system-ui, sans-serif; overflow-wrap: anywhere; }
+        #${TOOLBAR_ID} .et-notif-list small { display: block; margin-top: 2px; color: color-mix(in srgb, var(--et-tb-text) 42%, transparent); font: 400 11px/1.3 system-ui, sans-serif; }
+        #${TOOLBAR_ID} .et-portal-notification-copy, #${TOOLBAR_ID} .et-notif-foot { margin: 6px !important; }
+        #${TOOLBAR_ID} .et-notif-foot { font-size: 11px !important; opacity: .8; }
+        /* Korte melding in beeld als er iets nieuws is gevonden */
+        #${TOOLBAR_ID} .et-notif-toast {
+          position: absolute; z-index: 2147483644; top: calc(100% + 10px); right: 8px;
+          display: grid; gap: 2px; width: min(320px, calc(100vw - 24px)); padding: 12px 16px;
+          border: 1px solid color-mix(in srgb, var(--et-tb-text) 10%, transparent); border-radius: 20px;
+          background: color-mix(in srgb, var(--et-tb-surface) 94%, var(--et-tb-text)); color: var(--et-tb-text);
+          box-shadow: 0 14px 36px rgba(0,0,0,.4); cursor: pointer; text-align: left;
+          animation: et-portal-pop-in 200ms ease both;
+        }
+        #${TOOLBAR_ID} .et-notif-toast strong { font: 700 13.5px/1.35 system-ui, sans-serif; }
+        #${TOOLBAR_ID} .et-notif-toast span { color: color-mix(in srgb, var(--et-tb-text) 65%, transparent); font: 400 12px/1.4 system-ui, sans-serif; }
         /* Zoekvenster midden in beeld, boven alles (ook boven de filterbalk van de agenda) */
         #${TOOLBAR_ID} .et-portal-search {
           display: none;
@@ -500,8 +536,10 @@
           <div class="et-search-hint"><span><kbd>↑</kbd><kbd>↓</kbd> kiezen</span><span><kbd>Enter</kbd> openen</span><span><kbd>Ctrl</kbd>+<kbd>K</kbd> zoeken</span></div>
         </form>
         <section class="et-portal-popover" aria-label="Meldingen" aria-live="polite">
-          <h2>Meldingen</h2>
+          <div class="et-notif-head"><h2>Meldingen</h2><button class="et-notif-read" type="button" hidden>Alles gelezen</button></div>
+          <ul class="et-notif-list"></ul>
           <p class="et-portal-notification-copy"></p>
+          <p class="et-notif-foot">Eduarte Tools meldt nieuwe presentie (aanwezig, afwezig, ziek) zodra je het portaal opent, en nieuwe cijfers als je Resultaten bekijkt.</p>
           <a class="et-portal-message-link" hidden>Open berichten</a>
         </section>
       `;
@@ -611,15 +649,145 @@
         messageLink.hidden = false;
       }
 
+      // ---- Meldingen van Eduarte Tools zelf (presentie, afwezigheid, cijfers) ----
+      const Notify = globalThis.EduarteNotifications;
+      const notifList = actions.querySelector(".et-notif-list");
+      const notifReadButton = actions.querySelector(".et-notif-read");
+      const NOTIFY_LIST_KEY = "eduarteNotifications";
+      const NOTIFY_STATE_KEY = "eduarteNotifyState";
+      const NOTIFY_INTERVAL = 5 * 60 * 1000;
+      let notifications = [];
+
       const updateUnreadCount = () => {
-        const unread = getUnreadCount(actions);
+        const own = Notify ? Notify.unreadCount(notifications) : 0;
+        const native = getUnreadCount(actions);
+        const unread = own + native;
         count.textContent = unread > 99 ? "99+" : String(unread);
         count.style.display = unread ? "flex" : "none";
+        notificationButton.classList.toggle("has-unread", unread > 0);
         notificationButton.setAttribute("aria-label", unread ? `${unread} ongelezen meldingen` : "Meldingen");
-        notificationCopy.textContent = unread
-          ? `Eduarte toont ${unread} ongelezen ${unread === 1 ? "melding" : "meldingen"}.`
-          : "Er zijn geen ongelezen meldingen gevonden.";
+        notificationCopy.textContent = native
+          ? `Eduarte toont zelf ook ${native} ongelezen ${native === 1 ? "melding" : "meldingen"}.`
+          : (notifications.length ? "" : "Nog geen meldingen.");
+        notificationCopy.hidden = !notificationCopy.textContent;
+        notifReadButton.hidden = own === 0;
       };
+
+      const renderNotifications = () => {
+        notifList.replaceChildren(...notifications.map((item) => {
+          const li = document.createElement("li");
+          li.className = [item.read ? "is-read" : "", item.tone ? `is-${item.tone}` : ""].filter(Boolean).join(" ");
+          const link = document.createElement("a");
+          link.href = typeof item.href === "string" && item.href.startsWith("/") ? item.href : "#";
+          const dot = document.createElement("i");
+          const body = document.createElement("div");
+          const title = document.createElement("strong");
+          title.textContent = item.title;
+          body.append(title);
+          if (item.text) {
+            const text = document.createElement("span");
+            text.textContent = item.text;
+            body.append(text);
+          }
+          const time = document.createElement("small");
+          time.textContent = Notify.timeAgo(item.at);
+          body.append(time);
+          link.append(dot, body);
+          li.append(link);
+          return li;
+        }));
+        updateUnreadCount();
+      };
+
+      const saveNotifications = (next) => {
+        notifications = next;
+        chrome.storage.local.set({ [NOTIFY_LIST_KEY]: notifications });
+        renderNotifications();
+      };
+
+      const showToast = (created) => {
+        actions.querySelector(".et-notif-toast")?.remove();
+        if (notificationPanel.classList.contains("open")) return;
+        const toast = document.createElement("button");
+        toast.type = "button";
+        toast.className = "et-notif-toast";
+        const title = document.createElement("strong");
+        title.textContent = created.length === 1 ? created[0].title : `${created.length} nieuwe meldingen`;
+        const text = document.createElement("span");
+        text.textContent = created.length === 1 ? (created[0].text || "Klik om te bekijken") : created.slice(0, 2).map((item) => item.title).join(" · ");
+        toast.append(title, text);
+        toast.addEventListener("click", () => { toast.remove(); notificationButton.click(); });
+        actions.appendChild(toast);
+        window.setTimeout(() => toast.remove(), 7000);
+      };
+
+      const fetchDocument = (path) => fetch(path, { credentials: "same-origin" })
+        .then((response) => (response.ok ? response.text() : Promise.reject(new Error(`HTTP ${response.status}`))))
+        .then((html) => new DOMParser().parseFromString(html, "text/html"));
+
+      // Haalt de presentie op (en leest cijfers als je op Resultaten bent) en vergelijkt met de vorige keer.
+      // Een bron die niet laadt of niets oplevert slaat gewoon over; de rest gaat door.
+      const checkNotifications = (state) => {
+        const path = window.location.pathname;
+        const here = (prefix) => (path.startsWith(prefix) ? Promise.resolve(document) : fetchDocument(prefix));
+        const sources = [
+          ["presence", () => here("/presentie").then((doc) => Notify.presenceFromPresencePage(doc))],
+          ["grade", () => Promise.resolve(globalThis.EduarteApi && path.startsWith("/resultaten") ? Notify.gradesFromDocument(document, globalThis.EduarteApi) : null)],
+        ];
+        return Promise.all(sources.map(([kind, load]) => load().then((items) => [kind, items]).catch(() => [kind, null]))).then((results) => {
+          let nextState = { ...state, checkedAt: Date.now() };
+          const created = [];
+          results.forEach(([kind, items]) => {
+            // Cijfers laadt Eduarte na: een lege lijst zegt dan niets en mag geen beginstand worden
+            if (kind === "grade" && !items?.length) return;
+            // Niets gevonden terwijl er eerder wel iets was: waarschijnlijk een andere week of een laadfout, dus niet als basis nemen
+            if (!Array.isArray(items) || (!items.length && !Array.isArray(nextState[kind]))) {
+              if (Array.isArray(items) && !items.length) nextState = { ...nextState, [kind]: [] };
+              return;
+            }
+            const result = Notify.diff(nextState, kind, items);
+            nextState = result.state;
+            created.push(...result.created.map((item) => Notify.toNotification(item)));
+          });
+          chrome.storage.local.set({ [NOTIFY_STATE_KEY]: nextState });
+          if (created.length) {
+            saveNotifications(Notify.addNotifications(notifications, created));
+            showToast(created);
+          }
+        });
+      };
+
+      if (Notify) {
+        chrome.storage.local.get([NOTIFY_LIST_KEY, NOTIFY_STATE_KEY, "eduarteNotificationsEnabled"], (data) => {
+          notifications = (Array.isArray(data?.[NOTIFY_LIST_KEY]) ? data[NOTIFY_LIST_KEY] : [])
+            .filter((item) => item && typeof item.id === "string" && typeof item.title === "string")
+            .slice(0, Notify.MAX_NOTIFICATIONS);
+          renderNotifications();
+          if (data?.eduarteNotificationsEnabled === false) return;
+          const state = data?.[NOTIFY_STATE_KEY] && typeof data[NOTIFY_STATE_KEY] === "object" ? data[NOTIFY_STATE_KEY] : {};
+          // Blijft de pagina open staan, dan elke vijf minuten opnieuw kijken
+          window.setInterval(() => {
+            if (document.hidden) return;
+            chrome.storage.local.get([NOTIFY_STATE_KEY], (fresh) => {
+              const current = fresh?.[NOTIFY_STATE_KEY] && typeof fresh[NOTIFY_STATE_KEY] === "object" ? fresh[NOTIFY_STATE_KEY] : {};
+              if (Date.now() - (Number(current.checkedAt) || 0) >= NOTIFY_INTERVAL) checkNotifications(current).catch(() => {});
+            });
+          }, 60 * 1000);
+          // Op Presentie en Resultaten altijd meteen kijken; elders hooguit eens per vijf minuten
+          const onSource = /^\/(presentie|resultaten)/.test(window.location.pathname);
+          if (!onSource && Date.now() - (Number(state.checkedAt) || 0) < NOTIFY_INTERVAL) return;
+          // Even wachten tot de pagina zelf klaar is met laden
+          window.setTimeout(() => checkNotifications(state).catch(() => {}), 1500);
+        });
+        chrome.storage.onChanged.addListener((changes, area) => {
+          if (area !== "local" || !changes[NOTIFY_LIST_KEY]) return;
+          const next = changes[NOTIFY_LIST_KEY].newValue;
+          if (JSON.stringify(next) === JSON.stringify(notifications)) return;
+          notifications = Array.isArray(next) ? next : [];
+          renderNotifications();
+        });
+        notifReadButton.addEventListener("click", () => saveNotifications(Notify.markAllRead(notifications)));
+      }
 
       // Zoeken: pagina's uit het menu, lessen van deze week en tekst op de huidige pagina
       const resultsEl = searchForm.querySelector(".et-search-results");
@@ -739,6 +907,8 @@
         searchForm.classList.remove("open");
         notificationButton.setAttribute("aria-expanded", String(open));
         searchButton.setAttribute("aria-expanded", "false");
+        actions.querySelector(".et-notif-toast")?.remove();
+        if (open) renderNotifications();
         updateUnreadCount();
       });
       document.addEventListener("pointerdown", (event) => {
