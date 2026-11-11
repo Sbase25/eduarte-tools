@@ -1435,17 +1435,29 @@
     body:has(.agenda) .agenda--day li.et-now > div {
       box-shadow: 0 0 0 2px var(--et-course, ${accent}) !important;
     }
-    /* "Nu"-lijn: alleen in de kolom van vandaag (agenda.js zet left/width), met een bolletje */
+    /* "Nu"-lijn: eigen element van agenda.js in de kolom van vandaag, met een bolletje */
     body:has(.agenda) .agenda--present-time {
+      display: none !important;
+    }
+    body:has(.agenda) .agenda--day ul:not(.dropdown--list) > li.et-now-line {
+      position: absolute !important;
+      right: 0 !important;
+      left: 0 !important;
+      z-index: 20 !important;
+      width: auto !important;
       height: 0 !important;
       margin: 0 !important;
+      padding: 0 !important;
       overflow: visible !important;
       border: 0 !important;
       border-top: 2px solid ${accent} !important;
+      border-radius: 0 !important;
+      background: transparent !important;
       box-shadow: none !important;
+      transform: translateY(-1px) !important;
       pointer-events: none !important;
     }
-    body:has(.agenda) .agenda--present-time::before {
+    body:has(.agenda) .agenda--day ul:not(.dropdown--list) > li.et-now-line::before {
       content: "" !important;
       position: absolute !important;
       top: -6px !important;
@@ -1454,6 +1466,12 @@
       height: 10px !important;
       border-radius: 50% !important;
       background: ${accent} !important;
+    }
+    body:has(.agenda) .agenda-filter {
+      scrollbar-width: none !important;
+    }
+    body:has(.agenda) .agenda-filter::-webkit-scrollbar {
+      display: none !important;
     }
     /* Filterbalk: zelfde pilvormen als de rest, en ruimte rechts voor de filterknop */
     body:has(.agenda) .agenda-filter {
