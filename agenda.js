@@ -370,32 +370,30 @@
     });
   }
 
-  // De rode "nu"-lijn zelf neerzetten: Eduarte rekent met 108px per uur en zijn eigen kopruimte
+  // De "nu"-lijn. Die staat als eigen element ín de kolom van vandaag, zodat de plek
+  // alleen van de tijd afhangt en niet van het opmeten van Eduarte's eigen lijn.
   function placeNowLine(doc, startHour) {
-    const hr = doc.querySelector(".agenda--present-time");
-    if (!hr) return;
-    // Alleen in de week van vandaag: in een andere week zegt de lijn niets
+    const native = doc.querySelector(".agenda--present-time");
+    if (native) native.style.setProperty("display", "none", "important");
     const ul = doc.querySelector(".agenda--day.is-today > ul");
-    if (!ul) {
-      hr.style.setProperty("display", "none", "important");
-      return;
-    }
-    const parent = hr.offsetParent || hr.parentElement;
+    let line = doc.querySelector(".et-now-line");
     const now = new Date();
     const hours = now.getHours() + now.getMinutes() / 60 - startHour;
-    const maxHours = (parseFloat(ul.style.height) || ul.getBoundingClientRect().height) / COMPACT_HOUR_PX;
-    if (hours < 0 || hours > maxHours) {
-      hr.style.setProperty("display", "none", "important");
+    const maxHours = ul ? (parseFloat(ul.style.height) || ul.getBoundingClientRect().height) / COMPACT_HOUR_PX : 0;
+    // Alleen in de week van vandaag en binnen de uren van het rooster
+    if (!ul || !Number.isFinite(hours) || hours < 0 || hours > maxHours) {
+      if (line) line.remove();
       return;
     }
-    const offset = ul.getBoundingClientRect().top - parent.getBoundingClientRect().top - parent.clientTop;
-    hr.style.removeProperty("display");
-    hr.style.setProperty("top", `${offset + hours * COMPACT_HOUR_PX}px`, "important");
-    // De lijn loopt alleen door de kolom van vandaag
-    const box = ul.getBoundingClientRect();
-    hr.style.setProperty("left", `${box.left - parent.getBoundingClientRect().left - parent.clientLeft + (parent.scrollLeft || 0)}px`, "important");
-    hr.style.setProperty("right", "auto", "important");
-    hr.style.setProperty("width", `${box.width}px`, "important");
+    if (!line || line.parentElement !== ul) {
+      if (line) line.remove();
+      line = doc.createElement("li");
+      line.className = "et-now-line";
+      line.setAttribute("aria-hidden", "true");
+      ul.appendChild(line);
+    }
+    const top = `${Math.round(hours * COMPACT_HOUR_PX)}px`;
+    if (line.style.top !== top) line.style.setProperty("top", top, "important");
   }
 
   function watchAgenda(doc) {
