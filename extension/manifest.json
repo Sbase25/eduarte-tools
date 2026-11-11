@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Eduarte Tools",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "Automatisch inloggen, thema's, weer en widgets, cijfercalculator en je rooster in je agenda voor het Eduarte-studentenportaal.",
   "icons": {
     "16": "icons/icon16.png",
