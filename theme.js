@@ -1381,6 +1381,178 @@
       background: color-mix(in srgb, ${accent} 4%, transparent) !important;
     }
 
+    /* ---- Agenda: fijnafstelling ---- */
+    /* Eén rustig rooster: geen eigen kaartje met ronde hoeken per dag, één scheidingslijn */
+    body:has(.agenda) .agenda--day,
+    body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    body:has(.agenda) .agenda--day {
+      border: 0 !important;
+    }
+    body:has(.agenda) .agenda--day ul:not(.dropdown--list) {
+      border: 0 !important;
+      border-left: 1px solid color-mix(in srgb, ${border} 70%, transparent) !important;
+    }
+    body:has(.agenda) .agenda--day:first-child ul:not(.dropdown--list) {
+      border-left: 0 !important;
+    }
+    body:has(.agenda) .agenda--day .lead {
+      border-radius: 0 !important;
+      background: transparent !important;
+    }
+    body:has(.agenda) .agenda--day.is-today > .lead {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    body:has(.agenda) .agenda {
+      border-radius: 28px !important;
+    }
+    /* Lesblokken: tonaal vlak met een kleurbalk, zonder gekleurde omlijning */
+    body:has(.agenda) .agenda--day li.agenda--course > div {
+      margin: 1px 4px 0 !important;
+      padding: 8px 10px 8px 12px !important;
+      border: 0 !important;
+      border-left: 4px solid var(--et-course, ${accent}) !important;
+      border-radius: 6px 14px 14px 6px !important;
+      background: color-mix(in srgb, var(--et-course, ${accent}) 20%, ${surface}) !important;
+      box-shadow: none !important;
+      transition: background-color 150ms ease, border-radius 200ms ease !important;
+    }
+    body:has(.agenda) .agenda--day li.agenda--course:hover > div {
+      border-radius: 6px 20px 20px 6px !important;
+      background: color-mix(in srgb, var(--et-course, ${accent}) 30%, ${surface}) !important;
+    }
+    body:has(.agenda) .agenda--day li.agenda--course .is-subject {
+      color: color-mix(in srgb, var(--et-course, ${accent}) 62%, ${text}) !important;
+      font-size: 13.5px !important;
+      letter-spacing: .01em !important;
+    }
+    html.et-compact-agenda body:has(.agenda) .agenda--day li.agenda--course > div {
+      padding: 6px 10px 6px 11px !important;
+    }
+    body:has(.agenda) .agenda--day li.et-now > div {
+      box-shadow: 0 0 0 2px var(--et-course, ${accent}) !important;
+    }
+    /* "Nu"-lijn: alleen in de kolom van vandaag (agenda.js zet left/width), met een bolletje */
+    body:has(.agenda) .agenda--present-time {
+      height: 0 !important;
+      margin: 0 !important;
+      overflow: visible !important;
+      border: 0 !important;
+      border-top: 2px solid ${accent} !important;
+      box-shadow: none !important;
+      pointer-events: none !important;
+    }
+    body:has(.agenda) .agenda--present-time::before {
+      content: "" !important;
+      position: absolute !important;
+      top: -6px !important;
+      left: -5px !important;
+      width: 10px !important;
+      height: 10px !important;
+      border-radius: 50% !important;
+      background: ${accent} !important;
+    }
+    /* Filterbalk: zelfde pilvormen als de rest, en ruimte rechts voor de filterknop */
+    body:has(.agenda) .agenda-filter {
+      right: 64px !important;
+      height: 64px !important;
+      min-height: 64px !important;
+      padding: 8px 10px !important;
+      border-radius: 32px !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,.18) !important;
+    }
+    @media (min-width: 960px) {
+      body:has(.agenda) .agenda-filter {
+        left: calc(var(--navigation-width, 16rem) + 11px) !important;
+      }
+    }
+    body:has(.agenda) .agenda-filter .filter--inner {
+      gap: 10px !important;
+    }
+    body:has(.agenda) .agenda-filter .btn,
+    body:has(.agenda) .agenda-filter div.datepicker,
+    body:has(.agenda) .agenda-filter .popover-tabs ul {
+      border: 0 !important;
+      background: color-mix(in srgb, ${text} 8%, ${surface}) !important;
+      box-shadow: none !important;
+    }
+    body:has(.agenda) .agenda-filter .btn {
+      transition: background-color 150ms ease, border-radius 200ms ease !important;
+    }
+    body:has(.agenda) .agenda-filter .btn:hover {
+      background: color-mix(in srgb, ${accent} 22%, ${surface}) !important;
+    }
+    body:has(.agenda) .agenda-filter .btn:active {
+      border-radius: 14px !important;
+    }
+    body:has(.agenda) .agenda-filter div.datepicker {
+      flex-basis: 168px !important;
+      width: 168px !important;
+      min-width: 168px !important;
+      padding: 0 6px !important;
+    }
+    body:has(.agenda) .agenda-filter div.datepicker input {
+      font-weight: 600 !important;
+      letter-spacing: 0 !important;
+    }
+    body:has(.agenda) .agenda-filter .popover-tabs ul {
+      width: 300px !important;
+    }
+    body:has(.agenda) .agenda-filter .popover-tabs li {
+      font-weight: 600 !important;
+      transition: background-color 150ms ease !important;
+    }
+    body:has(.agenda) .agenda-filter .popover-tabs li:not(.is-selected):hover {
+      background: color-mix(in srgb, ${text} 8%, transparent) !important;
+    }
+    body:has(.agenda) .agenda-filter .filter-checkbox {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      height: 46px !important;
+      padding: 0 16px 0 14px !important;
+      border-radius: 999px !important;
+      background: color-mix(in srgb, ${text} 8%, ${surface}) !important;
+      white-space: nowrap !important;
+    }
+    body:has(.agenda) .agenda-filter .filter-checkbox :is(input, label) {
+      margin: 0 !important;
+      cursor: pointer !important;
+    }
+    body:has(.agenda) .agenda-filter .et-cal-actions button {
+      height: 46px !important;
+      padding: 0 18px !important;
+      border-radius: 999px !important;
+      transition: border-radius 200ms ease, filter 150ms ease !important;
+    }
+    body:has(.agenda) .agenda-filter .et-cal-actions button:not(.is-primary) {
+      border-color: transparent !important;
+      background: color-mix(in srgb, ${text} 8%, ${surface}) !important;
+    }
+    body:has(.agenda) .agenda-filter .et-cal-actions button:hover {
+      filter: brightness(1.1) !important;
+    }
+    body:has(.agenda) .agenda-filter .et-cal-actions button:active {
+      border-radius: 14px !important;
+    }
+    body:has(.agenda) .content:has(> .agenda-filter) {
+      padding-top: 100px !important;
+    }
+    body:has(.agenda) .s5-filterbar-toggle {
+      top: 101px !important;
+      left: -52px !important;
+      overflow: hidden !important;
+      border: 0 !important;
+      border-radius: 23px !important;
+      box-shadow: none !important;
+    }
+    body:has(.agenda) .s5-filterbar-toggle a {
+      width: 46px !important;
+    }
+
     @media (max-width: 700px) {
       body:has(.agenda) header.header:not(:has(> .header-tabs)) > .header-toolbar {
         min-height: 58px !important;
@@ -1393,7 +1565,7 @@
       }
       body:has(.agenda) .agenda-filter {
         top: 78px !important;
-        right: 8px !important;
+        right: 56px !important;
         left: 0 !important;
         width: auto !important;
         height: 66px !important;
@@ -1735,15 +1907,22 @@
       min-width: 0 !important;
       overflow: hidden !important;
       color: var(--et-nav-on) !important;
-      font-size: 16px !important;
+      font-size: 14.5px !important;
       font-weight: 700 !important;
-      letter-spacing: -.01em !important;
+      letter-spacing: -.015em !important;
       text-overflow: ellipsis !important;
       white-space: nowrap !important;
     }
 
     ${NAV} :is(.navigation-header--logo, .navigation-header--logo a) {
       min-width: 0 !important;
+    }
+
+    /* De agenda heeft een eigen achtergrondvlak; dat mag niet over de rand van het zwevende menu vallen */
+    @media (min-width: 960px) {
+      body:has(.agenda) .content-wrapper {
+        margin-left: 10px !important;
+      }
     }
 
     /* Met de sluitknop erbij (smal scherm) alles een maatje kleiner, zodat het op één regel past */
