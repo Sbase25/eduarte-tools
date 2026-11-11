@@ -699,6 +699,7 @@
         "eduarteQuickCalcEnabled",
         "eduarteTodayEnabled",
         "eduarteInstagramDismissed",
+        "eduarteBookmarks",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -862,7 +863,29 @@
               ${C} .et-bar-row b { color: var(--et-text); font-size: 13px; }
 
               /* Snelkoppelingen */
-              ${C} .et-links { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; padding: 10px; }
+              ${C} .et-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; padding: 10px; }
+              ${C} button.et-link { border: 0; background: transparent; font-family: inherit; cursor: pointer; }
+              ${C} .et-link.is-custom span { font-size: 17px; font-weight: 800; text-transform: uppercase; }
+              ${C} .et-link.is-add span { font-size: 24px; font-weight: 400; line-height: 1; background: var(--et-surface-2); color: var(--et-text); box-shadow: none; border: 1px dashed color-mix(in srgb, var(--et-text) 30%, transparent); }
+              ${C} .et-link.is-add[aria-expanded="true"] span { border-style: solid; border-color: var(--et-accent); color: var(--et-accent); transform: rotate(45deg); }
+              ${C} .et-bm { grid-column: 1 / -1; padding: 12px; border-radius: 20px; background: var(--et-surface-2); }
+              ${C} .et-bm[hidden] { display: none; }
+              ${C} .et-bm form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto; gap: 8px; }
+              ${C} .et-bm input {
+                box-sizing: border-box; width: 100%; min-width: 0; height: 40px; padding: 0 14px; border: 1px solid transparent; border-radius: 14px; outline: none;
+                background: var(--et-surface); color: var(--et-text); font: inherit; font-size: 14px;
+              }
+              ${C} .et-bm input:focus { border-color: var(--et-accent); box-shadow: 0 0 0 3px var(--et-accent-soft); }
+              ${C} .et-bm button[type="submit"] { height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--et-accent); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+              ${C} .et-bm-error { margin: 8px 2px 0; color: #f87171; font-size: 12.5px; }
+              ${C} .et-bm-error[hidden] { display: none; }
+              ${C} .et-bm-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+              ${C} .et-bm-list:empty { display: none; }
+              ${C} .et-bm-list li { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 5px 6px 5px 12px; border-radius: 999px; background: var(--et-surface); color: var(--et-text); font-size: 12.5px; font-weight: 600; }
+              ${C} .et-bm-list li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+              ${C} .et-bm-list button { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--et-muted); font: inherit; font-size: 16px; line-height: 1; cursor: pointer; }
+              ${C} .et-bm-list button:hover { background: color-mix(in srgb, #f87171 22%, transparent); color: #f87171; }
+              @media (max-width: 640px) { ${C} .et-bm form { grid-template-columns: 1fr; } }
               ${C} .et-link {
                 display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0;
                 padding: 12px 6px 10px; border-radius: 20px;
@@ -1030,6 +1053,16 @@
                 <a class="et-link" href="https://mbowebshop.nl/Gebruikers/Licenties/" target="_blank" rel="noreferrer"><span style="--tile:#d97706">${icon("book")}</span><em>MboWebshop</em></a>
                 <a class="et-link" href="/resultaten"><span style="--tile:#059669">${icon("chart")}</span><em>Cijfers</em></a>
                 <a class="et-link" href="/agenda"><span style="--tile:#db2777">${icon("calendar")}</span><em>Agenda</em></a>
+                <button class="et-link is-add" type="button" aria-expanded="false" title="Eigen snelkoppeling toevoegen of verwijderen"><span>+</span><em>Toevoegen</em></button>
+                <div class="et-bm" hidden>
+                  <form novalidate>
+                    <input class="et-bm-name" type="text" maxlength="24" placeholder="Naam" aria-label="Naam" autocomplete="off">
+                    <input class="et-bm-url" type="text" inputmode="url" maxlength="500" placeholder="Link, bv. itslearning.com" aria-label="Link" autocomplete="off">
+                    <button type="submit">Toevoegen</button>
+                  </form>
+                  <p class="et-bm-error" role="alert" hidden></p>
+                  <ul class="et-bm-list" aria-label="Eigen snelkoppelingen"></ul>
+                </div>
               </nav>
             ` : ""}
 
@@ -1319,6 +1352,97 @@
             updateDisplay();
           }
 
+          // Eigen snelkoppelingen (bladwijzers), bewaard in de extensie-opslag
+          if (showShortcuts) {
+            const nav = container.querySelector(".et-links");
+            const addButton = nav.querySelector(".is-add");
+            const box = nav.querySelector(".et-bm");
+            const form = box.querySelector("form");
+            const errorEl = box.querySelector(".et-bm-error");
+            const listEl = box.querySelector(".et-bm-list");
+            const MAX_BOOKMARKS = 12;
+            const TILE_COLORS = ["#6366f1", "#0891b2", "#16a34a", "#ca8a04", "#dc2626", "#9333ea", "#0d9488", "#e11d48"];
+            // Alleen gewone weblinks: geen javascript:, data: en dergelijke
+            const cleanUrl = (value) => {
+              const raw = String(value || "").trim();
+              if (!raw || /\s/.test(raw)) return null;
+              try {
+                const url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`);
+                return (url.protocol === "https:" || url.protocol === "http:") && url.hostname.includes(".") ? url.href : null;
+              } catch { return null; }
+            };
+            let bookmarks = (Array.isArray(settings.eduarteBookmarks) ? settings.eduarteBookmarks : [])
+              .map((item) => ({ name: String(item?.name || "").trim().slice(0, 24), url: cleanUrl(item?.url) }))
+              .filter((item) => item.name && item.url)
+              .slice(0, MAX_BOOKMARKS);
+
+            const renderBookmarks = () => {
+              nav.querySelectorAll(".et-link.is-custom").forEach((el) => el.remove());
+              bookmarks.forEach((item, index) => {
+                const link = document.createElement("a");
+                link.className = "et-link is-custom";
+                link.href = item.url;
+                link.target = "_blank";
+                link.rel = "noreferrer noopener";
+                link.title = item.url;
+                const tile = document.createElement("span");
+                const hash = [...item.name].reduce((sum, char) => sum + char.codePointAt(0), 0);
+                tile.style.setProperty("--tile", TILE_COLORS[hash % TILE_COLORS.length]);
+                tile.textContent = [...item.name][0];
+                const label = document.createElement("em");
+                label.textContent = item.name;
+                link.append(tile, label);
+                addButton.before(link);
+              });
+              listEl.replaceChildren(...bookmarks.map((item, index) => {
+                const li = document.createElement("li");
+                const name = document.createElement("span");
+                name.textContent = item.name;
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.textContent = "×";
+                remove.title = `${item.name} verwijderen`;
+                remove.setAttribute("aria-label", remove.title);
+                remove.addEventListener("click", () => {
+                  bookmarks = bookmarks.filter((_, i) => i !== index);
+                  saveBookmarks();
+                });
+                li.append(name, remove);
+                return li;
+              }));
+            };
+            const saveBookmarks = () => {
+              chrome.storage.local.set({ eduarteBookmarks: bookmarks });
+              renderBookmarks();
+            };
+            const showError = (text) => { errorEl.textContent = text; errorEl.hidden = !text; };
+
+            addButton.addEventListener("click", () => {
+              box.hidden = !box.hidden;
+              addButton.setAttribute("aria-expanded", String(!box.hidden));
+              showError("");
+              if (!box.hidden) form.querySelector(".et-bm-name").focus();
+            });
+            form.addEventListener("submit", (event) => {
+              event.preventDefault();
+              const nameInput = form.querySelector(".et-bm-name");
+              const urlInput = form.querySelector(".et-bm-url");
+              const url = cleanUrl(urlInput.value);
+              if (!url) return showError("Vul een geldige link in, bijvoorbeeld itslearning.com.");
+              let name = nameInput.value.trim().slice(0, 24);
+              if (!name) name = new URL(url).hostname.replace(/^www\./, "").split(".")[0];
+              if (bookmarks.length >= MAX_BOOKMARKS) return showError(`Je kunt maximaal ${MAX_BOOKMARKS} eigen snelkoppelingen toevoegen.`);
+              if (bookmarks.some((item) => item.url === url)) return showError("Deze link staat er al tussen.");
+              bookmarks = [...bookmarks, { name, url }];
+              nameInput.value = "";
+              urlInput.value = "";
+              showError("");
+              saveBookmarks();
+              nameInput.focus();
+            });
+            renderBookmarks();
+          }
+
           // Snelle Cijfercalculator logica
           if (showQuickCalc) {
             const avgInput = container.querySelector("#et-calc-avg");
@@ -1556,13 +1680,28 @@
           .backup-description { color:var(--grade-on-surface-variant); font-size:12px; line-height:1.5; }
           .message { min-height: 36px; margin: 13px 0 0; }
           @keyframes enter { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+          .collapse, .mini-summary { display: none; }
+          /* Telefoon: het blad kan inklappen tot een smalle balk, zodat je cijfers in de lijst kunt aantikken */
+          @media (max-width: 700px) {
+            .panel { transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease, height .28s cubic-bezier(.22,1,.36,1); }
+            .head { margin-bottom: 10px; cursor: pointer; }
+            .head-text { flex: 1; min-width: 0; }
+            .collapse { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--grade-outline); border-radius: 50%; background: var(--grade-surface-high); color: var(--grade-on-surface); cursor: pointer; }
+            .collapse svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s ease; }
+            .panel.mini { height: 84px; overflow: hidden; }
+            .panel.mini .collapse svg { transform: rotate(180deg); }
+            .panel.mini .eyebrow, .panel.mini h2 { display: none; }
+            .panel.mini .mini-summary { display: block; margin: 0; overflow: hidden; color: var(--grade-on-surface); font-size: 14px; font-weight: 700; line-height: 1.3; }
+            .panel.mini .mini-summary small { display: block; overflow: hidden; color: var(--grade-on-surface-variant); font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+            .panel.mini .head { margin-bottom: 40px; }
+          }
           @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
         </style>
         <button class="toggle" aria-label="Open cijfercalculator" title="Cijfercalculator" aria-expanded="false">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 2v4h10V4H7Zm0 6v2h2v-2H7Zm4 0v2h2v-2h-2Zm4 0v2h2v-2h-2ZM7 14v2h2v-2H7Zm4 0v2h2v-2h-2Zm4 0v6h2v-6h-2ZM7 18v2h2v-2H7Zm4 0v2h2v-2h-2Z"/></svg>
         </button>
         <aside class="panel" aria-hidden="true">
-          <div class="head"><div><p class="eyebrow">Eduarte Tools</p><h2>Cijferoverzicht</h2></div><button class="close" aria-label="Sluiten">×</button></div>
+          <div class="head"><div class="head-text"><p class="eyebrow">Eduarte Tools</p><h2>Cijferoverzicht</h2><p class="mini-summary"></p></div><button class="collapse" type="button" aria-label="Paneel inklappen" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><button class="close" aria-label="Sluiten">×</button></div>
           <p class="intro">Selecteer cijfers uit je cijferlijst of voeg ze hieronder toe. De berekening wordt meteen bijgewerkt.</p>
           <div class="tabs" role="tablist" aria-label="Cijfertools">
             <button class="tab" type="button" role="tab" data-tab="calculator" aria-selected="true">Rekenen</button>
@@ -1649,6 +1788,15 @@
         const list = shadow.querySelector(".entries");
         shadow.querySelector(".cc-title").textContent = entries.length ? `Cijfers in berekening (${entries.length})` : "Cijfercalculator";
         shadow.querySelector(".cc-empty").hidden = entries.length > 0;
+        const summaryEl = shadow.querySelector(".mini-summary");
+        const weightSum = entries.reduce((sum, entry) => sum + entry.weight, 0);
+        summaryEl.replaceChildren();
+        const summaryTitle = document.createTextNode(entries.length
+          ? `${entries.length} ${entries.length === 1 ? "cijfer" : "cijfers"} · gemiddelde ${format(entries.reduce((sum, entry) => sum + entry.result * entry.weight, 0) / weightSum)}`
+          : "Cijfercalculator");
+        const summaryHint = document.createElement("small");
+        summaryHint.textContent = entries.length ? "Tik om de berekening te openen" : "Tik op cijfers in je lijst om ze toe te voegen";
+        summaryEl.append(summaryTitle, summaryHint);
         shadow.querySelector(".cc-body").hidden = entries.length === 0;
         list.replaceChildren(...entries.map(({ result, weight, row, manual, title }) => {
           const entry = document.createElement("button");
@@ -2013,16 +2161,44 @@
       }
 
       const toggle = shadow.querySelector(".toggle");
+      // Telefoon: ingeklapt blad + ruimte onder de pagina, zodat de hele cijferlijst boven het blad uit kan scrollen
+      const phone = window.matchMedia("(max-width: 700px)");
+      const collapseButton = shadow.querySelector(".collapse");
+      const SPACER_ID = "eduarte-tools-grades-spacer";
+      const updateSpacer = () => {
+        document.getElementById(SPACER_ID)?.remove();
+        if (!phone.matches || !panel.classList.contains("open")) return;
+        const spacer = document.createElement("style");
+        spacer.id = SPACER_ID;
+        const room = panel.classList.contains("mini") ? "110px" : "60vh";
+        spacer.textContent = `.content-wrapper, .l-flex-content > .content, main { padding-bottom: ${room} !important; }`;
+        document.head.appendChild(spacer);
+      };
+      const setMini = (mini) => {
+        panel.classList.toggle("mini", mini);
+        if (mini) panel.scrollTop = 0;
+        collapseButton.setAttribute("aria-expanded", String(!mini));
+        collapseButton.setAttribute("aria-label", mini ? "Paneel uitklappen" : "Paneel inklappen");
+        updateSpacer();
+      };
       toggle.addEventListener("click", () => {
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
         toggle.setAttribute("aria-expanded", "true");
+        // Op een telefoon begint het blad ingeklapt: eerst cijfers aantikken, dan openklappen
+        setMini(phone.matches);
       });
-      shadow.querySelector(".close").addEventListener("click", () => {
-        panel.classList.remove("open");
+      shadow.querySelector(".close").addEventListener("click", (event) => {
+        event.stopPropagation();
+        panel.classList.remove("open", "mini");
         panel.setAttribute("aria-hidden", "true");
         toggle.setAttribute("aria-expanded", "false");
+        updateSpacer();
       });
+      shadow.querySelector(".head").addEventListener("click", () => {
+        if (phone.matches) setMini(!panel.classList.contains("mini"));
+      });
+      phone.addEventListener?.("change", () => setMini(phone.matches && panel.classList.contains("mini")));
       // Handmatig toevoegen: klein formulier in plaats van losse lege rijen
       const addButton = shadow.querySelector('[data-action="add"]');
       const addForm = shadow.querySelector(".cc-form");

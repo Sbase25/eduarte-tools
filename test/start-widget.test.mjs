@@ -161,3 +161,47 @@ describe("startpagina: wat moet ik halen?", () => {
     expect((await calc({ avg: "abc", weights: "3", target: "7", future: "1" })).needed).toBe("—");
   });
 });
+
+describe("startpagina: eigen snelkoppelingen", () => {
+  async function add(root, name, url) {
+    root.querySelector(".et-bm-name").value = name;
+    root.querySelector(".et-bm-url").value = url;
+    root.querySelector(".et-bm form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
+  }
+
+  it("voegt een eigen link toe, vult https:// aan en bewaart hem", async () => {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    const saved = [];
+    dom.window.chrome.storage.local.set = (value) => saved.push(value);
+    root.querySelector(".et-link.is-add").click();
+    expect(root.querySelector(".et-bm").hidden).toBe(false);
+
+    await add(root, "itslearning", "tilburg.itslearning.com");
+    const link = root.querySelector(".et-link.is-custom");
+    expect(link.href).toBe("https://tilburg.itslearning.com/");
+    expect(link.querySelector("em").textContent).toBe("itslearning");
+    expect(saved.at(-1)).toEqual({ eduarteBookmarks: [{ name: "itslearning", url: "https://tilburg.itslearning.com/" }] });
+
+    root.querySelector(".et-bm-list button").click();
+    expect(root.querySelector(".et-link.is-custom")).toBeNull();
+    expect(saved.at(-1)).toEqual({ eduarteBookmarks: [] });
+  });
+
+  it("weigert links die geen gewone webpagina zijn", async () => {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    for (const bad of ["javascript:alert(1)", "data:text/html,x", "geen link", "localhost"]) {
+      await add(root, "x", bad);
+      expect(root.querySelector(".et-link.is-custom")).toBeNull();
+    }
+    expect(text(".et-bm-error")).toBe("Vul een geldige link in, bijvoorbeeld itslearning.com.");
+  });
+
+  it("gebruikt de sitenaam als je geen naam invult en weigert dubbele links", async () => {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    await add(root, "", "https://www.youtube.com/watch?v=1");
+    expect(root.querySelector(".et-link.is-custom em").textContent).toBe("youtube");
+    await add(root, "nog een keer", "https://www.youtube.com/watch?v=1");
+    expect(root.querySelectorAll(".et-link.is-custom").length).toBe(1);
+    expect(text(".et-bm-error")).toBe("Deze link staat er al tussen.");
+  });
+});
