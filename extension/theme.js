@@ -2046,9 +2046,31 @@
       -webkit-backdrop-filter: blur(12px) !important;
     }
 
+    /* Op een breed scherm is de bovenbalk hetzelfde soort zwevende paneel als het menu links:
+       zelfde afstand tot de rand, zelfde ronding, kleur, rand en schaduw. */
     @media (min-width: 960px) {
-      header.header {
-        left: calc(var(--navigation-width) + 10px) !important;
+      header.header,
+      header.header:has(> .header-tabs) {
+        left: calc(var(--navigation-width) + 20px) !important;
+        right: 10px !important;
+        width: auto !important;
+        margin: 10px 0 0 !important;
+        border: 1px solid color-mix(in srgb, ${text} 7%, transparent) !important;
+        border-radius: 28px !important;
+        background: color-mix(in srgb, ${surface} 96%, ${text} 4%) !important;
+        box-shadow: 0 16px 40px -16px rgba(0,0,0,.5) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      /* Wat onder de balk door schuift vervaagt in de smalle strook erboven */
+      header.header::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: -12px -1px 100% -1px !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        pointer-events: none !important;
       }
     }
 
@@ -2553,6 +2575,14 @@
       background: transparent !important;
       border-bottom: 0 !important;
       backdrop-filter: none !important;
+    }
+
+    /* Breed scherm: de bovenbalk is hetzelfde glazen paneel als het menu */
+    @media (min-width: 960px) {
+      html body header.header, html body header.header:has(> .header-tabs) {
+        ${glass}
+        box-shadow: 0 20px 40px -20px rgba(0,0,0,.6) !important;
+      }
     }
 
     #eduarte-tools-portal-actions .et-portal-action {
