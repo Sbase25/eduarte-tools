@@ -1470,7 +1470,34 @@
           .tab { flex:1; min-width:0; min-height:36px; border:0; border-radius:999px; color:var(--grade-on-surface-variant); background:transparent; cursor:pointer; font:600 11px system-ui,sans-serif; }
           .tab[aria-selected="true"] { color:var(--grade-on-primary); background:var(--grade-primary); }
           .view[hidden] { display:none; }
-          .rows { display: grid; gap: 7px; }
+          .rows { display: none; }
+          .cc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+          .cc-title { margin: 0; color: var(--grade-on-surface); font-size: 15px; font-weight: 700; }
+          .cc-add { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--grade-outline); border-radius: 50%; background: var(--grade-surface-high); color: var(--grade-on-surface); font: 400 22px/1 inherit; cursor: pointer; transition: border-radius .2s, background-color .15s, transform .2s; }
+          .cc-add:hover { border-color: var(--grade-primary); }
+          .cc-add[aria-expanded="true"] { border-radius: 12px; background: var(--grade-primary); color: var(--grade-on-primary); transform: rotate(45deg); }
+          .cc-empty { margin: 4px 0 12px; color: var(--grade-on-surface-variant); font-size: 13px; line-height: 1.5; }
+          .cc-empty[hidden], .cc-form[hidden], .cc-body[hidden], .cc-error[hidden] { display: none; }
+          .cc-form { margin: 4px 0 12px; padding: 12px; border: 1px solid var(--grade-outline); border-radius: 20px; background: var(--grade-surface-high); }
+          .cc-form p { margin: 0 0 8px; color: var(--grade-on-surface-variant); font-size: 12px; }
+          .cc-form > div { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
+          .cc-form .cc-error { margin: 8px 0 0; color: #f87171; }
+          .entries { display: grid; gap: 2px; max-height: 240px; overflow: auto; }
+          .entry { display: block; width: 100%; margin: 0; padding: 7px 10px; overflow: hidden; border: 0; border-radius: 10px; background: transparent; color: var(--grade-on-surface); font: inherit; font-size: 13px; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+          .entry b { font-variant-numeric: tabular-nums; }
+          .entry span { color: var(--grade-on-surface-variant); }
+          .entry:hover, .entry:focus-visible { background: color-mix(in srgb, #f87171 18%, transparent); text-decoration: line-through; outline: none; }
+          hr { height: 1px; margin: 14px 0; border: 0; background: var(--grade-outline); }
+          .cc-body .metrics { display: flex; gap: 8px; margin-top: 0; }
+          .cc-body .metric { flex: 1; padding: 0; border: 0; border-radius: 0; background: transparent; }
+          .cc-body .metric span { display: block; margin-bottom: 2px; font-size: 11px; }
+          .cc-body .metric b { font-size: 20px; }
+          .cc-body .metrics.two { margin-top: 14px; }
+          .cc-question { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--grade-on-surface); font-size: 13px; line-height: 1.35; }
+          .cc-question + .cc-question { margin-top: 8px; }
+          .cc-question span { flex: 2; text-wrap: balance; }
+          .cc-question input { flex: 1; min-width: 0; margin: 0; }
+          .cc-body .prediction { margin-top: 0; }
           .row { display:grid; grid-template-columns: 1fr 1fr 32px; gap: 7px; animation: enter .25s both; }
           input { width:100%; min-width: 0; min-height: 40px; padding: 9px 10px; border: 1px solid var(--grade-outline); border-radius: 14px 14px 5px 14px; outline: 0; color:var(--grade-on-surface); background: var(--grade-surface-high); font: inherit; }
           input:focus { border: 2px solid var(--grade-primary); padding: 8px 9px; }
@@ -1527,10 +1554,26 @@
             <button class="tab" type="button" role="tab" data-tab="backup" aria-selected="false">Back-up</button>
           </div>
           <section class="view" data-view="calculator">
-            <div class="rows"></div>
-            <div class="actions"><button class="action" data-action="add">+ Cijfer</button><button class="action primary" data-action="scan">Scannen</button></div>
-            <div class="settings"><label>Doelgemiddelde<input class="target" type="number" min="${gradeMinimum}" max="${gradeMaximum}" step=".1" value="${passThreshold}"></label><label>Weging volgend cijfer<input class="future" type="number" min=".1" step=".1" placeholder="Auto"></label></div>
-            <div class="metrics"><div class="metric"><b class="average">—</b><span>Gewogen gemiddelde</span></div><div class="metric"><b class="median">—</b><span>Mediaan</span></div><div class="metric"><b class="total-weight">—</b><span>Totale weging</span></div><div class="metric"><b class="needed">—</b><span>Benodigd cijfer</span></div><div class="metric"><b class="result">—</b><span>Nieuw gemiddelde</span></div></div>
+            <div class="cc-head">
+              <h3 class="cc-title">Cijfercalculator</h3>
+              <button class="cc-add" type="button" data-action="add" title="Cijfer handmatig toevoegen" aria-label="Cijfer handmatig toevoegen" aria-expanded="false">+</button>
+            </div>
+            <p class="cc-empty">Bereken hier welk cijfer je moet halen of wat je gemiddelde zal zijn.<br><br>Klik op cijfers in je cijferlijst of voeg ze met + handmatig toe om te beginnen.</p>
+            <form class="cc-form" hidden novalidate>
+              <p>Voer het cijfer en de weging in.</p>
+              <div><input class="cc-grade" type="text" inputmode="decimal" autocomplete="off" placeholder="Cijfer" aria-label="Cijfer"><input class="cc-weight" type="text" inputmode="decimal" autocomplete="off" placeholder="Weging" aria-label="Weging"><button class="action primary" type="submit">Toevoegen</button></div>
+              <p class="cc-error" role="alert" hidden></p>
+            </form>
+            <div class="entries"></div>
+            <div class="rows" hidden></div>
+            <div class="actions"><button class="action" data-action="scan">Cijferlijst scannen</button></div>
+            <div class="cc-body" hidden>
+              <hr>
+              <div class="metrics"><div class="metric"><span title="Gewogen gemiddelde">Gemiddelde</span><b class="average">—</b></div><div class="metric"><span>Mediaan</span><b class="median">—</b></div><div class="metric"><span>Totale weging</span><b class="total-weight">—</b></div></div>
+              <hr>
+              <label class="cc-question"><span>Hoe vaak telt het volgende cijfer mee?</span><input class="future" type="number" min=".1" step=".1" placeholder="1x"></label>
+              <label class="cc-question"><span>Welk gemiddelde wil je halen?</span><input class="target" type="number" min="${gradeMinimum}" max="${gradeMaximum}" step=".1" value="${passThreshold}"></label>
+              <hr>
             <div class="prediction" hidden>
               <p class="advice"></p>
               <div class="chart" role="img" aria-label="Grafiek: cijfer voor je volgende toets tegen je nieuwe gemiddelde">
@@ -1538,6 +1581,8 @@
                 <i class="chart-dot"></i><span class="chart-tip"></span>
               </div>
               <div class="chart-axis"><span class="axis-min"></span><span>volgend cijfer → nieuw gemiddelde</span><span class="axis-max"></span></div>
+            </div>
+              <div class="metrics two"><div class="metric"><span>Benodigd cijfer</span><b class="needed">—</b></div><div class="metric"><span>Nieuw gemiddelde</span><b class="result">—</b></div></div>
             </div>
             <div class="actions"><button class="action" data-action="export">CSV exporteren</button></div>
           </section>
@@ -1582,6 +1627,27 @@
       const format = (value) => Number.isFinite(value) ? value.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—";
       const sourceElements = new Map();
 
+      // Lijst "Cijfers in berekening", zoals in Study Tools: klik op een regel om het cijfer te verwijderen
+      function renderEntries(entries) {
+        const list = shadow.querySelector(".entries");
+        shadow.querySelector(".cc-title").textContent = entries.length ? `Cijfers in berekening (${entries.length})` : "Cijfercalculator";
+        shadow.querySelector(".cc-empty").hidden = entries.length > 0;
+        shadow.querySelector(".cc-body").hidden = entries.length === 0;
+        list.replaceChildren(...entries.map(({ result, weight, row, manual, title }) => {
+          const entry = document.createElement("button");
+          entry.type = "button";
+          entry.className = "entry";
+          entry.title = "Verwijderen";
+          const grade = document.createElement("b");
+          grade.textContent = result.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+          const rest = document.createElement("span");
+          rest.textContent = ` (${weight.toLocaleString("nl-NL", { maximumFractionDigits: 2 })}x) — ${manual ? "Handmatig toegevoegd" : title}`;
+          entry.append(grade, rest);
+          entry.addEventListener("click", () => row.querySelector(".icon").click());
+          return entry;
+        }));
+      }
+
       function addRow(grade = "", weight = "1", sourceKey = "", title = "") {
         const row = document.createElement("div");
         row.className = "row";
@@ -1602,6 +1668,8 @@
           result: row.querySelector(".grade").value.trim() === "" ? NaN : Number(row.querySelector(".grade").value),
           weight: row.querySelector(".weight").value.trim() === "" ? NaN : Number(row.querySelector(".weight").value),
           title: row.dataset.title || `Cijfer ${index + 1}`,
+          manual: !row.dataset.title,
+          row,
           index,
         }));
         const validValues = values.filter(({ result, weight }) =>
@@ -1610,6 +1678,7 @@
         );
         renderStatistics(validValues);
         renderList(validValues);
+        renderEntries(validValues);
         if (!validValues.length) {
           ["average", "median", "total-weight", "needed", "result"].forEach((name) => input(name).textContent = "—");
           message.textContent = "Voeg cijfers toe of scan je cijferlijst.";
@@ -1621,6 +1690,7 @@
         const preliminary = calculator.calculateGradeSummary(validValues, target, 1, gradeMinimum, gradeMaximum);
         const futureInput = input("future").value.trim();
         const future = futureInput ? Number(futureInput) : (preliminary.medianWeight || 1);
+        input("future").placeholder = `${(preliminary.medianWeight || 1).toLocaleString("nl-NL", { maximumFractionDigits: 2 })}x`;
         const summary = calculator.calculateGradeSummary(validValues, target, future, gradeMinimum, gradeMaximum);
         input("average").textContent = format(summary.weightedAverage);
         input("median").textContent = format(summary.median);
@@ -1936,7 +2006,40 @@
         panel.setAttribute("aria-hidden", "true");
         toggle.setAttribute("aria-expanded", "false");
       });
-      shadow.querySelector('[data-action="add"]').addEventListener("click", () => { addRow(); calculate(); });
+      // Handmatig toevoegen: klein formulier in plaats van losse lege rijen
+      const addButton = shadow.querySelector('[data-action="add"]');
+      const addForm = shadow.querySelector(".cc-form");
+      const addError = shadow.querySelector(".cc-error");
+      const readDecimal = (field) => {
+        const raw = field.value.trim().replace(",", ".");
+        return /^\d+(\.\d*)?$|^\.\d+$/.test(raw) ? Number(raw) : NaN;
+      };
+      addButton.addEventListener("click", () => {
+        addForm.hidden = !addForm.hidden;
+        addButton.setAttribute("aria-expanded", String(!addForm.hidden));
+        addError.hidden = true;
+        if (!addForm.hidden) input("cc-grade").focus();
+      });
+      addForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const grade = readDecimal(input("cc-grade"));
+        const weight = input("cc-weight").value.trim() === "" ? 1 : readDecimal(input("cc-weight"));
+        if (!(grade >= gradeMinimum && grade <= gradeMaximum)) {
+          addError.textContent = `Voer een geldig cijfer in tussen ${format(gradeMinimum)} en ${format(gradeMaximum)}.`;
+          addError.hidden = false;
+          return;
+        }
+        if (!(weight > 0)) {
+          addError.textContent = "Voer een weging groter dan 0 in.";
+          addError.hidden = false;
+          return;
+        }
+        addError.hidden = true;
+        addRow(String(grade), String(weight));
+        input("cc-grade").value = "";
+        input("cc-grade").focus();
+        calculate();
+      });
       shadow.querySelector('[data-action="scan"]').addEventListener("click", scan);
       shadow.querySelector('[data-action="export"]').addEventListener("click", exportCsv);
       shadow.querySelector('[data-action="backup-export"]').addEventListener("click", exportBackup);
@@ -1954,7 +2057,6 @@
       }));
       input("target").addEventListener("input", calculate);
       input("future").addEventListener("input", calculate);
-      addRow();
       calculate();
       const stopWatchingResults = globalThis.EduarteApi.watchGrades(document, (grades) => {
         if (!grades.length || root.dataset.resultsFound) return;
