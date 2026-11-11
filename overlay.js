@@ -977,6 +977,7 @@
                 ${C} .et-links { grid-template-columns: repeat(4, minmax(0, 1fr)); }
               }
               @media (max-width: 640px) {
+                ${C} .et-chip { max-width: 100%; white-space: normal; text-align: left; }
                 ${C} .et-timer, ${C} .et-calc { grid-column: span 12; }
                 ${C} .et-links { grid-template-columns: repeat(3, minmax(0, 1fr)); }
                 ${C} .et-hello h2 { font-size: 26px; }

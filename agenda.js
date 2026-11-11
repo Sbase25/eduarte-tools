@@ -351,6 +351,19 @@
 
     markLessonTimes(doc, startHour);
     placeNowLine(doc, startHour);
+    showTodayOnPhone(doc);
+  }
+
+  // Op een telefoon staat er één dag in beeld: begin dan bij vandaag (eenmalig per week die je opent)
+  function showTodayOnPhone(doc) {
+    const view = doc.defaultView;
+    const days = doc.querySelector(".agenda--days");
+    const today = doc.querySelector(".agenda--day.is-today");
+    if (!days || !today || !view.matchMedia?.("(max-width: 700px)").matches) return;
+    const key = today.querySelector(".lead")?.textContent.trim() || "today";
+    if (days.dataset.etShownDay === key) return;
+    days.dataset.etShownDay = key;
+    days.scrollLeft = today.offsetLeft - days.offsetLeft;
   }
 
   // Voorbije lessen vager, de les van nu met een rand
