@@ -953,8 +953,12 @@
               ${C} .et-need span { color: var(--et-text); font-weight: 600; }
               ${C} .et-need span small { display: block; margin-top: 1px; color: var(--et-muted); font-size: 12px; font-weight: 500; }
               ${C} .et-need b { font-size: 32px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-              ${C} .et-need b.is-bad { background: none; color: #f87171; font-size: 16px; }
-              ${C} .et-need b.is-ok { background: none; color: var(--et-ok); font-size: 16px; }
+              ${C} .et-need b { flex: none; white-space: nowrap; }
+              ${C} .et-need span { min-width: 0; }
+              ${C} .et-need b.is-bad { background: none; color: #f87171; }
+              ${C} .et-need b.is-ok { background: none; color: var(--et-ok); }
+              ${C} .et-need b.is-empty { background: none; color: var(--et-muted); }
+              ${C} .et-fields input.is-invalid { border-color: #f87171; box-shadow: 0 0 0 3px color-mix(in srgb, #f87171 22%, transparent); }
 
               /* Instagram */
               ${C} .et-ig { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 10px; border-radius: 24px; }
@@ -1066,12 +1070,12 @@
               <section class="et-card et-calc">
                 <h3 class="et-label">${icon("target")} Wat moet ik halen?</h3>
                 <div class="et-fields">
-                  <label>Huidig gemiddelde<input type="number" id="et-calc-avg" min="1" max="10" step=".1" value="6.5"></label>
-                  <label>Weging tot nu<input type="number" id="et-calc-weights" min="1" step="1" value="3"></label>
-                  <label>Gewenst gemiddelde<input type="number" id="et-calc-target" min="1" max="10" step=".1" value="7.0"></label>
-                  <label>Weging toets<input type="number" id="et-calc-future" min="1" step="1" value="1"></label>
+                  <label>Huidig gemiddelde<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-avg" value="6,5"></label>
+                  <label title="Alle wegingen van je cijfers tot nu toe bij elkaar opgeteld">Totale weging tot nu<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-weights" value="3"></label>
+                  <label>Gewenst gemiddelde<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-target" value="7,0"></label>
+                  <label>Weging volgende toets<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-future" value="1"></label>
                 </div>
-                <div class="et-need"><span>Je hebt nodig<small id="et-calc-hint"></small></span><b id="et-calc-needed">8,5</b></div>
+                <div class="et-need"><span>Je hebt nodig<small id="et-calc-hint"></small></span><b id="et-calc-needed" aria-live="polite">8,5</b></div>
               </section>
             ` : ""}
           `;
@@ -1323,28 +1327,62 @@
             const neededOutput = container.querySelector("#et-calc-needed");
             const hintOutput = container.querySelector("#et-calc-hint");
 
-            function calcNeeded() {
-              const curAvg = parseFloat(avgInput.value);
-              const curWeights = parseFloat(weightsInput.value);
-              const target = parseFloat(targetInput.value);
-              const futureWeight = parseFloat(futureInput.value);
-              neededOutput.className = "";
-              hintOutput.textContent = isNaN(target) ? "" : `voor een ${target.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gemiddeld`;
+            // Komma en punt werken allebei ("6,5" en "6.5")
+            const readNumber = (input) => {
+              const raw = input.value.trim().replace(",", ".");
+              return /^\d+(\.\d*)?$|^\.\d+$/.test(raw) ? Number(raw) : NaN;
+            };
+            const nl = (value, digits = 1) => value.toLocaleString("nl-NL", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+            const STORE_KEY = "eduarteToolsQuickCalc";
+            const fields = { avg: avgInput, weights: weightsInput, target: targetInput, future: futureInput };
 
-              if ([curAvg, curWeights, target, futureWeight].some(isNaN) || futureWeight <= 0) {
+            // Onthoud wat je invulde tot je volgende bezoek
+            try {
+              const saved = JSON.parse(window.localStorage.getItem(STORE_KEY) || "null");
+              if (saved) Object.entries(fields).forEach(([key, input]) => { if (typeof saved[key] === "string" && saved[key]) input.value = saved[key]; });
+            } catch { /* opslag niet beschikbaar: standaardwaarden blijven staan */ }
+
+            function calcNeeded() {
+              const curAvg = readNumber(avgInput);
+              const curWeights = readNumber(weightsInput);
+              const target = readNumber(targetInput);
+              const futureWeight = readNumber(futureInput);
+              const valid = {
+                avg: curAvg >= 1 && curAvg <= 10,
+                weights: curWeights > 0,
+                target: target >= 1 && target <= 10,
+                future: futureWeight > 0,
+              };
+              Object.entries(fields).forEach(([key, input]) => input.classList.toggle("is-invalid", input.value.trim() !== "" && !valid[key]));
+              neededOutput.className = "";
+
+              if (!Object.values(valid).every(Boolean)) {
                 neededOutput.textContent = "—";
+                neededOutput.className = "is-empty";
+                hintOutput.textContent = !valid.avg || !valid.target ? "vul cijfers tussen 1 en 10 in" : "vul een weging groter dan 0 in";
                 return;
               }
 
+              try {
+                window.localStorage.setItem(STORE_KEY, JSON.stringify(Object.fromEntries(Object.entries(fields).map(([key, input]) => [key, input.value.trim()]))));
+              } catch { /* niet erg */ }
+
               const needed = (target * (curWeights + futureWeight) - curAvg * curWeights) / futureWeight;
-              if (needed > 10) {
-                neededOutput.textContent = `${needed.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} · onhaalbaar`;
+              // Naar boven afronden op één decimaal: met een 8,4 haal je een benodigde 8,41 net niet
+              const rounded = Math.ceil((needed - 1e-9) * 10) / 10;
+              const goal = `voor een ${nl(target)} gemiddeld`;
+              if (rounded > 10) {
+                const best = (curAvg * curWeights + 10 * futureWeight) / (curWeights + futureWeight);
+                neededOutput.textContent = nl(rounded);
                 neededOutput.className = "is-bad";
-              } else if (needed < 1) {
-                neededOutput.textContent = "Al gehaald!";
+                hintOutput.textContent = `niet haalbaar met één toets · met een 10 kom je op ${nl(Math.floor(best * 10 + 1e-9) / 10)}`;
+              } else if (rounded <= 1) {
+                neededOutput.textContent = nl(1);
                 neededOutput.className = "is-ok";
+                hintOutput.textContent = `elk cijfer is genoeg ${goal}`;
               } else {
-                neededOutput.textContent = needed.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                neededOutput.textContent = nl(rounded);
+                hintOutput.textContent = goal;
               }
             }
 
@@ -1432,7 +1470,34 @@
           .tab { flex:1; min-width:0; min-height:36px; border:0; border-radius:999px; color:var(--grade-on-surface-variant); background:transparent; cursor:pointer; font:600 11px system-ui,sans-serif; }
           .tab[aria-selected="true"] { color:var(--grade-on-primary); background:var(--grade-primary); }
           .view[hidden] { display:none; }
-          .rows { display: grid; gap: 7px; }
+          .rows { display: none; }
+          .cc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+          .cc-title { margin: 0; color: var(--grade-on-surface); font-size: 15px; font-weight: 700; }
+          .cc-add { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--grade-outline); border-radius: 50%; background: var(--grade-surface-high); color: var(--grade-on-surface); font: 400 22px/1 inherit; cursor: pointer; transition: border-radius .2s, background-color .15s, transform .2s; }
+          .cc-add:hover { border-color: var(--grade-primary); }
+          .cc-add[aria-expanded="true"] { border-radius: 12px; background: var(--grade-primary); color: var(--grade-on-primary); transform: rotate(45deg); }
+          .cc-empty { margin: 4px 0 12px; color: var(--grade-on-surface-variant); font-size: 13px; line-height: 1.5; }
+          .cc-empty[hidden], .cc-form[hidden], .cc-body[hidden], .cc-error[hidden] { display: none; }
+          .cc-form { margin: 4px 0 12px; padding: 12px; border: 1px solid var(--grade-outline); border-radius: 20px; background: var(--grade-surface-high); }
+          .cc-form p { margin: 0 0 8px; color: var(--grade-on-surface-variant); font-size: 12px; }
+          .cc-form > div { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
+          .cc-form .cc-error { margin: 8px 0 0; color: #f87171; }
+          .entries { display: grid; gap: 2px; max-height: 240px; overflow: auto; }
+          .entry { display: block; width: 100%; margin: 0; padding: 7px 10px; overflow: hidden; border: 0; border-radius: 10px; background: transparent; color: var(--grade-on-surface); font: inherit; font-size: 13px; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+          .entry b { font-variant-numeric: tabular-nums; }
+          .entry span { color: var(--grade-on-surface-variant); }
+          .entry:hover, .entry:focus-visible { background: color-mix(in srgb, #f87171 18%, transparent); text-decoration: line-through; outline: none; }
+          hr { height: 1px; margin: 14px 0; border: 0; background: var(--grade-outline); }
+          .cc-body .metrics { display: flex; gap: 8px; margin-top: 0; }
+          .cc-body .metric { flex: 1; padding: 0; border: 0; border-radius: 0; background: transparent; }
+          .cc-body .metric span { display: block; margin-bottom: 2px; font-size: 11px; }
+          .cc-body .metric b { font-size: 20px; }
+          .cc-body .metrics.two { margin-top: 14px; }
+          .cc-question { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--grade-on-surface); font-size: 13px; line-height: 1.35; }
+          .cc-question + .cc-question { margin-top: 8px; }
+          .cc-question span { flex: 2; text-wrap: balance; }
+          .cc-question input { flex: 1; min-width: 0; margin: 0; }
+          .cc-body .prediction { margin-top: 0; }
           .row { display:grid; grid-template-columns: 1fr 1fr 32px; gap: 7px; animation: enter .25s both; }
           input { width:100%; min-width: 0; min-height: 40px; padding: 9px 10px; border: 1px solid var(--grade-outline); border-radius: 14px 14px 5px 14px; outline: 0; color:var(--grade-on-surface); background: var(--grade-surface-high); font: inherit; }
           input:focus { border: 2px solid var(--grade-primary); padding: 8px 9px; }
@@ -1460,6 +1525,17 @@
           .grade-list-item span { min-width:0; overflow:hidden; color:var(--grade-on-surface-variant); text-overflow:ellipsis; white-space:nowrap; }
           .grade-list-item b { color:var(--grade-on-surface); font-variant-numeric:tabular-nums; }
           .sort { min-height:38px; padding:0 12px; border:1px solid var(--grade-outline); border-radius:999px; color:var(--grade-on-surface); background:var(--grade-surface-high); font:inherit; }
+          .prediction { margin-top: 14px; }
+          .prediction[hidden] { display: none; }
+          .advice { margin: 0 0 10px; color: var(--grade-on-surface); font-size: 13px; line-height: 1.45; text-wrap: balance; }
+          .advice.is-warn { color: #f87171; }
+          .chart { position: relative; height: 150px; overflow: hidden; border: 1px solid var(--grade-outline); border-radius: 22px; background: var(--grade-surface-high); cursor: crosshair; touch-action: none; }
+          .chart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+          .chart-dot { position: absolute; z-index: 1; display: none; width: 10px; height: 10px; border-radius: 50%; background: var(--grade-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--grade-primary) 30%, transparent); transform: translate(-50%, -50%); pointer-events: none; }
+          .chart-tip { position: absolute; z-index: 2; display: none; padding: 3px 8px; border-radius: 999px; background: var(--grade-surface); color: var(--grade-on-surface); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
+          .chart-tip.is-ok { color: #34d399; }
+          .chart-tip.is-warn { color: #f87171; }
+          .chart-axis { display: flex; justify-content: space-between; gap: 8px; margin-top: 5px; color: var(--grade-on-surface-variant); font-size: 10px; font-variant-numeric: tabular-nums; }
           .backup-description { color:var(--grade-on-surface-variant); font-size:12px; line-height:1.5; }
           .message { min-height: 36px; margin: 13px 0 0; }
           @keyframes enter { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
@@ -1478,10 +1554,36 @@
             <button class="tab" type="button" role="tab" data-tab="backup" aria-selected="false">Back-up</button>
           </div>
           <section class="view" data-view="calculator">
-            <div class="rows"></div>
-            <div class="actions"><button class="action" data-action="add">+ Cijfer</button><button class="action primary" data-action="scan">Scannen</button></div>
-            <div class="settings"><label>Doelgemiddelde<input class="target" type="number" min="${gradeMinimum}" max="${gradeMaximum}" step=".1" value="${passThreshold}"></label><label>Weging volgend cijfer<input class="future" type="number" min=".1" step=".1" placeholder="Auto"></label></div>
-            <div class="metrics"><div class="metric"><b class="average">—</b><span>Gewogen gemiddelde</span></div><div class="metric"><b class="median">—</b><span>Mediaan</span></div><div class="metric"><b class="total-weight">—</b><span>Totale weging</span></div><div class="metric"><b class="needed">—</b><span>Benodigd cijfer</span></div><div class="metric"><b class="result">—</b><span>Nieuw gemiddelde</span></div></div>
+            <div class="cc-head">
+              <h3 class="cc-title">Cijfercalculator</h3>
+              <button class="cc-add" type="button" data-action="add" title="Cijfer handmatig toevoegen" aria-label="Cijfer handmatig toevoegen" aria-expanded="false">+</button>
+            </div>
+            <p class="cc-empty">Bereken hier welk cijfer je moet halen of wat je gemiddelde zal zijn.<br><br>Klik op cijfers in je cijferlijst of voeg ze met + handmatig toe om te beginnen.</p>
+            <form class="cc-form" hidden novalidate>
+              <p>Voer het cijfer en de weging in.</p>
+              <div><input class="cc-grade" type="text" inputmode="decimal" autocomplete="off" placeholder="Cijfer" aria-label="Cijfer"><input class="cc-weight" type="text" inputmode="decimal" autocomplete="off" placeholder="Weging" aria-label="Weging"><button class="action primary" type="submit">Toevoegen</button></div>
+              <p class="cc-error" role="alert" hidden></p>
+            </form>
+            <div class="entries"></div>
+            <div class="rows" hidden></div>
+            <div class="actions"><button class="action" data-action="scan">Cijferlijst scannen</button></div>
+            <div class="cc-body" hidden>
+              <hr>
+              <div class="metrics"><div class="metric"><span title="Gewogen gemiddelde">Gemiddelde</span><b class="average">—</b></div><div class="metric"><span>Mediaan</span><b class="median">—</b></div><div class="metric"><span>Totale weging</span><b class="total-weight">—</b></div></div>
+              <hr>
+              <label class="cc-question"><span>Hoe vaak telt het volgende cijfer mee?</span><input class="future" type="number" min=".1" step=".1" placeholder="1x"></label>
+              <label class="cc-question"><span>Welk gemiddelde wil je halen?</span><input class="target" type="number" min="${gradeMinimum}" max="${gradeMaximum}" step=".1" value="${passThreshold}"></label>
+              <hr>
+            <div class="prediction" hidden>
+              <p class="advice"></p>
+              <div class="chart" role="img" aria-label="Grafiek: cijfer voor je volgende toets tegen je nieuwe gemiddelde">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+                <i class="chart-dot"></i><span class="chart-tip"></span>
+              </div>
+              <div class="chart-axis"><span class="axis-min"></span><span>volgend cijfer → nieuw gemiddelde</span><span class="axis-max"></span></div>
+            </div>
+              <div class="metrics two"><div class="metric"><span>Benodigd cijfer</span><b class="needed">—</b></div><div class="metric"><span>Nieuw gemiddelde</span><b class="result">—</b></div></div>
+            </div>
             <div class="actions"><button class="action" data-action="export">CSV exporteren</button></div>
           </section>
           <section class="view" data-view="statistics" hidden>
@@ -1525,6 +1627,27 @@
       const format = (value) => Number.isFinite(value) ? value.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—";
       const sourceElements = new Map();
 
+      // Lijst "Cijfers in berekening", zoals in Study Tools: klik op een regel om het cijfer te verwijderen
+      function renderEntries(entries) {
+        const list = shadow.querySelector(".entries");
+        shadow.querySelector(".cc-title").textContent = entries.length ? `Cijfers in berekening (${entries.length})` : "Cijfercalculator";
+        shadow.querySelector(".cc-empty").hidden = entries.length > 0;
+        shadow.querySelector(".cc-body").hidden = entries.length === 0;
+        list.replaceChildren(...entries.map(({ result, weight, row, manual, title }) => {
+          const entry = document.createElement("button");
+          entry.type = "button";
+          entry.className = "entry";
+          entry.title = "Verwijderen";
+          const grade = document.createElement("b");
+          grade.textContent = result.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+          const rest = document.createElement("span");
+          rest.textContent = ` (${weight.toLocaleString("nl-NL", { maximumFractionDigits: 2 })}x) — ${manual ? "Handmatig toegevoegd" : title}`;
+          entry.append(grade, rest);
+          entry.addEventListener("click", () => row.querySelector(".icon").click());
+          return entry;
+        }));
+      }
+
       function addRow(grade = "", weight = "1", sourceKey = "", title = "") {
         const row = document.createElement("div");
         row.className = "row";
@@ -1545,6 +1668,8 @@
           result: row.querySelector(".grade").value.trim() === "" ? NaN : Number(row.querySelector(".grade").value),
           weight: row.querySelector(".weight").value.trim() === "" ? NaN : Number(row.querySelector(".weight").value),
           title: row.dataset.title || `Cijfer ${index + 1}`,
+          manual: !row.dataset.title,
+          row,
           index,
         }));
         const validValues = values.filter(({ result, weight }) =>
@@ -1553,9 +1678,11 @@
         );
         renderStatistics(validValues);
         renderList(validValues);
+        renderEntries(validValues);
         if (!validValues.length) {
           ["average", "median", "total-weight", "needed", "result"].forEach((name) => input(name).textContent = "—");
           message.textContent = "Voeg cijfers toe of scan je cijferlijst.";
+          renderPrediction(null, 0, passThreshold);
           return;
         }
         const target = Number(input("target").value);
@@ -1563,10 +1690,16 @@
         const preliminary = calculator.calculateGradeSummary(validValues, target, 1, gradeMinimum, gradeMaximum);
         const futureInput = input("future").value.trim();
         const future = futureInput ? Number(futureInput) : (preliminary.medianWeight || 1);
+        input("future").placeholder = `${(preliminary.medianWeight || 1).toLocaleString("nl-NL", { maximumFractionDigits: 2 })}x`;
         const summary = calculator.calculateGradeSummary(validValues, target, future, gradeMinimum, gradeMaximum);
         input("average").textContent = format(summary.weightedAverage);
         input("median").textContent = format(summary.median);
         input("total-weight").textContent = `${format(summary.totalWeight)}×`;
+        renderPrediction(
+          summary,
+          Number.isFinite(future) && future > 0 ? future : 0,
+          Number.isFinite(target) && target >= gradeMinimum && target <= gradeMaximum ? target : passThreshold
+        );
         if (summary.needed === undefined) {
           input("needed").textContent = "—";
           input("result").textContent = "—";
@@ -1583,6 +1716,92 @@
             ? `Je ligt op koers voor een gemiddelde van ${format(target)}; een ${format(gradeMinimum)} is voldoende.`
             : `${summary.currentlyPassing ? "Je staat voldoende. " : ""}Je hebt minimaal een ${format(summary.roundedNeeded)} nodig voor ${format(target)}.`;
       }
+
+      // Voorspelling met grafiek, overgenomen van de cijfercalculator van Study Tools (MIT, Quinten Althues):
+      // nieuw gemiddelde = helling × volgend cijfer + snijpunt
+      const chart = shadow.querySelector(".chart");
+      let line = null;
+      function renderPrediction(summary, future, goal) {
+        const box = shadow.querySelector(".prediction");
+        const advice = shadow.querySelector(".advice");
+        if (!summary || !(future > 0)) {
+          box.hidden = true;
+          line = null;
+          return;
+        }
+        const weightedTotal = summary.weightedAverage * summary.totalWeight;
+        const slope = future / (summary.totalWeight + future);
+        const intercept = weightedTotal / (summary.totalWeight + future);
+        const span = gradeMaximum - gradeMinimum;
+        const norm = (value) => ((value - gradeMinimum) / span) * 100;
+        line = { slope, intercept };
+        box.hidden = false;
+
+        const one = (value) => value.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        const weight = future.toLocaleString("nl-NL", { maximumFractionDigits: 2 });
+        const needed = (goal * (summary.totalWeight + future) - weightedTotal) / future;
+        const goalText = goal === passThreshold ? "voldoende" : `op een ${one(goal)}`;
+        advice.className = "advice";
+        if (needed > gradeMaximum) {
+          advice.textContent = `Met een cijfer dat ${weight}× meetelt, kun je niet hoger dan een ${format(slope * gradeMaximum + intercept)} komen te staan.`;
+          advice.classList.add("is-warn");
+        } else if (needed < gradeMinimum) {
+          advice.textContent = `Met een cijfer dat ${weight}× meetelt, kun je niet lager dan een ${format(slope * gradeMinimum + intercept)} komen te staan.`;
+        } else {
+          const atLeast = one(Math.ceil((needed - 1e-9) * 10) / 10);
+          advice.textContent = `Haal ten minste een ${atLeast} die ${weight}× meetelt om ${goalText} ${summary.weightedAverage < goal ? "te komen" : "te blijven"} staan.`;
+        }
+
+        const grid = Array.from({ length: Math.max(0, Math.round(span) - 1) }, (_, index) => {
+          const at = ((index + 1) / Math.round(span)) * 100;
+          return `<line x1="${at}" y1="0" x2="${at}" y2="100"/><line x1="0" y1="${at}" x2="100" y2="${at}"/>`;
+        }).join("");
+        const threshold = norm(goal);
+        line.goal = goal;
+        chart.querySelector("svg").innerHTML = `
+          <g stroke="var(--grade-outline)" stroke-width=".5" vector-effect="non-scaling-stroke" opacity=".6">${grid}</g>
+          <rect x="0" y="0" width="${threshold}" height="100" fill="#f87171" fill-opacity=".07"/>
+          <rect x="0" y="${100 - threshold}" width="100" height="${threshold}" fill="#f87171" fill-opacity=".07"/>
+          <line x1="0" y1="${100 - norm(slope * gradeMinimum + intercept)}" x2="100" y2="${100 - norm(slope * gradeMaximum + intercept)}"
+            stroke="var(--grade-primary)" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+        shadow.querySelector(".axis-min").textContent = one(gradeMinimum);
+        shadow.querySelector(".axis-max").textContent = one(gradeMaximum);
+        hideChartTip();
+      }
+
+      function hideChartTip() {
+        chart.querySelector(".chart-dot").style.display = "none";
+        chart.querySelector(".chart-tip").style.display = "none";
+      }
+
+      function showChartTip(clientX) {
+        if (!line) return;
+        const rect = chart.getBoundingClientRect();
+        if (!rect.width) return;
+        const span = gradeMaximum - gradeMinimum;
+        // Op tienden van een cijfer vastklikken
+        const raw = gradeMinimum + Math.min(1, Math.max(0, (clientX - rect.left) / rect.width)) * span;
+        const grade = Math.round(raw * 10) / 10;
+        const average = line.slope * grade + line.intercept;
+        const x = ((grade - gradeMinimum) / span) * 100;
+        const y = 100 - ((average - gradeMinimum) / span) * 100;
+        const dot = chart.querySelector(".chart-dot");
+        const tip = chart.querySelector(".chart-tip");
+        dot.style.display = "block";
+        dot.style.left = `${x}%`;
+        dot.style.top = `${y}%`;
+        tip.style.display = "block";
+        tip.textContent = `${grade.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ➜ ${format(average)}`;
+        tip.className = `chart-tip ${average >= line.goal - 1e-9 ? "is-ok" : "is-warn"}`;
+        const half = (tip.offsetWidth / 2 / rect.width) * 100;
+        tip.style.left = `${Math.min(100 - half, Math.max(half, x))}%`;
+        tip.style.top = `${y}%`;
+        tip.style.transform = (y / 100) * rect.height - tip.offsetHeight - 12 < 0 ? "translate(-50%, 40%)" : "translate(-50%, -140%)";
+      }
+
+      chart.addEventListener("pointermove", (event) => showChartTip(event.clientX));
+      chart.addEventListener("pointerdown", (event) => showChartTip(event.clientX));
+      chart.addEventListener("pointerleave", hideChartTip);
 
       function renderStatistics(entries) {
         const statistics = globalThis.EduarteGradeCalculator.calculateGradeStatistics(
@@ -1787,7 +2006,40 @@
         panel.setAttribute("aria-hidden", "true");
         toggle.setAttribute("aria-expanded", "false");
       });
-      shadow.querySelector('[data-action="add"]').addEventListener("click", () => { addRow(); calculate(); });
+      // Handmatig toevoegen: klein formulier in plaats van losse lege rijen
+      const addButton = shadow.querySelector('[data-action="add"]');
+      const addForm = shadow.querySelector(".cc-form");
+      const addError = shadow.querySelector(".cc-error");
+      const readDecimal = (field) => {
+        const raw = field.value.trim().replace(",", ".");
+        return /^\d+(\.\d*)?$|^\.\d+$/.test(raw) ? Number(raw) : NaN;
+      };
+      addButton.addEventListener("click", () => {
+        addForm.hidden = !addForm.hidden;
+        addButton.setAttribute("aria-expanded", String(!addForm.hidden));
+        addError.hidden = true;
+        if (!addForm.hidden) input("cc-grade").focus();
+      });
+      addForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const grade = readDecimal(input("cc-grade"));
+        const weight = input("cc-weight").value.trim() === "" ? 1 : readDecimal(input("cc-weight"));
+        if (!(grade >= gradeMinimum && grade <= gradeMaximum)) {
+          addError.textContent = `Voer een geldig cijfer in tussen ${format(gradeMinimum)} en ${format(gradeMaximum)}.`;
+          addError.hidden = false;
+          return;
+        }
+        if (!(weight > 0)) {
+          addError.textContent = "Voer een weging groter dan 0 in.";
+          addError.hidden = false;
+          return;
+        }
+        addError.hidden = true;
+        addRow(String(grade), String(weight));
+        input("cc-grade").value = "";
+        input("cc-grade").focus();
+        calculate();
+      });
       shadow.querySelector('[data-action="scan"]').addEventListener("click", scan);
       shadow.querySelector('[data-action="export"]').addEventListener("click", exportCsv);
       shadow.querySelector('[data-action="backup-export"]').addEventListener("click", exportBackup);
@@ -1805,7 +2057,6 @@
       }));
       input("target").addEventListener("input", calculate);
       input("future").addEventListener("input", calculate);
-      addRow();
       calculate();
       const stopWatchingResults = globalThis.EduarteApi.watchGrades(document, (grades) => {
         if (!grades.length || root.dataset.resultsFound) return;
