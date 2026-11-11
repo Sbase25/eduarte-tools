@@ -182,9 +182,64 @@ describe("startpagina: eigen snelkoppelingen", () => {
     expect(link.querySelector("em").textContent).toBe("itslearning");
     expect(saved.at(-1)).toEqual({ eduarteBookmarks: [{ name: "itslearning", url: "https://tilburg.itslearning.com/" }] });
 
-    root.querySelector(".et-bm-list button").click();
+    // Via het eigen menu (⋯ of rechtsklik) weer verwijderen
+    root.querySelector(".et-custom .et-more").click();
+    const menu = root.querySelector(".et-bm-menu");
+    expect(menu.hidden).toBe(false);
+    expect(menu.querySelector(".et-bm-menu-title").textContent).toBe("itslearning");
+    menu.querySelector('[data-action="remove"]').click();
+    expect(menu.hidden).toBe(true);
     expect(root.querySelector(".et-link.is-custom")).toBeNull();
     expect(saved.at(-1)).toEqual({ eduarteBookmarks: [] });
+  });
+
+  it("wijzigt naam en link van een bestaande snelkoppeling", async () => {
+    const { root } = await mountHome({ hour: 12, minute: 0 });
+    const saved = [];
+    dom.window.chrome.storage.local.set = (value) => saved.push(value);
+    root.querySelector(".et-link.is-add").click();
+    await add(root, "Its", "tilburg.itslearning.com");
+    await add(root, "Teams", "teams.microsoft.com");
+
+    // Rechtsklik opent ons eigen menu in plaats van dat van de browser
+    const event = new dom.window.MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 40, clientY: 40 });
+    root.querySelectorAll(".et-custom")[0].querySelector("a").dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    const menu = root.querySelector(".et-bm-menu");
+    expect(menu.hidden).toBe(false);
+    menu.querySelector('[data-action="edit"]').click();
+
+    const box = root.querySelector(".et-bm");
+    expect(box.classList.contains("is-editing")).toBe(true);
+    expect(root.querySelector(".et-bm-name").value).toBe("Its");
+    expect(root.querySelector(".et-bm-url").value).toBe("https://tilburg.itslearning.com/");
+    expect(box.querySelector('button[type="submit"]').textContent).toBe("Opslaan");
+
+    // Een link die al bij een andere snelkoppeling hoort mag niet
+    await add(root, "Dubbel", "teams.microsoft.com");
+    expect(root.querySelector(".et-bm-error").textContent).toBe("Deze link staat er al tussen.");
+
+    await add(root, "itslearning", "https://tilburg.itslearning.com/main.aspx");
+    expect(saved.at(-1)).toEqual({ eduarteBookmarks: [
+      { name: "itslearning", url: "https://tilburg.itslearning.com/main.aspx" },
+      { name: "Teams", url: "https://teams.microsoft.com/" },
+    ] });
+    expect(box.hidden).toBe(true);
+    const links = [...root.querySelectorAll(".et-link.is-custom")];
+    expect(links.map((link) => link.querySelector("em").textContent)).toEqual(["itslearning", "Teams"]);
+    expect(links[0].href).toBe("https://tilburg.itslearning.com/main.aspx");
+  });
+
+  it("annuleren laat de snelkoppeling ongemoeid", async () => {
+    const { root } = await mountHome({ hour: 12, minute: 0 });
+    root.querySelector(".et-link.is-add").click();
+    await add(root, "Its", "tilburg.itslearning.com");
+    root.querySelector(".et-custom .et-more").click();
+    root.querySelector('.et-bm-menu [data-action="edit"]').click();
+    root.querySelector(".et-bm-name").value = "Anders";
+    root.querySelector(".et-bm-cancel").click();
+    expect(root.querySelector(".et-bm").hidden).toBe(true);
+    expect(root.querySelector(".et-link.is-custom em").textContent).toBe("Its");
   });
 
   it("weigert links die geen gewone webpagina zijn", async () => {
