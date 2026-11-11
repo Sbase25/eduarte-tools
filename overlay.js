@@ -40,6 +40,24 @@
     }
   }
 
+  // Material 3 Expressive: een veer die een klein beetje doorschiet (cubic-bezier als terugval)
+  // en de geschulpte cirkel ("cookie") uit de vormenbibliotheek, als clip-path.
+  const SPRING_FALLBACK = "cubic-bezier(.34, 1.45, .64, 1)";
+  const SPRING = "linear(0, .13 6.2%, .397 12.5%, .671 18.8%, .885 25%, 1.019 31.2%, 1.082 37.5%, 1.094 43.8%, 1.079 50%, 1.052 56.2%, 1.027 62.5%, 1.008 68.8%, .997 75%, .992 81.2%, .993 93.8%, 1)";
+  const springVars = (selector) => `
+    ${selector} { --et-spring: ${SPRING_FALLBACK}; }
+    @supports (transition-timing-function: linear(0, 1)) { ${selector} { --et-spring: ${SPRING}; } }`;
+
+  function scallopedShape(lobes = 12, depth = 0.055, steps = 120) {
+    const points = [];
+    for (let i = 0; i < steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      const radius = 50 * (1 - depth + depth * Math.cos(lobes * angle));
+      points.push(`${(50 + radius * Math.cos(angle)).toFixed(1)}% ${(50 + radius * Math.sin(angle)).toFixed(1)}%`);
+    }
+    return `polygon(${points.join(", ")})`;
+  }
+
   const WEATHER_CODES = {
     0: { text: "Zonnig / Helder", icon: "☀️", iconNight: "🌙" },
     1: { text: "Overwegend zonnig", icon: "🌤️", iconNight: "🌙" },
@@ -89,11 +107,39 @@
     sunrise: '<path d="M12 2v8M4.93 10.93l1.41 1.41M2 18h2M20 18h2M19.07 10.93l-1.41 1.41M22 22H2M8 6l4-4 4 4M16 18a4 4 0 0 0-8 0"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
     x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+    moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+    rain: '<path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M16 14v6M8 14v6M12 16v6"/>',
+    snow: '<path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M8 15h.01M8 19h.01M12 17h.01M12 21h.01M16 15h.01M16 19h.01"/>',
+    bolt: '<path d="M6 16.33A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.97"/><path d="m13 12-3 5h4l-3 5"/>',
+    fog: '<path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M16 17H7M17 21H9"/>',
+    drop: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5S12.5 5 12 2c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7Z"/>',
     instagram: '<rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
   };
 
   function icon(name) {
     return `<svg class="et-i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ""}</svg>`;
+  }
+
+  // Lijn-icoon bij een Open-Meteo weercode, zodat het weer bij de rest van de iconen past
+  function weatherIconName(code, isDay) {
+    if (code <= 1) return isDay ? "sun" : "moon";
+    if (code <= 3) return "cloud";
+    if (code <= 48) return "fog";
+    if (code >= 71 && code <= 77) return "snow";
+    if (code === 82 || code >= 95) return "bolt";
+    return "rain";
+  }
+
+  // "over 45 min", "over 8u 48m", "over 2 dagen"
+  function formatCountdown(minutes) {
+    const m = Math.max(0, Math.round(minutes));
+    if (m < 1) return "nu";
+    if (m < 60) return `over ${m} min`;
+    if (m < 24 * 60) return `over ${Math.floor(m / 60)}u ${String(m % 60).padStart(2, "0")}m`;
+    const days = Math.round(m / (24 * 60));
+    return `over ${days} ${days === 1 ? "dag" : "dagen"}`;
   }
 
   function escapeHtml(value) {
@@ -185,7 +231,11 @@
       const style = document.createElement("style");
       style.id = STYLE_ID;
       style.textContent = `
+        ${springVars(`#${TOOLBAR_ID}`)}
         #${TOOLBAR_ID} {
+          --et-tb-surface: var(--color-bg-surface, #14171f);
+          --et-tb-text: var(--color-text-primary, #eceef3);
+          --et-tb-accent: var(--color-bg-fill-action, #ff7a59);
           position: relative;
           display: flex;
           flex: 0 0 auto;
@@ -193,30 +243,34 @@
           gap: 8px;
           margin-left: auto;
           padding: 0 10px;
-          color: #f3f6ff;
+          color: var(--et-tb-text);
           font: 500 13px/1.3 system-ui, sans-serif;
         }
+        /* Ronde tonale icoonknoppen; indrukken of openen maakt ze hoekiger (vormverandering) */
         #${TOOLBAR_ID} .et-portal-action {
           position: relative;
           display: grid;
           flex: 0 0 auto;
-          width: 38px;
-          height: 38px;
+          width: 40px;
+          height: 40px;
           place-items: center;
           padding: 0;
-          border: 1px solid color-mix(in srgb, var(--color-border-primary, #252a37) 80%, transparent);
-          border-radius: 10px;
-          background: var(--color-bg-surface, #14171f);
-          color: var(--color-text-primary, #eceef3);
+          border: 0;
+          border-radius: 20px;
+          background: color-mix(in srgb, var(--et-tb-surface) 91%, var(--et-tb-text));
+          color: var(--et-tb-text);
           box-shadow: none;
           cursor: pointer;
           text-decoration: none;
-          transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+          transition: border-radius 260ms var(--et-spring), background-color 150ms linear;
         }
-        #${TOOLBAR_ID} .et-portal-action:hover,
+        #${TOOLBAR_ID} .et-portal-action:hover {
+          background: color-mix(in srgb, var(--et-tb-surface) 83%, var(--et-tb-text));
+        }
+        #${TOOLBAR_ID} .et-portal-action:active { border-radius: 12px; }
         #${TOOLBAR_ID} .et-portal-action[aria-expanded="true"] {
-          border-color: var(--color-bg-fill-action, #ff7a59);
-          background: color-mix(in srgb, var(--color-bg-surface, #14171f) 88%, var(--color-text-primary, #eceef3));
+          border-radius: 14px;
+          background: color-mix(in srgb, var(--et-tb-accent) 26%, var(--et-tb-surface));
         }
         #${TOOLBAR_ID} .et-portal-action:focus-visible {
           outline: 2px solid var(--color-bg-fill-action, #ff7a59);
@@ -225,13 +279,13 @@
         #${TOOLBAR_ID} .et-portal-action svg { width: 20px; height: 20px; fill: currentColor; }
         #${TOOLBAR_ID} .et-portal-bell::after {
           position: absolute;
-          top: 5px;
-          right: 6px;
-          width: 7px;
-          height: 7px;
+          top: 8px;
+          right: 9px;
+          width: 8px;
+          height: 8px;
           border: 0;
           border-radius: 50%;
-          background: var(--color-bg-fill-action, #ff7a59);
+          background: var(--et-tb-accent);
           content: "";
         }
         #${TOOLBAR_ID} .et-portal-count {
@@ -239,12 +293,13 @@
           top: -4px;
           right: -4px;
           display: none;
-          min-width: 17px;
-          height: 17px;
+          box-sizing: border-box;
+          min-width: 20px;
+          height: 20px;
           align-items: center;
           justify-content: center;
           padding: 0 4px;
-          border: 1px solid #101a44;
+          border: 2px solid var(--color-bg, #0c0e13);
           border-radius: 99px;
           background: #fb4b72;
           color: white;
@@ -252,20 +307,39 @@
           font-weight: 800;
           line-height: 1;
         }
-        #${TOOLBAR_ID} .et-portal-avatar {
-          overflow: hidden;
-          border-color: transparent;
-          background: var(--color-bg-fill-action, #ff7a59);
-          color: #fff;
+        /* Profiel in dezelfde geschulpte vorm als het logo in het menu. De vorm zit op ::before
+           en de foto, niet op de link zelf, zodat de focusrand zichtbaar blijft. */
+        #${TOOLBAR_ID} .et-portal-avatar,
+        #${TOOLBAR_ID} .et-portal-avatar:hover,
+        #${TOOLBAR_ID} .et-portal-avatar:active {
+          isolation: isolate;
+          border-radius: 50%;
+          background: transparent;
+          color: #fff !important;
+          color: oklch(from var(--et-tb-accent) calc((.62 - l) * 1000) 0 0) !important;
           font-size: 14px;
           font-weight: 750;
           letter-spacing: -.03em;
           box-shadow: none;
         }
+        #${TOOLBAR_ID} .et-portal-avatar::before {
+          position: absolute;
+          inset: -2px;
+          z-index: -1;
+          background: var(--et-tb-accent);
+          clip-path: ${scallopedShape()};
+          content: "";
+          transition: transform 500ms var(--et-spring);
+        }
+        #${TOOLBAR_ID} .et-portal-avatar:hover::before { transform: rotate(30deg) scale(1.06); }
+        #${TOOLBAR_ID} .et-portal-avatar:active::before { transform: scale(.94); }
         #${TOOLBAR_ID} .et-portal-avatar img {
-          width: 100%;
-          height: 100%;
+          position: absolute;
+          inset: -2px;
+          width: calc(100% + 4px);
+          height: calc(100% + 4px);
           object-fit: cover;
+          clip-path: ${scallopedShape()};
         }
         #${TOOLBAR_ID} .et-portal-popover {
           position: absolute;
@@ -274,14 +348,12 @@
           right: 8px;
           display: none;
           width: min(320px, calc(100vw - 32px));
-          padding: 16px;
-          border: 1px solid rgba(139,169,255,.3);
-          border-radius: 20px;
-          background: linear-gradient(145deg, rgba(18,30,76,.97), rgba(9,15,43,.98));
-          color: #f3f6ff;
-          box-shadow: 0 18px 48px rgba(1,5,24,.5), inset 0 1px rgba(255,255,255,.08);
-          backdrop-filter: blur(20px) saturate(145%);
-          -webkit-backdrop-filter: blur(20px) saturate(145%);
+          padding: 18px 20px;
+          border: 1px solid color-mix(in srgb, var(--et-tb-text) 8%, transparent);
+          border-radius: 24px;
+          background: color-mix(in srgb, var(--et-tb-surface) 94%, var(--et-tb-text));
+          color: var(--et-tb-text);
+          box-shadow: 0 18px 48px rgba(0,0,0,.45);
         }
         #${TOOLBAR_ID} .et-portal-popover.open { display: block; animation: et-portal-pop-in 150ms ease both; }
         #${TOOLBAR_ID} .et-portal-popover h2 {
@@ -291,7 +363,7 @@
         }
         #${TOOLBAR_ID} .et-portal-popover p {
           margin: 0;
-          color: #bac9ed;
+          color: color-mix(in srgb, var(--et-tb-text) 68%, transparent);
           font: 400 12px/1.5 system-ui, sans-serif;
         }
         /* Zoekvenster midden in beeld, boven alles (ook boven de filterbalk van de agenda) */
@@ -303,10 +375,10 @@
           left: 50%;
           width: min(560px, calc(100vw - 32px));
           box-sizing: border-box;
-          padding: 10px;
+          padding: 12px;
           transform: translateX(-50%);
           border: 1px solid color-mix(in srgb, var(--color-text-primary, #eceef3) 12%, transparent);
-          border-radius: 18px;
+          border-radius: 28px;
           background: var(--color-bg-surface, #14171f);
           color: var(--color-text-primary, #eceef3);
           box-shadow: 0 0 0 100vmax rgba(0,0,0,.45), 0 24px 60px rgba(0,0,0,.5);
@@ -317,12 +389,12 @@
         #${TOOLBAR_ID} .et-portal-search input {
           box-sizing: border-box;
           width: 100%;
-          min-height: 46px;
-          padding: 0 14px 0 40px;
+          min-height: 48px;
+          padding: 0 18px 0 46px;
           border: 1px solid transparent;
-          border-radius: 12px;
+          border-radius: 24px;
           outline: 0;
-          background: color-mix(in srgb, var(--color-bg-surface, #14171f) 90%, var(--color-text-primary, #eceef3)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a92a6' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 13px 50% / 17px;
+          background: color-mix(in srgb, var(--color-bg-surface, #14171f) 90%, var(--color-text-primary, #eceef3)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a92a6' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 17px 50% / 18px;
           color: inherit;
           font: 500 15px system-ui, sans-serif;
         }
@@ -331,9 +403,9 @@
         #${TOOLBAR_ID} .et-search-results { display: grid; gap: 2px; max-height: 50vh; margin: 8px 0 0; padding: 0; overflow-y: auto; list-style: none; }
         #${TOOLBAR_ID} .et-search-results:empty { display: none; }
         #${TOOLBAR_ID} .et-search-group { padding: 8px 10px 4px; color: color-mix(in srgb, currentColor 50%, transparent); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-        #${TOOLBAR_ID} .et-search-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+        #${TOOLBAR_ID} .et-search-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 16px; cursor: pointer; }
         #${TOOLBAR_ID} .et-search-item.is-active { background: color-mix(in srgb, var(--color-bg-fill-action, #ff7a59) 16%, transparent); }
-        #${TOOLBAR_ID} .et-search-item i { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: color-mix(in srgb, currentColor 8%, transparent); font-style: normal; font-size: 14px; }
+        #${TOOLBAR_ID} .et-search-item i { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: color-mix(in srgb, currentColor 8%, transparent); font-style: normal; font-size: 14px; }
         #${TOOLBAR_ID} .et-search-item b { display: block; font-weight: 600; }
         #${TOOLBAR_ID} .et-search-item small { display: block; overflow: hidden; color: color-mix(in srgb, currentColor 55%, transparent); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
         #${TOOLBAR_ID} .et-search-item span { min-width: 0; }
@@ -344,7 +416,7 @@
           margin-top: 12px;
           padding: 8px 12px;
           border-radius: 999px;
-          background: linear-gradient(100deg, #386cf1, #654fe8);
+          background: var(--et-tb-accent);
           color: #fff;
           font: 650 12px system-ui, sans-serif;
           text-decoration: none;
@@ -357,6 +429,7 @@
         @media (max-width: 520px) {
           #${TOOLBAR_ID} { gap: 5px; padding-inline: 5px; }
           #${TOOLBAR_ID} .et-portal-action { width: 36px; height: 36px; }
+          #${TOOLBAR_ID} .et-portal-bell::after { top: 7px; right: 8px; }
         }
         @media (prefers-reduced-motion: reduce) {
           #${TOOLBAR_ID} *, #${TOOLBAR_ID} *::before, #${TOOLBAR_ID} *::after {
@@ -666,6 +739,7 @@
 
           container.innerHTML = `
             <style>
+              ${springVars(C)}
               ${C} {
                 --et-surface: var(--color-bg-surface, #14171f);
                 --et-text: var(--color-text-primary, #eceef3);
@@ -675,6 +749,7 @@
                 --et-accent: var(--color-bg-fill-action, #ff7a59);
                 --et-accent-2: color-mix(in oklch, var(--et-accent), #a855f7 55%);
                 --et-accent-soft: color-mix(in srgb, var(--et-accent) 14%, transparent);
+                --et-accent-tonal: color-mix(in srgb, var(--et-accent) 26%, var(--et-surface));
                 --et-ok: #34d399;
                 display: grid;
                 grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -706,9 +781,9 @@
                 grid-column: span 12;
                 box-sizing: border-box;
                 min-width: 0;
-                padding: 18px 20px;
+                padding: 20px 22px;
                 border: 1px solid var(--et-line);
-                border-radius: 20px;
+                border-radius: 28px;
                 background:
                   linear-gradient(180deg, color-mix(in srgb, var(--et-text) 3%, transparent), transparent 60%),
                   var(--et-surface);
@@ -769,6 +844,17 @@
               @keyframes et-pulse { 0% { box-shadow: 0 0 0 0 currentColor; } 70%, 100% { box-shadow: 0 0 0 6px transparent; } }
               ${C} .et-now h4 { margin: 14px 0 2px; color: var(--et-text); font-size: 22px; font-weight: 700; letter-spacing: -.025em; }
               ${C} .et-now .et-meta { color: var(--et-muted); }
+              ${C} .et-now.is-next .et-tag { background: color-mix(in srgb, var(--et-text) 8%, transparent); color: var(--et-text); }
+              ${C} .et-now.is-next .et-tag::before { background: var(--et-accent); }
+              ${C} .et-after { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--et-muted); font-size: 12.5px; }
+              ${C} .et-after b { color: var(--et-text); font-weight: 600; }
+              ${C} .et-after[hidden], ${C} .et-when[hidden] { display: none; }
+              ${C} .et-when { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--et-line); color: var(--et-muted); font-variant-numeric: tabular-nums; }
+              ${C} .et-when span { display: inline-flex; align-items: center; gap: 7px; }
+              ${C} .et-when svg.et-i { width: 15px; height: 15px; color: var(--et-accent); }
+              ${C} .et-when b { color: var(--et-text); font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+              ${C} .et-now .et-meta:empty { display: none; }
+              ${C} .et-now.is-next .et-meta { margin-bottom: 18px; }
               ${C} .et-progress { margin-top: auto; padding-top: 18px; }
               ${C} .et-bar { position: relative; height: 8px; margin-bottom: 8px; border-radius: 99px; background: var(--et-surface-2); }
               ${C} .et-bar > div { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); box-shadow: 0 0 16px color-mix(in srgb, var(--et-accent) 45%, transparent); transition: width .6s ease; }
@@ -779,27 +865,31 @@
               ${C} .et-links { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; padding: 10px; }
               ${C} .et-link {
                 display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0;
-                padding: 12px 6px 10px; border-radius: 14px;
+                padding: 12px 6px 10px; border-radius: 20px;
                 color: var(--et-text) !important; font-size: 12.5px; font-weight: 600; text-decoration: none !important;
-                transition: background-color .15s ease, transform .15s ease;
+                transition: background-color .15s ease;
               }
-              ${C} .et-link:hover { background: var(--et-surface-2); transform: translateY(-2px); }
+              ${C} .et-link:hover { background: var(--et-surface-2); }
               ${C} .et-link span {
-                display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px;
+                display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px;
                 background: var(--tile); color: #fff;
                 box-shadow: 0 6px 16px -6px var(--tile), inset 0 1px rgba(255,255,255,.25);
+                transition: border-radius 320ms var(--et-spring), transform 320ms var(--et-spring);
               }
-              ${C} .et-link span svg.et-i { width: 19px; height: 19px; }
+              ${C} .et-link:hover span { border-radius: 21px; transform: scale(1.08) rotate(-6deg); }
+              ${C} .et-link:active span { border-radius: 10px; transform: scale(.94); }
+              ${C} .et-link span svg.et-i { width: 20px; height: 20px; }
               ${C} .et-link em { max-width: 100%; overflow: hidden; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
 
               /* Vandaag */
               ${C} .et-today { grid-column: span 5; }
               ${C} .et-tl { position: relative; display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-              ${C} .et-tl li { position: relative; display: grid; grid-template-columns: 42px 14px minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 10px 8px 4px; border-radius: 12px; transition: background-color .15s; }
+              ${C} .et-tl li { position: relative; display: grid; grid-template-columns: 42px 14px minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 10px 8px 4px; border-radius: 16px; transition: background-color .15s; }
               ${C} .et-tl li:not(.et-empty)::after { content: ""; position: absolute; left: 62px; top: 50%; bottom: -50%; width: 2px; background: var(--et-line); }
               ${C} .et-tl li:last-child::after { display: none; }
               ${C} .et-tl li.is-current { background: var(--et-surface-2); }
-              ${C} .et-tl li.is-past { opacity: .45; }
+              ${C} .et-tl li.is-past { opacity: .6; }
+              ${C} .et-tl li.is-past strong { font-weight: 500; }
               ${C} .et-tl time { color: var(--et-muted); font-size: 12px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
               ${C} .et-tl i { position: relative; z-index: 1; width: 12px; height: 12px; margin-left: 1px; border: 3px solid var(--et-surface); border-radius: 50%; box-shadow: 0 0 0 2px currentColor; background: currentColor; }
               ${C} .et-tl li.is-current i { box-shadow: 0 0 0 2px currentColor, 0 0 12px currentColor; }
@@ -812,10 +902,14 @@
               /* Timer */
               ${C} .et-timer { grid-column: span 3; display: flex; flex-direction: column; align-items: center; }
               ${C} .et-timer .et-label { align-self: stretch; }
-              ${C} .et-seg { display: flex; gap: 2px; width: 100%; box-sizing: border-box; padding: 3px; border-radius: 12px; background: var(--et-surface-2); }
-              ${C} .et-seg button { flex: 1; padding: 6px 0; border: 0; border-radius: 9px; background: none; color: var(--et-muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s; }
+              /* Verbonden knoppengroep: de gekozen duur wordt een volle pil, de rest blijft hoekiger */
+              ${C} .et-seg { display: flex; gap: 2px; width: 100%; box-sizing: border-box; }
+              ${C} .et-seg button { flex: 1; height: 36px; padding: 0; border: 0; border-radius: 8px; background: var(--et-surface-2); color: var(--et-muted); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: border-radius 260ms var(--et-spring), background-color .15s, color .15s; }
+              ${C} .et-seg button:first-child { border-radius: 18px 8px 8px 18px; }
+              ${C} .et-seg button:last-child { border-radius: 8px 18px 18px 8px; }
               ${C} .et-seg button:hover { color: var(--et-text); }
-              ${C} .et-seg button.is-on { background: var(--et-surface); color: var(--et-text); box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+              ${C} .et-seg button:active { border-radius: 6px; }
+              ${C} .et-seg button.is-on { border-radius: 18px; background: var(--et-accent-tonal); color: var(--et-text); }
               ${C} .et-ring { position: relative; width: 132px; height: 132px; margin: 14px 0; }
               ${C} .et-ring svg { display: block; transform: rotate(-90deg); overflow: visible; }
               ${C} .et-ring circle { fill: none; stroke-width: 9; }
@@ -827,15 +921,17 @@
               ${C} .et-ring.is-done .et-ring-fg { stroke: var(--et-ok); }
               ${C} .et-row { display: flex; gap: 8px; width: 100%; }
               ${C} .et-primary {
-                flex: 1; padding: 10px; border: 0; border-radius: 12px;
+                flex: 1; min-height: 44px; padding: 0 16px; border: 0; border-radius: 22px;
                 background: linear-gradient(135deg, var(--et-accent), var(--et-accent-2)); color: #fff;
-                font: inherit; font-weight: 700; cursor: pointer;
+                font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
                 box-shadow: 0 8px 20px -8px var(--et-accent);
-                transition: transform .15s ease, filter .15s ease;
+                transition: border-radius 260ms var(--et-spring), transform 260ms var(--et-spring), filter .15s ease;
               }
-              ${C} .et-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
-              ${C} .et-ghost { display: grid; place-items: center; width: 42px; border: 1px solid var(--et-line); border-radius: 12px; background: var(--et-surface-2); color: var(--et-text); cursor: pointer; }
-              ${C} .et-ghost:hover { border-color: color-mix(in srgb, var(--et-text) 20%, transparent); }
+              ${C} .et-primary:hover { filter: brightness(1.08); }
+              ${C} .et-primary:active { border-radius: 12px; transform: scale(.98); }
+              ${C} .et-ghost { flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 22px; background: var(--et-surface-2); color: var(--et-text); cursor: pointer; transition: border-radius 260ms var(--et-spring), background-color .15s; }
+              ${C} .et-ghost:hover { background: color-mix(in srgb, var(--et-surface) 84%, var(--et-text)); }
+              ${C} .et-ghost:active { border-radius: 12px; }
 
               /* Calculator */
               ${C} .et-calc { grid-column: span 4; display: flex; flex-direction: column; }
@@ -843,29 +939,30 @@
               ${C} .et-fields label { display: block; color: var(--et-muted); font-size: 12px; font-weight: 500; }
               ${C} .et-fields input {
                 box-sizing: border-box; width: 100%; margin-top: 5px; padding: 9px 12px;
-                border: 1px solid transparent; border-radius: 11px; outline: none;
+                border: 1px solid transparent; border-radius: 14px; outline: none;
                 background: var(--et-surface-2); color: var(--et-text);
                 font: inherit; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
                 transition: border-color .15s, box-shadow .15s;
               }
               ${C} .et-fields input:focus { border-color: var(--et-accent); box-shadow: 0 0 0 3px var(--et-accent-soft); }
               ${C} .et-need {
-                display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto;
-                padding: 12px 16px; border: 1px solid color-mix(in srgb, var(--et-accent) 25%, transparent); border-radius: 14px;
+                flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+                min-height: 56px; padding: 12px 18px; border: 1px solid color-mix(in srgb, var(--et-accent) 25%, transparent); border-radius: 20px;
                 background: linear-gradient(120deg, color-mix(in srgb, var(--et-accent) 16%, transparent), color-mix(in srgb, var(--et-accent-2) 12%, transparent));
               }
-              ${C} .et-need span { color: var(--et-muted); font-weight: 500; }
-              ${C} .et-need b { font-size: 28px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+              ${C} .et-need span { color: var(--et-text); font-weight: 600; }
+              ${C} .et-need span small { display: block; margin-top: 1px; color: var(--et-muted); font-size: 12px; font-weight: 500; }
+              ${C} .et-need b { font-size: 32px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
               ${C} .et-need b.is-bad { background: none; color: #f87171; font-size: 16px; }
               ${C} .et-need b.is-ok { background: none; color: var(--et-ok); font-size: 16px; }
 
               /* Instagram */
-              ${C} .et-ig { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 12px; border-radius: 16px; }
-              ${C} .et-ig > span { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, #f58529, #dd2a7b 50%, #8134af); color: #fff; }
+              ${C} .et-ig { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 10px; border-radius: 24px; }
+              ${C} .et-ig > span { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #f58529, #dd2a7b 50%, #8134af); color: #fff; }
               ${C} .et-ig div { flex: 1; min-width: 0; color: var(--et-muted); font-size: 12.5px; }
               ${C} .et-ig div b { color: var(--et-text); font-weight: 600; }
               ${C} .et-ig a { flex: none; padding: 5px 12px; border-radius: 99px; background: var(--et-text); color: var(--et-surface) !important; font-size: 12px; font-weight: 700; text-decoration: none !important; }
-              ${C} .et-ig button { flex: none; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--et-muted); cursor: pointer; }
+              ${C} .et-ig button { flex: none; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--et-muted); cursor: pointer; }
               ${C} .et-ig button:hover { background: var(--et-surface-2); color: var(--et-text); }
 
               ${C} button:focus-visible, ${C} a:focus-visible, ${C} input:focus-visible { outline: 2px solid var(--et-accent); outline-offset: 2px; }
@@ -900,7 +997,7 @@
                 <div class="et-chips">
                   ${showWeather ? `<button type="button" class="et-chip et-weather" title="Ververs weerbericht">${icon("cloud")} <span>Weer laden…</span></button>` : ""}
                   ${showToday ? `<span class="et-chip et-lesson-count" hidden></span>` : ""}
-                  ${native.tomorrow ? `<span class="et-chip">${icon("sunrise")} ${escapeHtml(native.tomorrow.replace(/\.$/, ""))}</span>` : ""}
+                  ${native.tomorrow && !showToday ? `<span class="et-chip">${icon("sunrise")} ${escapeHtml(native.tomorrow.replace(/\.$/, ""))}</span>` : ""}
                 </div>
               </section>
             ` : ""}
@@ -910,10 +1007,12 @@
                 <span class="et-tag">${native.lesson ? "Nu bezig" : "Vrij"}</span>
                 <h4>${escapeHtml(native.lesson ? native.lesson.title : (native.free || native.tomorrow || "Geen les op dit moment"))}</h4>
                 <div class="et-meta">${escapeHtml(native.lesson ? native.lesson.meta : (native.free && native.tomorrow ? native.tomorrow : ""))}</div>
+                <div class="et-after" hidden></div>
                 <div class="et-progress" hidden>
                   <div class="et-bar"><div></div></div>
                   <div class="et-bar-row"><span class="et-from"></span><span class="et-left"></span><span class="et-to"></span></div>
                 </div>
+                <div class="et-when" hidden></div>
               </section>
             ` : ""}
 
@@ -931,7 +1030,7 @@
 
             ${showToday ? `
               <section class="et-card et-today">
-                <h3 class="et-label">${icon("list")} Vandaag <a href="/agenda">Hele week ${icon("arrow")}</a></h3>
+                <h3 class="et-label">${icon("list")} <span class="et-today-title">Vandaag</span> <a href="/agenda">Hele week ${icon("arrow")}</a></h3>
                 <ul class="et-tl"><li class="et-empty" style="display:block">Lessen laden…</li></ul>
                 <div class="et-tl-foot" hidden></div>
               </section>
@@ -972,7 +1071,7 @@
                   <label>Gewenst gemiddelde<input type="number" id="et-calc-target" min="1" max="10" step=".1" value="7.0"></label>
                   <label>Weging toets<input type="number" id="et-calc-future" min="1" step="1" value="1"></label>
                 </div>
-                <div class="et-need"><span>Je hebt nodig</span><b id="et-calc-needed">8,5</b></div>
+                <div class="et-need"><span>Je hebt nodig<small id="et-calc-hint"></small></span><b id="et-calc-needed">8,5</b></div>
               </section>
             ` : ""}
           `;
@@ -999,46 +1098,115 @@
             const nowCard = container.querySelector(".et-now");
             const nowHours = () => { const d = new Date(); return d.getHours() + d.getMinutes() / 60; };
 
-            const renderToday = (lessons) => {
-              const now = nowHours();
-              if (!lessons.length) {
-                listEl.innerHTML = `<li class="et-empty" style="display:block">Geen lessen vandaag</li>`;
-                return;
-              }
-              if (countEl) {
-                countEl.hidden = false;
-                countEl.innerHTML = `${icon("book")} <b>${lessons.length}</b> ${lessons.length === 1 ? "les" : "lessen"} vandaag`;
-              }
-              listEl.innerHTML = lessons.map((l) => {
-                const state = l.end <= now ? "is-past" : (l.start <= now ? "is-current" : "");
-                const meta = [l.location, l.participants].filter(Boolean).join(" · ");
-                return `<li class="${state}"><time>${Agenda.formatTime(l.start)}</time><i style="color:${Agenda.courseColor(l.title)}"></i>`
-                  + `<div><strong title="${escapeHtml(l.subject)}">${escapeHtml(l.title)}</strong><small>${escapeHtml(meta)} · tot ${Agenda.formatTime(l.end)}</small></div></li>`;
-              }).join("");
-              const last = lessons[lessons.length - 1];
-              footEl.hidden = false;
-              footEl.innerHTML = last.end <= now ? `${icon("check")} Klaar voor vandaag` : `${icon("check")} Vrij vanaf ${Agenda.formatTime(last.end)}`;
+            const titleEl = container.querySelector(".et-today-title");
+            const afterEl = nowCard?.querySelector(".et-after");
+            const whenEl = nowCard?.querySelector(".et-when");
+            const progress = nowCard?.querySelector(".et-progress");
+            const metaOf = (l) => [l.location, l.participants].filter(Boolean).join(" · ");
+            const dayName = (date) => {
+              const d = Agenda.lessonDate(date, 12);
+              const t = new Date();
+              const tomorrow = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1);
+              if (d.toDateString() === tomorrow.toDateString()) return "Morgen";
+              const name = new Intl.DateTimeFormat("nl-NL", { weekday: "long" }).format(d);
+              return name.charAt(0).toUpperCase() + name.slice(1);
+            };
+            const row = (l, state) => `<li class="${state}"><time>${Agenda.formatTime(l.start)}</time><i style="color:${Agenda.courseColor(l.title)}"></i>`
+              + `<div><strong title="${escapeHtml(l.subject)}">${escapeHtml(l.title)}</strong><small>${escapeHtml(metaOf(l))} · tot ${Agenda.formatTime(l.end)}</small></div></li>`;
 
-              const current = lessons.find((l) => l.start <= now && l.end > now);
-              const progress = nowCard?.querySelector(".et-progress");
-              if (current && progress && nowCard.classList.contains("is-live")) {
+            // Kaart rechtsboven: de les van nu, of anders de eerstvolgende les met aftelling
+            const renderNow = (current, next, nextLabel, minutesUntil) => {
+              if (!nowCard) return;
+              const set = (state, tag, title, meta) => {
+                nowCard.classList.remove("is-live", "is-free", "is-next");
+                nowCard.classList.add(state);
+                nowCard.querySelector(".et-tag").textContent = tag;
+                nowCard.querySelector("h4").textContent = title;
+                nowCard.querySelector(".et-meta").textContent = meta;
+              };
+              progress.hidden = true;
+              afterEl.hidden = true;
+              whenEl.hidden = true;
+              if (current) {
+                const now = nowHours();
                 const pct = Math.min(100, Math.max(0, ((now - current.start) / (current.end - current.start)) * 100));
                 const left = Math.max(0, Math.round((current.end - now) * 60));
+                set("is-live", "Nu bezig", current.title, metaOf(current));
                 progress.hidden = false;
                 progress.querySelector(".et-bar > div").style.width = `${pct}%`;
                 progress.querySelector(".et-from").textContent = Agenda.formatTime(current.start);
                 progress.querySelector(".et-to").textContent = Agenda.formatTime(current.end);
                 progress.querySelector(".et-left").innerHTML = `nog <b>${left >= 60 ? `${Math.floor(left / 60)}u ${left % 60}m` : `${left}m`}</b>`;
+                if (next && nextLabel === "Volgende les") {
+                  afterEl.hidden = false;
+                  afterEl.innerHTML = `Hierna <b>${escapeHtml(next.title)}</b> · ${Agenda.formatTime(next.start)}`;
+                }
+              } else if (next) {
+                set("is-next", nextLabel, next.title, metaOf(next));
+                whenEl.hidden = false;
+                whenEl.innerHTML = `<span>${icon("clock")} ${Agenda.formatTime(next.start)} – ${Agenda.formatTime(next.end)}</span><b>${formatCountdown(minutesUntil)}</b>`;
+              } else if (!native.lesson) {
+                set("is-free", "Vrij", native.free || native.tomorrow || "Geen les op dit moment", native.free && native.tomorrow ? native.tomorrow : "");
+              }
+            };
+
+            const renderToday = (lessons, week = []) => {
+              const now = nowHours();
+              const d = new Date();
+              const todayKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+              const done = !lessons.length || lessons[lessons.length - 1].end <= now;
+              const nextDate = week.map((l) => l.date).filter((date) => date > todayKey).sort()[0];
+              const nextDay = nextDate ? week.filter((l) => l.date === nextDate).sort((a, b) => a.start - b.start) : [];
+
+              if (countEl && lessons.length) {
+                countEl.hidden = false;
+                countEl.innerHTML = `${icon("book")} <b>${lessons.length}</b> ${lessons.length === 1 ? "les" : "lessen"} ${done ? "gehad" : "vandaag"}`;
+              }
+
+              // Is vandaag klaar, dan toont de lijst alvast de eerstvolgende lesdag
+              if (done && nextDay.length) {
+                if (titleEl) titleEl.textContent = dayName(nextDate);
+                listEl.innerHTML = nextDay.map((l) => row(l, "")).join("");
+                footEl.hidden = !lessons.length;
+                footEl.innerHTML = `${icon("check")} Klaar voor vandaag`;
+              } else if (!lessons.length) {
+                if (titleEl) titleEl.textContent = "Vandaag";
+                listEl.innerHTML = `<li class="et-empty" style="display:block">Geen lessen vandaag</li>`;
+                footEl.hidden = true;
+              } else {
+                if (titleEl) titleEl.textContent = "Vandaag";
+                listEl.innerHTML = lessons.map((l) => row(l, l.end <= now ? "is-past" : (l.start <= now ? "is-current" : ""))).join("");
+                const last = lessons[lessons.length - 1];
+                footEl.hidden = false;
+                footEl.innerHTML = last.end <= now ? `${icon("check")} Klaar voor vandaag` : `${icon("check")} Vrij vanaf ${Agenda.formatTime(last.end)}`;
+              }
+
+              const current = lessons.find((l) => l.start <= now && l.end > now);
+              const laterToday = lessons.find((l) => l.start > now);
+              if (laterToday) {
+                renderNow(current, laterToday, "Volgende les", (laterToday.start - now) * 60);
+              } else if (nextDay.length) {
+                const first = nextDay[0];
+                renderNow(current, first, dayName(nextDate), (Agenda.lessonDate(first.date, first.start) - d) / 60000);
+              } else {
+                renderNow(current, null, "", 0);
               }
             };
 
             let todayLessons = [];
-            Agenda.fetchTodayLessons()
-              .then((lessons) => { todayLessons = lessons; renderToday(lessons); })
+            let weekLessons = [];
+            let loaded = false;
+            Agenda.fetchAgendaDocument()
+              .then((doc) => {
+                todayLessons = Agenda.getTodayLessons(doc);
+                weekLessons = Agenda.getWeekLessons(doc).lessons;
+                loaded = true;
+                renderToday(todayLessons, weekLessons);
+              })
               .catch(() => { listEl.innerHTML = `<li class="et-empty" style="display:block">Kon de agenda niet laden.</li>`; });
             const refresh = window.setInterval(() => {
               if (!container.isConnected) return window.clearInterval(refresh);
-              if (todayLessons.length) renderToday(todayLessons);
+              if (loaded) renderToday(todayLessons, weekLessons);
             }, 60 * 1000);
           }
 
@@ -1061,13 +1229,13 @@
                 locationLabel,
               }, (res) => {
                 if (chrome.runtime.lastError || !res || !res.success) {
-                  weatherEl.innerHTML = `⛅ <span>${escapeHtml(res?.error || "Weer niet beschikbaar")}</span>`;
+                  weatherEl.innerHTML = `${icon("cloud")} <span>${escapeHtml(res?.error || "Weer niet beschikbaar")}</span>`;
                   return;
                 }
                 const info = WEATHER_CODES[res.weathercode] || { text: "Onbekend", icon: "⛅" };
-                const icon = res.is_day ? info.icon : (info.iconNight || info.icon);
-                const rain = res.precipitation > 0 ? ` · 💧 ${res.precipitation}%` : "";
-                weatherEl.innerHTML = `${icon} <b>${Math.round(res.temp)}°</b> ${escapeHtml(info.text)} · ${escapeHtml(res.city || cityLabel)}${rain}`;
+                const weatherIcon = icon(weatherIconName(Number(res.weathercode), !!res.is_day));
+                const rain = res.precipitation > 0 ? ` · ${icon("drop")} ${res.precipitation}%` : "";
+                weatherEl.innerHTML = `${weatherIcon} <b>${Math.round(res.temp)}°</b> ${escapeHtml(info.text)} · ${escapeHtml(res.city || cityLabel)}${rain}`;
               });
             }
 
@@ -1090,7 +1258,7 @@
             const toggleBtn = container.querySelector("#et-pomo-toggle");
             const resetBtn = container.querySelector("#et-pomo-reset");
             const tabs = container.querySelectorAll(".et-seg button");
-            const circumference = 2 * Math.PI * 54;
+            const circumference = 2 * Math.PI * 56;
             const modes = { 1500: "focus", 300: "pauze", 900: "lange pauze" };
 
             let currentDuration = 1500;
@@ -1153,6 +1321,7 @@
             const targetInput = container.querySelector("#et-calc-target");
             const futureInput = container.querySelector("#et-calc-future");
             const neededOutput = container.querySelector("#et-calc-needed");
+            const hintOutput = container.querySelector("#et-calc-hint");
 
             function calcNeeded() {
               const curAvg = parseFloat(avgInput.value);
@@ -1160,6 +1329,7 @@
               const target = parseFloat(targetInput.value);
               const futureWeight = parseFloat(futureInput.value);
               neededOutput.className = "";
+              hintOutput.textContent = isNaN(target) ? "" : `voor een ${target.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gemiddeld`;
 
               if ([curAvg, curWeights, target, futureWeight].some(isNaN) || futureWeight <= 0) {
                 neededOutput.textContent = "—";
