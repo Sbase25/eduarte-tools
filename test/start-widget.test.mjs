@@ -205,3 +205,36 @@ describe("startpagina: eigen snelkoppelingen", () => {
     expect(text(".et-bm-error")).toBe("Deze link staat er al tussen.");
   });
 });
+
+describe("startpagina: takenlijst", () => {
+  it("voegt taken toe, vinkt af, wist afgevinkte en bewaart alles", async () => {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    const saved = [];
+    dom.window.chrome.storage.local.set = (value) => saved.push(value);
+    const submit = (value) => {
+      root.querySelector(".et-todo-form input").value = value;
+      root.querySelector(".et-todo-form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
+    };
+    expect(root.querySelector(".et-todo-empty").hidden).toBe(false);
+
+    submit("Verslag PJ inleveren");
+    submit("   ");
+    submit("<b>Rekenen</b> oefenen");
+    const labels = () => [...root.querySelectorAll(".et-todo-list label")].map((el) => el.textContent);
+    expect(labels()).toEqual(["Verslag PJ inleveren", "<b>Rekenen</b> oefenen"]);
+    expect(root.querySelector(".et-todo-list b")).toBeNull();
+    expect(text(".et-todo-count")).toBe("2 open");
+    expect(saved.at(-1).eduarteTodos.map((t) => [t.text, t.done])).toEqual([["Verslag PJ inleveren", false], ["<b>Rekenen</b> oefenen", false]]);
+
+    const first = root.querySelector(".et-todo-list input[type=checkbox]");
+    first.checked = true;
+    first.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+    expect(labels()).toEqual(["<b>Rekenen</b> oefenen", "Verslag PJ inleveren"]);
+    expect(text(".et-todo-count")).toBe("1 open");
+    expect(root.querySelector(".et-todo-clear").hidden).toBe(false);
+
+    root.querySelector(".et-todo-clear").click();
+    expect(labels()).toEqual(["<b>Rekenen</b> oefenen"]);
+    expect(saved.at(-1).eduarteTodos.length).toBe(1);
+  });
+});

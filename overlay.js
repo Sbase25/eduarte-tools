@@ -700,6 +700,8 @@
         "eduarteTodayEnabled",
         "eduarteInstagramDismissed",
         "eduarteBookmarks",
+        "eduarteTodoEnabled",
+        "eduarteTodos",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -710,8 +712,9 @@
         const showPomodoro = settings.eduartePomodoroEnabled !== false;
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
         const showToday = settings.eduarteTodayEnabled !== false;
+        const showTodo = settings.eduarteTodoEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc && !showToday) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc && !showToday && !showTodo) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -983,6 +986,33 @@
               ${C} .et-need b.is-empty { background: none; color: var(--et-muted); }
               ${C} .et-fields input.is-invalid { border-color: #f87171; box-shadow: 0 0 0 3px color-mix(in srgb, #f87171 22%, transparent); }
 
+              /* Takenlijst */
+              ${C} .et-todo { grid-column: span 12; }
+              ${C} .et-todo .et-label { justify-content: flex-start; }
+              ${C} .et-todo .et-label small { margin-left: auto; color: var(--et-muted); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+              ${C} .et-todo-form { display: flex; gap: 8px; margin-bottom: 12px; }
+              ${C} .et-todo-form input {
+                flex: 1; min-width: 0; height: 44px; box-sizing: border-box; padding: 0 16px; border: 1px solid transparent; border-radius: 22px; outline: none;
+                background: var(--et-surface-2); color: var(--et-text); font: inherit; font-size: 14.5px;
+              }
+              ${C} .et-todo-form input:focus { border-color: var(--et-accent); box-shadow: 0 0 0 3px var(--et-accent-soft); }
+              ${C} .et-todo-form button { flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--et-accent); color: #fff; font-family: inherit; font-size: 26px; font-weight: 400; line-height: 1; cursor: pointer; transition: border-radius 200ms ease; }
+              ${C} .et-todo-form button:active { border-radius: 14px; }
+              ${C} .et-todo-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 4px 12px; margin: 0; padding: 0; list-style: none; }
+              ${C} .et-todo-list li { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 6px 6px 8px; border-radius: 14px; }
+              ${C} .et-todo-list li:hover { background: var(--et-surface-2); }
+              ${C} .et-todo-list input[type="checkbox"] { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--et-accent); cursor: pointer; }
+              ${C} .et-todo-list label { display: block; flex: 1 1 0; width: auto; max-width: none; min-width: 0; margin: 0; padding: 0; font-weight: 500; text-transform: none; letter-spacing: 0; overflow-wrap: anywhere; color: var(--et-text); font-size: 14px; line-height: 1.35; cursor: pointer; }
+              ${C} .et-todo-list li.is-done label { color: var(--et-muted); text-decoration: line-through; }
+              ${C} .et-todo-list button { flex: none; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--et-muted); font: inherit; font-size: 17px; line-height: 1; text-decoration: none; cursor: pointer; opacity: 0; }
+              ${C} .et-todo-list li:hover button, ${C} .et-todo-list button:focus-visible { opacity: 1; }
+              ${C} .et-todo-list button:hover { background: color-mix(in srgb, #f87171 22%, transparent); color: #f87171; }
+              @media (hover: none) { ${C} .et-todo-list button { opacity: 1; } }
+              ${C} .et-todo-empty { margin: 4px 2px 0; color: var(--et-muted); font-size: 13.5px; }
+              ${C} .et-todo-empty[hidden], ${C} .et-todo-clear[hidden] { display: none; }
+              ${C} .et-todo-clear { margin-top: 10px; padding: 6px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--et-muted); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+              ${C} .et-todo-clear:hover { background: var(--et-surface-2); color: var(--et-text); }
+
               /* Instagram */
               ${C} .et-ig { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 10px; border-radius: 24px; }
               ${C} .et-ig > span { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #f58529, #dd2a7b 50%, #8134af); color: #fff; }
@@ -1110,6 +1140,19 @@
                   <label>Weging volgende toets<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-future" value="1"></label>
                 </div>
                 <div class="et-need"><span>Je hebt nodig<small id="et-calc-hint"></small></span><b id="et-calc-needed" aria-live="polite">8,5</b></div>
+              </section>
+            ` : ""}
+
+            ${showTodo ? `
+              <section class="et-card et-todo">
+                <h3 class="et-label">${icon("check")} Taken <small class="et-todo-count"></small></h3>
+                <form class="et-todo-form" novalidate>
+                  <input type="text" maxlength="140" placeholder="Nieuwe taak, bv. verslag PJ inleveren" aria-label="Nieuwe taak" autocomplete="off">
+                  <button type="submit" title="Taak toevoegen" aria-label="Taak toevoegen">+</button>
+                </form>
+                <ul class="et-todo-list"></ul>
+                <p class="et-todo-empty">Nog geen taken. Typ er hierboven een en druk op Enter.</p>
+                <button class="et-todo-clear" type="button" hidden>Afgevinkte taken wissen</button>
               </section>
             ` : ""}
           `;
@@ -1350,6 +1393,74 @@
               updateDisplay();
             });
             updateDisplay();
+          }
+
+          // Takenlijst, bewaard in de extensie-opslag
+          if (showTodo) {
+            const card = container.querySelector(".et-todo");
+            const form = card.querySelector(".et-todo-form");
+            const field = form.querySelector("input");
+            const listEl = card.querySelector(".et-todo-list");
+            const emptyEl = card.querySelector(".et-todo-empty");
+            const clearButton = card.querySelector(".et-todo-clear");
+            const countEl = card.querySelector(".et-todo-count");
+            const MAX_TODOS = 50;
+            let todos = (Array.isArray(settings.eduarteTodos) ? settings.eduarteTodos : [])
+              .map((item) => ({ id: String(item?.id || ""), text: String(item?.text || "").trim().slice(0, 140), done: item?.done === true }))
+              .filter((item) => item.id && item.text)
+              .slice(0, MAX_TODOS);
+
+            const saveTodos = () => {
+              chrome.storage.local.set({ eduarteTodos: todos });
+              renderTodos();
+            };
+            const renderTodos = () => {
+              // Open taken eerst, afgevinkte onderaan
+              const ordered = [...todos.filter((item) => !item.done), ...todos.filter((item) => item.done)];
+              listEl.replaceChildren(...ordered.map((item) => {
+                const li = document.createElement("li");
+                li.classList.toggle("is-done", item.done);
+                const box = document.createElement("input");
+                box.type = "checkbox";
+                box.checked = item.done;
+                box.id = `et-todo-${item.id}`;
+                box.addEventListener("change", () => {
+                  todos = todos.map((todo) => todo.id === item.id ? { ...todo, done: box.checked } : todo);
+                  saveTodos();
+                });
+                const label = document.createElement("label");
+                label.htmlFor = box.id;
+                label.textContent = item.text;
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.textContent = "×";
+                remove.title = "Taak verwijderen";
+                remove.setAttribute("aria-label", `Taak verwijderen: ${item.text}`);
+                remove.addEventListener("click", () => {
+                  todos = todos.filter((todo) => todo.id !== item.id);
+                  saveTodos();
+                });
+                li.append(box, label, remove);
+                return li;
+              }));
+              const open = todos.filter((item) => !item.done).length;
+              emptyEl.hidden = todos.length > 0;
+              clearButton.hidden = open === todos.length;
+              countEl.textContent = todos.length ? `${open} open` : "";
+            };
+            form.addEventListener("submit", (event) => {
+              event.preventDefault();
+              const text = field.value.trim().slice(0, 140);
+              if (!text || todos.length >= MAX_TODOS) return;
+              todos = [...todos, { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, text, done: false }];
+              field.value = "";
+              saveTodos();
+            });
+            clearButton.addEventListener("click", () => {
+              todos = todos.filter((item) => !item.done);
+              saveTodos();
+            });
+            renderTodos();
           }
 
           // Eigen snelkoppelingen (bladwijzers), bewaard in de extensie-opslag
