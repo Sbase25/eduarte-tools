@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { JSDOM } from "jsdom";
 
-const agendaSource = readFileSync(new URL("../agenda.js", import.meta.url), "utf8");
-const overlaySource = readFileSync(new URL("../overlay.js", import.meta.url), "utf8");
+const agendaSource = readFileSync(new URL("../extension/agenda.js", import.meta.url), "utf8");
+const overlaySource = readFileSync(new URL("../extension/overlay.js", import.meta.url), "utf8");
 
 // Eduarte tekent het rooster met 108px per uur vanaf 08:00
 const lesson = (id, start, end, subject, location, teacher) => {

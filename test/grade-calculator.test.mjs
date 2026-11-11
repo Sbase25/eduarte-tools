@@ -3,7 +3,7 @@ import {
   calculateGradeStatistics,
   calculateGradeSummary,
   parseGradeBackup,
-} from "../grade-calculator.js";
+} from "../extension/grade-calculator.js";
 
 describe("calculateGradeSummary", () => {
   it("calculates weighted average, median, total weighting, and required grade", () => {

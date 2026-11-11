@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { JSDOM } from "jsdom";
-import { BADGE_SCAN_SELECTOR, extractBadgeCount, sumBadgeCounts } from "../badge-logic.js";
+import { BADGE_SCAN_SELECTOR, extractBadgeCount, sumBadgeCounts } from "../extension/badge-logic.js";
 
 function elementFromHtml(html) {
   const dom = new JSDOM(`<!doctype html><html><body>${html}</body></html>`);

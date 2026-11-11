@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { JSDOM } from "jsdom";
-import { formatTime, getTodayLessons, shortenSubject } from "../agenda.js";
+import { formatTime, getTodayLessons, shortenSubject } from "../extension/agenda.js";
 
 describe("shortenSubject", () => {
   it("keeps only the course code from Eduarte lesson names", () => {
@@ -40,7 +40,7 @@ describe("getTodayLessons", () => {
 
 describe("week export", () => {
   it("reads every day of the week with dates and builds an .ics file", async () => {
-    const { getWeekLessons, parseDayLabel, toIcs } = await import("../agenda.js");
+    const { getWeekLessons, parseDayLabel, toIcs } = await import("../extension/agenda.js");
     const today = new Date(2026, 10, 9);
     expect(parseDayLabel("ma 9 nov", today)).toBe("2026-11-09");
     expect(parseDayLabel("vr 2 jan", new Date(2026, 11, 29))).toBe("2027-01-02");

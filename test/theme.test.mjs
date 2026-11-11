@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { JSDOM } from "jsdom";
 
-const themeSource = readFileSync(new URL("../theme.js", import.meta.url), "utf8");
+const themeSource = readFileSync(new URL("../extension/theme.js", import.meta.url), "utf8");
 
 function buildTheme(settings) {
   const dom = new JSDOM("<!doctype html><html><head></head><body></body></html>", {

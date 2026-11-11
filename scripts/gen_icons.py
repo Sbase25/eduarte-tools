@@ -5,7 +5,7 @@ in dezelfde stijl als het aangeleverde referentielogo."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageChops
 
-ICONS_DIR = Path(__file__).resolve().parent.parent / "icons"
+ICONS_DIR = Path(__file__).resolve().parent.parent / "extension" / "icons"
 
 TOP_LEFT = (45, 103, 185)      # blauw
 BOTTOM_RIGHT = (188, 60, 188)  # magenta/paars

@@ -4,23 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "manifest.json"
-      - "background.js"
-      - "badge-logic.js"
-      - "badge.js"
-      - "content.js"
-      - "eduarte-api.js"
-      - "grade-calculator.js"
-      - "agenda.js"
-      - "calendar-feed.js"
-      - "overlay.js"
-      - "location-tracker.html"
-      - "location-tracker.js"
+      - "extension/**"
       - "popup-app/**"
-      - "popup-dist/**"
-      - "theme.js"
-      - "icons/**"
-      - "assets/**"
       - ".github/workflows/chrome-webstore.yml"
   workflow_dispatch:
 
@@ -58,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -c 'import json, re; version=json.load(open("manifest.json"))["version"]; assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version), version; print(version)'
+          python3 -c 'import json, re; version=json.load(open("extension/manifest.json"))["version"]; assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version), version; print(version)'
 
       - name: Prepare extension package
         shell: bash
@@ -66,8 +51,7 @@ jobs:
           set -euo pipefail
           rm -rf extension-package extension.zip
           mkdir -p extension-package
-          cp manifest.json background.js badge-logic.js badge.js content.js eduarte-api.js grade-calculator.js agenda.js calendar-feed.js overlay.js theme.js location-tracker.html location-tracker.js extension-package/
-          cp -R icons assets popup-dist extension-package/
+          cp -R extension/. extension-package/
           python3 - <<'PY'
           import json
           from pathlib import Path

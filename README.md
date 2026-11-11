@@ -65,7 +65,7 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
 - **Rooster in je agenda** — zet je Eduarte-rooster in Outlook, Google Agenda
   of de agenda van je telefoon via een persoonlijke agenda-link. Je agenda-app
   haalt wijzigingen zelf op. Alleen lesnaam, tijden, lokaal en docentcode gaan
-  naar de agendaserver; zie het [privacybeleid](privacy.html).
+  naar de agendaserver; zie het [privacybeleid](docs/privacy.html).
 - **Huiswerk & Deadlines Widget** — houd zelf je huiswerk en deadlines bij
   (vak, omschrijving, datum) met kleurcodering naar urgentie, direct op het
   dashboard.
@@ -96,7 +96,7 @@ node scripts/build-firefox.mjs
 ```
 
 Dit maakt `dist/firefox/` en `dist/eduarte-tools-firefox-<versie>.zip`. Laad tijdelijk via
-`about:debugging` → **Deze Firefox** → **Tijdelijke add-on laden** (kies `manifest.json`),
+`about:debugging` → **Deze Firefox** → **Tijdelijke add-on laden** (kies `dist/firefox/manifest.json`),
 of upload de zip naar addons.mozilla.org. Geef de extensie in Firefox toegang tot je
 Eduarte-site (Add-ons → Eduarte Tools → Machtigingen), anders draait hij daar niet.
 
@@ -111,14 +111,14 @@ Je krijgt dan ook automatisch updates.
 1. Download of clone deze repository.
 2. Open `chrome://extensions` in Chrome of Edge.
 3. Zet **Ontwikkelaarsmodus** aan (rechtsboven).
-4. Klik **Uitgepakte extensie laden** en kies deze map.
+4. Klik **Uitgepakte extensie laden** en kies de map `extension/` in deze repository.
 5. Klik op het extensie-icoon, vul je gegevens in bij **Inloggen**, en
    stel je uiterlijk in bij **Uiterlijk** / **Eigen thema**.
 
 Instellingen, inloggegevens en cijfers worden alleen lokaal in je browser
 opgeslagen (`chrome.storage.local`) en nergens naartoe verzonden. Alleen als je
 zelf een agenda-link maakt, gaat je rooster naar de agendaserver van Eduarte
-Tools (zie het [privacybeleid](privacy.html)).
+Tools (zie het [privacybeleid](docs/privacy.html)).
 
 Voor het weer kan de extensie, na jouw toestemming, je huidige locatie
 gebruiken. De coördinaten worden lokaal bewaard en alleen naar Open-Meteo
@@ -136,10 +136,8 @@ een eigen startdashboard en cijfertools.
 
 | Pad | Wat |
 | --- | --- |
-| `manifest.json`, `*.js`, `location-tracker.html` | De extensie zelf (content- en achtergrondscripts). Deze map laad je als uitgepakte extensie. |
-| `popup-app/` | Bron van het instellingenvenster (Vue + Vite). `npm run build --prefix popup-app` schrijft naar `popup-dist/`. |
-| `popup-dist/` | Gebouwde popup; wordt meegeleverd in de extensie. |
-| `icons/`, `assets/` | Iconen en de meegeleverde achtergrond. |
+| `extension/` | De extensie zelf: `manifest.json`, de scripts, `icons/`, `assets/` en de gebouwde popup (`popup-dist/`). **Deze map laad je als uitgepakte extensie.** |
+| `popup-app/` | Bron van het instellingenvenster (Vue + Vite). `npm run build --prefix popup-app` schrijft naar `extension/popup-dist/`. |
 | `test/` | Tests (`npm test`). |
 | `scripts/` | `build-firefox.mjs` (Firefox-pakket) en `gen_icons.py` (iconen genereren). |
 | `calendar-server/` | De server voor het agenda-abonnement. |
