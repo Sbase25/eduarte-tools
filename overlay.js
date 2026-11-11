@@ -1459,6 +1459,22 @@
             transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease;
           }
           .panel.open { transform: translateX(0); opacity: 1; }
+          /* De knop zat over de inhoud van het open paneel heen; sluiten gaat met het kruisje */
+          .toggle[aria-expanded="true"] { opacity: 0; transform: scale(.6); pointer-events: none; }
+          /* Telefoon: paneel als blad onderaan, zodat de cijferlijst erboven zichtbaar en aan te tikken blijft */
+          @media (max-width: 700px) {
+            .panel {
+              top: auto; right: 8px; bottom: 8px; left: 8px; width: auto;
+              height: min(56vh, 520px); padding: 10px 18px 18px;
+              border-radius: 28px; box-shadow: 0 -6px 28px rgba(0,0,0,.35);
+              transform: translateY(calc(100% + 24px));
+            }
+            .panel.open { transform: translateY(0); }
+            .panel::before { content: ""; display: block; width: 36px; height: 4px; margin: 0 auto 10px; border-radius: 999px; background: var(--grade-outline); }
+            .head { margin-bottom: 10px; }
+            .intro { display: none; }
+            .toggle { right: 14px; bottom: 14px; }
+          }
           .head { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin-bottom: 18px; }
           h2 { margin: 0; font-size: 20px; letter-spacing: -.03em; }
           .eyebrow { margin: 0 0 3px; color: var(--grade-primary); font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
