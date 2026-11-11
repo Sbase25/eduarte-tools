@@ -2757,9 +2757,125 @@
     );
   }
 
+  // ---- Opstartscherm ----
+  // Eén keer per browsersessie, bij de eerste Eduarte-pagina: een kort scherm in de kleuren van
+  // je thema terwijl de pagina laadt (idee: het laadscherm dat Study Tools voor Magister opmaakt).
+  // De kleuren en de aan/uit-stand komen uit een kleine cache, want op document_start is de
+  // extensie-opslag nog niet uitgelezen.
+  const SPLASH_SEEN_KEY = "eduarteToolsSplashSeen";
+  const SPLASH_CACHE_KEY = "eduarteToolsSplashCache";
+
+  function readSplashCache() {
+    try { return JSON.parse(window.localStorage.getItem(SPLASH_CACHE_KEY) || "{}") || {}; } catch { return {}; }
+  }
+
+  function rememberSplashState(extra) {
+    try {
+      window.localStorage.setItem(SPLASH_CACHE_KEY, JSON.stringify({ ...readSplashCache(), ...extra }));
+    } catch { /* opslag niet beschikbaar */ }
+  }
+
+  function showSplash() {
+    if (window.top !== window) return;
+    let cache;
+    try {
+      if (window.sessionStorage.getItem(SPLASH_SEEN_KEY)) return;
+      window.sessionStorage.setItem(SPLASH_SEEN_KEY, "1");
+      cache = readSplashCache();
+    } catch { return; }
+    if (cache.enabled === false) return;
+
+    const safe = (value, fallback) => (typeof value === "string" && /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%/]+\))$/i.test(value.trim()) ? value.trim() : fallback);
+    const bg = safe(cache.bg, "#0b1020");
+    const text = safe(cache.text, "#f4f6fb");
+    const accent = safe(cache.accent, "#4f8cff");
+    const reduce = cache.animations === false || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    const host = document.createElement("div");
+    host.id = "eduarte-tools-splash";
+    host.setAttribute("aria-hidden", "true");
+    const shadow = host.attachShadow({ mode: "closed" });
+    shadow.innerHTML = `
+      <style>
+        :host { all: initial; }
+        .splash {
+          position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center;
+          background:
+            radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${accent} 26%, transparent), transparent 60%),
+            radial-gradient(90% 80% at 100% 100%, color-mix(in srgb, ${accent} 12%, transparent), transparent 65%),
+            ${bg};
+          color: ${text}; font: 600 15px/1.3 system-ui, -apple-system, "Segoe UI", sans-serif;
+          transition: opacity .38s ease, visibility .38s;
+        }
+        .splash.is-leaving { opacity: 0; visibility: hidden; }
+        .mark { display: grid; justify-items: center; gap: 22px; animation: rise .5s cubic-bezier(.2,.9,.3,1.2) both; }
+        .shape { position: relative; display: grid; place-items: center; width: 92px; height: 92px; }
+        .shape::before {
+          content: ""; position: absolute; inset: 0; background: ${accent}; clip-path: ${scallopedShape(10, 0.075)};
+          animation: spin 6s linear infinite, breathe 1.8s ease-in-out infinite;
+        }
+        .shape svg { position: relative; width: 42px; height: 42px; fill: none; stroke: #fff; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .name { font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+        .name span { color: ${accent}; }
+        .dots { display: flex; gap: 7px; }
+        .dots i { width: 7px; height: 7px; border-radius: 50%; background: color-mix(in srgb, ${text} 55%, transparent); animation: dot 1s ease-in-out infinite; }
+        .dots i:nth-child(2) { animation-delay: .15s; }
+        .dots i:nth-child(3) { animation-delay: .3s; }
+        @keyframes spin { to { rotate: 360deg; } }
+        @keyframes breathe { 50% { scale: .9; } }
+        @keyframes rise { from { opacity: 0; transform: translateY(10px) scale(.94); } }
+        @keyframes dot { 0%, 100% { opacity: .35; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+        ${reduce ? ".mark, .shape::before, .dots i { animation: none !important; }" : ""}
+      </style>
+      <div class="splash">
+        <div class="mark">
+          <div class="shape"><svg viewBox="0 0 24 24"><path d="M3 9.2 12 5l9 4.2-9 4.2-9-4.2Z"/><path d="M7 11.3v4.2c1.3 1.3 3 2 5 2s3.7-.7 5-2v-4.2"/><path d="M21 9.3v5"/></svg></div>
+          <div class="name">Eduarte <span>Tools</span></div>
+          <div class="dots"><i></i><i></i><i></i></div>
+        </div>
+      </div>`;
+    (document.documentElement || document).appendChild(host);
+
+    const shownAt = Date.now();
+    let leaving = false;
+    const leave = () => {
+      if (leaving) return;
+      leaving = true;
+      // Kort genoeg om niet te hinderen, lang genoeg om niet te flitsen
+      window.setTimeout(() => {
+        shadow.querySelector(".splash").classList.add("is-leaving");
+        window.setTimeout(() => host.remove(), 420);
+      }, Math.max(0, 650 - (Date.now() - shownAt)));
+    };
+    if (document.readyState === "complete") leave();
+    else window.addEventListener("load", leave, { once: true });
+    window.setTimeout(leave, 3500);
+  }
+
+  // Kleuren van het actieve thema en de instellingen onthouden voor het volgende opstartscherm
+  function cacheSplashColors() {
+    if (window.top !== window || !document.body) return;
+    const root = window.getComputedStyle(document.documentElement);
+    const pick = (name) => root.getPropertyValue(name).trim();
+    rememberSplashState({
+      bg: window.getComputedStyle(document.body).backgroundColor || pick("--color-bg"),
+      text: pick("--color-text-primary"),
+      accent: pick("--color-bg-fill-action"),
+    });
+  }
+
+  showSplash();
+  chrome.storage.local.get(["eduarteSplashEnabled", "eduarteAnimations"], (data) => {
+    rememberSplashState({ enabled: data.eduarteSplashEnabled !== false, animations: data.eduarteAnimations !== false });
+  });
+  if (window.top === window) {
+    window.addEventListener("load", () => window.setTimeout(cacheSplashColors, 600), { once: true });
+  }
+
   loadAndApply();
 
   chrome.storage.onChanged.addListener((changes, area) => {
+    if (changes.eduarteSplashEnabled && area === "local") rememberSplashState({ enabled: changes.eduarteSplashEnabled.newValue !== false });
     if (area !== "local") return;
     if (
       changes.eduarteThemePreset ||
