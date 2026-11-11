@@ -1671,6 +1671,132 @@
       left: -2px !important;
     }
 
+    /* ---- Agenda: knoppenbalk zonder omlijsting ---- */
+    /* Geen zwevende pil meer waar knoppen overheen of buiten konden vallen: een egale strook
+       over de volle breedte, met de knoppen als losse groepjes. */
+    body:has(.agenda) .agenda-filter {
+      top: 69px !important;
+      right: 0 !important;
+      height: 72px !important;
+      min-height: 72px !important;
+      padding: 14px 72px 14px 12px !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: ${bg} !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    @media (min-width: 960px) {
+      body:has(.agenda) .agenda-filter {
+        left: calc(var(--navigation-width, 16rem) + 10px) !important;
+      }
+    }
+    body:has(.agenda) .agenda-filter .filter--inner {
+      gap: 12px !important;
+      height: 44px !important;
+    }
+    body:has(.agenda) .agenda-filter .filter--inner > * {
+      flex-shrink: 0 !important;
+    }
+    body:has(.agenda) .agenda-filter .btn,
+    body:has(.agenda) .agenda-filter div.datepicker,
+    body:has(.agenda) .agenda-filter .popover-tabs ul,
+    body:has(.agenda) .agenda-filter .filter-checkbox {
+      height: 44px !important;
+      min-height: 44px !important;
+      box-sizing: border-box !important;
+      background: color-mix(in srgb, ${text} 9%, ${bg}) !important;
+    }
+    /* Vorige/volgende als één verbonden knop */
+    body:has(.agenda) .agenda-filter .btn {
+      width: 44px !important;
+      flex: 0 0 44px !important;
+    }
+    body:has(.agenda) .agenda-filter .btn:has(+ .btn) {
+      margin-right: -10px !important;
+      border-radius: 22px 8px 8px 22px !important;
+    }
+    body:has(.agenda) .agenda-filter .btn + .btn {
+      border-radius: 8px 22px 22px 8px !important;
+    }
+    body:has(.agenda) .agenda-filter .btn:hover {
+      background: color-mix(in srgb, ${accent} 24%, ${bg}) !important;
+    }
+    body:has(.agenda) .agenda-filter .btn:active {
+      border-radius: 14px !important;
+    }
+    body:has(.agenda) .agenda-filter div.datepicker {
+      flex: 0 0 156px !important;
+      width: 156px !important;
+      min-width: 156px !important;
+      padding: 0 4px !important;
+    }
+    body:has(.agenda) .agenda-filter div.datepicker input {
+      min-height: 40px !important;
+      height: 40px !important;
+    }
+    body:has(.agenda) .agenda-filter .popover-tabs ul {
+      width: auto !important;
+      margin: 0 !important;
+      padding: 4px !important;
+    }
+    body:has(.agenda) .agenda-filter .popover-tabs li {
+      flex: 0 0 auto !important;
+    }
+    body:has(.agenda) .agenda-filter .popover-tabs li a {
+      min-height: 36px !important;
+      padding: 0 18px !important;
+    }
+    body:has(.agenda) .agenda-filter .filter-checkbox {
+      padding: 0 16px 0 14px !important;
+    }
+    body:has(.agenda) .agenda-filter .et-cal-actions {
+      margin-left: auto !important;
+      padding-left: 12px !important;
+    }
+    body:has(.agenda) .agenda-filter .et-cal-actions button {
+      height: 44px !important;
+      flex-shrink: 0 !important;
+    }
+    body:has(.agenda) .agenda-filter .et-cal-actions button:not(.is-primary) {
+      background: color-mix(in srgb, ${text} 9%, ${bg}) !important;
+    }
+    /* Smal scherm: .ics en Sync als ronde icoonknoppen, zodat alles blijft passen */
+    @media (max-width: 1320px) {
+      body:has(.agenda) .agenda-filter .et-cal-actions button {
+        width: 44px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+        gap: 0 !important;
+        font-size: 0 !important;
+      }
+      body:has(.agenda) .agenda-filter .et-cal-actions svg {
+        width: 18px !important;
+        height: 18px !important;
+      }
+      body:has(.agenda) .agenda-filter .filter--inner {
+        gap: 8px !important;
+      }
+      body:has(.agenda) .agenda-filter .btn:has(+ .btn) {
+        margin-right: -6px !important;
+      }
+    }
+    body:has(.agenda) .content:has(> .agenda-filter) {
+      padding-top: 82px !important;
+    }
+    body:has(.agenda) .s5-filterbar-toggle {
+      top: 83px !important;
+      left: -56px !important;
+      border-radius: 22px !important;
+    }
+    body:has(.agenda) .s5-filterbar-toggle a {
+      width: 44px !important;
+      height: 44px !important;
+    }
+
     @media (max-width: 700px) {
       body:has(.agenda) header.header:not(:has(> .header-tabs)) > .header-toolbar {
         min-height: 58px !important;
@@ -1693,6 +1819,108 @@
       body:has(.agenda) .s5-filterbar-toggle { top: 96px !important; }
       body:has(.agenda) .agenda--time { flex-basis: 62px !important; width: 62px !important; }
       body:has(.agenda) .agenda--day { flex-basis: 148px !important; min-width: 148px !important; }
+    }
+
+    /* ---- Agenda op een telefoon ---- */
+    @media (max-width: 700px) {
+      /* Knoppenbalk in twee rijen: navigatie + datum + export, daaronder de weergavekeuze */
+      body:has(.agenda) .agenda-filter {
+        top: 59px !important;
+        right: 0 !important;
+        left: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 8px 60px 10px 10px !important;
+        overflow: visible !important;
+      }
+      body:has(.agenda) .agenda-filter .filter--inner {
+        flex-wrap: wrap !important;
+        height: auto !important;
+        gap: 8px !important;
+      }
+      body:has(.agenda) .agenda-filter .btn {
+        width: 40px !important;
+        flex: 0 0 40px !important;
+      }
+      body:has(.agenda) .agenda-filter .btn:has(+ .btn) {
+        margin-right: -6px !important;
+      }
+      body:has(.agenda) .agenda-filter .et-cal-actions button {
+        width: 40px !important;
+      }
+      body:has(.agenda) .agenda-filter div.datepicker {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+      }
+      body:has(.agenda) .agenda-filter div.datepicker input {
+        padding: 0 4px 0 32px !important;
+        font-size: 13.5px !important;
+      }
+      body:has(.agenda) .agenda-filter div.datepicker .input-group > svg.svg-sprites.datepicker {
+        left: 10px !important;
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+      }
+      body:has(.agenda) .agenda-filter .popover-tabs {
+        order: 10 !important;
+        flex: 1 1 100% !important;
+        margin-right: -50px !important;
+      }
+      body:has(.agenda) .agenda-filter .popover-tabs ul {
+        width: 100% !important;
+      }
+      body:has(.agenda) .agenda-filter .popover-tabs li {
+        flex: 1 1 0 !important;
+      }
+      /* "Toon lesuren" heeft hier geen zichtbaar effect (de lesurenkolom is verborgen) */
+      body:has(.agenda) .agenda-filter .filter-checkbox {
+        display: none !important;
+      }
+      body:has(.agenda) .agenda-filter .et-cal-actions {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+      }
+      body:has(.agenda) .agenda-filter .et-cal-status {
+        display: none !important;
+      }
+      body:has(.agenda) .content:has(> .agenda-filter) {
+        padding-top: 124px !important;
+      }
+      body:has(.agenda) .s5-filterbar-toggle {
+        top: 67px !important;
+        left: -52px !important;
+      }
+      /* Eén dag per keer, vegen naar de volgende; de volgende dag piept er net naast */
+      body:has(.agenda) .agenda {
+        width: 100% !important;
+        margin: 0 0 12px !important;
+      }
+      body:has(.agenda) .agenda--time {
+        flex-basis: 42px !important;
+        width: 42px !important;
+      }
+      body:has(.agenda) .agenda--days {
+        gap: 8px !important;
+        padding-right: 10px !important;
+        scroll-snap-type: x mandatory !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      body:has(.agenda) .agenda--days::-webkit-scrollbar {
+        display: none !important;
+      }
+      body:has(.agenda) .agenda--day,
+      body:has(.agenda) .agenda--day:not(:has(li.agenda--course, li.agenda--appointment, li.agenda--bpv)) {
+        flex: 0 0 calc(100vw - 100px) !important;
+        min-width: calc(100vw - 100px) !important;
+        scroll-snap-align: start !important;
+      }
+      body:has(.agenda) .agenda--day li.agenda--course .is-subject {
+        font-size: 15px !important;
+      }
     }
 
     nav.navigation.navigation--student a {
@@ -2034,6 +2262,13 @@
 
     ${NAV} :is(.navigation-header--logo, .navigation-header--logo a) {
       min-width: 0 !important;
+    }
+
+    /* Smal scherm: het dichte menu helemaal buiten beeld (de marge van het zwevende paneel liet een randje zien) */
+    @media (max-width: 959px) {
+      ${NAV}:not(.is-open) {
+        transform: translateX(calc(-100% - 14px)) !important;
+      }
     }
 
     /* De agenda heeft een eigen achtergrondvlak; dat mag niet over de rand van het zwevende menu vallen */

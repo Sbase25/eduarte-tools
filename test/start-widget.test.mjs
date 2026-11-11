@@ -115,3 +115,126 @@ describe("startpagina: nu bezig / volgende les", () => {
     expect([...root.querySelectorAll(".et-tl li")].map((li) => li.className)).toEqual(["is-past", "is-past", "", ""]);
   });
 });
+
+describe("startpagina: wat moet ik halen?", () => {
+  async function calc(values) {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    const event = new dom.window.Event("input", { bubbles: true });
+    Object.entries(values).forEach(([id, value]) => {
+      const input = root.querySelector(`#et-calc-${id}`);
+      input.value = value;
+      input.dispatchEvent(event);
+    });
+    return { root, needed: text("#et-calc-needed"), hint: text("#et-calc-hint") };
+  }
+
+  it("rekent met komma's én punten", async () => {
+    expect((await calc({ avg: "6,5", weights: "3", target: "7,0", future: "1" })).needed).toBe("8,5");
+    expect((await calc({ avg: "6.5", weights: "3", target: "7.0", future: "1" })).needed).toBe("8,5");
+  });
+
+  it("rondt naar boven af, zodat het cijfer ook echt genoeg is", async () => {
+    // (5,5 × 4 − 6,1 × 3) / 1 = 3,7 ; (7 × 7 − 6,8 × 6) / 1 = 8,2 ; (6 × 3 − 5,7 × 2,5) / 0,5 = 7,5
+    expect((await calc({ avg: "6,13", weights: "3", target: "5,5", future: "1" })).needed).toBe("3,7");
+    expect((await calc({ avg: "6,81", weights: "6", target: "7", future: "1" })).needed).toBe("8,2");
+  });
+
+  it("zegt het erbij als het doel niet haalbaar is", async () => {
+    const { root, needed, hint } = await calc({ avg: "5", weights: "10", target: "8", future: "1" });
+    expect(needed).toBe("38,0");
+    expect(root.querySelector("#et-calc-needed").className).toBe("is-bad");
+    expect(hint).toBe("niet haalbaar met één toets · met een 10 kom je op 5,4");
+  });
+
+  it("zegt het erbij als elk cijfer genoeg is", async () => {
+    const { needed, hint } = await calc({ avg: "9", weights: "10", target: "5,5", future: "1" });
+    expect(needed).toBe("1,0");
+    expect(hint).toBe("elk cijfer is genoeg voor een 5,5 gemiddeld");
+  });
+
+  it("markeert ongeldige invoer in plaats van onzin te rekenen", async () => {
+    const { root, needed, hint } = await calc({ avg: "12", weights: "3", target: "7", future: "1" });
+    expect(needed).toBe("—");
+    expect(hint).toBe("vul cijfers tussen 1 en 10 in");
+    expect(root.querySelector("#et-calc-avg").classList.contains("is-invalid")).toBe(true);
+    expect((await calc({ avg: "6", weights: "3", target: "7", future: "0" })).hint).toBe("vul een weging groter dan 0 in");
+    expect((await calc({ avg: "abc", weights: "3", target: "7", future: "1" })).needed).toBe("—");
+  });
+});
+
+describe("startpagina: eigen snelkoppelingen", () => {
+  async function add(root, name, url) {
+    root.querySelector(".et-bm-name").value = name;
+    root.querySelector(".et-bm-url").value = url;
+    root.querySelector(".et-bm form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
+  }
+
+  it("voegt een eigen link toe, vult https:// aan en bewaart hem", async () => {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    const saved = [];
+    dom.window.chrome.storage.local.set = (value) => saved.push(value);
+    root.querySelector(".et-link.is-add").click();
+    expect(root.querySelector(".et-bm").hidden).toBe(false);
+
+    await add(root, "itslearning", "tilburg.itslearning.com");
+    const link = root.querySelector(".et-link.is-custom");
+    expect(link.href).toBe("https://tilburg.itslearning.com/");
+    expect(link.querySelector("em").textContent).toBe("itslearning");
+    expect(saved.at(-1)).toEqual({ eduarteBookmarks: [{ name: "itslearning", url: "https://tilburg.itslearning.com/" }] });
+
+    root.querySelector(".et-bm-list button").click();
+    expect(root.querySelector(".et-link.is-custom")).toBeNull();
+    expect(saved.at(-1)).toEqual({ eduarteBookmarks: [] });
+  });
+
+  it("weigert links die geen gewone webpagina zijn", async () => {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    for (const bad of ["javascript:alert(1)", "data:text/html,x", "geen link", "localhost"]) {
+      await add(root, "x", bad);
+      expect(root.querySelector(".et-link.is-custom")).toBeNull();
+    }
+    expect(text(".et-bm-error")).toBe("Vul een geldige link in, bijvoorbeeld itslearning.com.");
+  });
+
+  it("gebruikt de sitenaam als je geen naam invult en weigert dubbele links", async () => {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    await add(root, "", "https://www.youtube.com/watch?v=1");
+    expect(root.querySelector(".et-link.is-custom em").textContent).toBe("youtube");
+    await add(root, "nog een keer", "https://www.youtube.com/watch?v=1");
+    expect(root.querySelectorAll(".et-link.is-custom").length).toBe(1);
+    expect(text(".et-bm-error")).toBe("Deze link staat er al tussen.");
+  });
+});
+
+describe("startpagina: takenlijst", () => {
+  it("voegt taken toe, vinkt af, wist afgevinkte en bewaart alles", async () => {
+    const { root, text } = await mountHome({ hour: 12, minute: 0 });
+    const saved = [];
+    dom.window.chrome.storage.local.set = (value) => saved.push(value);
+    const submit = (value) => {
+      root.querySelector(".et-todo-form input").value = value;
+      root.querySelector(".et-todo-form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
+    };
+    expect(root.querySelector(".et-todo-empty").hidden).toBe(false);
+
+    submit("Verslag PJ inleveren");
+    submit("   ");
+    submit("<b>Rekenen</b> oefenen");
+    const labels = () => [...root.querySelectorAll(".et-todo-list label")].map((el) => el.textContent);
+    expect(labels()).toEqual(["Verslag PJ inleveren", "<b>Rekenen</b> oefenen"]);
+    expect(root.querySelector(".et-todo-list b")).toBeNull();
+    expect(text(".et-todo-count")).toBe("2 open");
+    expect(saved.at(-1).eduarteTodos.map((t) => [t.text, t.done])).toEqual([["Verslag PJ inleveren", false], ["<b>Rekenen</b> oefenen", false]]);
+
+    const first = root.querySelector(".et-todo-list input[type=checkbox]");
+    first.checked = true;
+    first.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+    expect(labels()).toEqual(["<b>Rekenen</b> oefenen", "Verslag PJ inleveren"]);
+    expect(text(".et-todo-count")).toBe("1 open");
+    expect(root.querySelector(".et-todo-clear").hidden).toBe(false);
+
+    root.querySelector(".et-todo-clear").click();
+    expect(labels()).toEqual(["<b>Rekenen</b> oefenen"]);
+    expect(saved.at(-1).eduarteTodos.length).toBe(1);
+  });
+});

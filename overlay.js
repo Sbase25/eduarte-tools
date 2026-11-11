@@ -699,6 +699,9 @@
         "eduarteQuickCalcEnabled",
         "eduarteTodayEnabled",
         "eduarteInstagramDismissed",
+        "eduarteBookmarks",
+        "eduarteTodoEnabled",
+        "eduarteTodos",
       ],
       (settings) => {
         if (settings.eduarteStartEnabled === false) return;
@@ -709,8 +712,9 @@
         const showPomodoro = settings.eduartePomodoroEnabled !== false;
         const showQuickCalc = settings.eduarteQuickCalcEnabled !== false;
         const showToday = settings.eduarteTodayEnabled !== false;
+        const showTodo = settings.eduarteTodoEnabled !== false;
 
-        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc && !showToday) return;
+        if (!showWeather && !showGreeting && !showShortcuts && !showPomodoro && !showQuickCalc && !showToday && !showTodo) return;
 
         function tryMount() {
           if (!isDashboardPage()) {
@@ -862,7 +866,29 @@
               ${C} .et-bar-row b { color: var(--et-text); font-size: 13px; }
 
               /* Snelkoppelingen */
-              ${C} .et-links { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; padding: 10px; }
+              ${C} .et-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; padding: 10px; }
+              ${C} button.et-link { border: 0; background: transparent; font-family: inherit; cursor: pointer; }
+              ${C} .et-link.is-custom span { font-size: 17px; font-weight: 800; text-transform: uppercase; }
+              ${C} .et-link.is-add span { font-size: 24px; font-weight: 400; line-height: 1; background: var(--et-surface-2); color: var(--et-text); box-shadow: none; border: 1px dashed color-mix(in srgb, var(--et-text) 30%, transparent); }
+              ${C} .et-link.is-add[aria-expanded="true"] span { border-style: solid; border-color: var(--et-accent); color: var(--et-accent); transform: rotate(45deg); }
+              ${C} .et-bm { grid-column: 1 / -1; padding: 12px; border-radius: 20px; background: var(--et-surface-2); }
+              ${C} .et-bm[hidden] { display: none; }
+              ${C} .et-bm form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto; gap: 8px; }
+              ${C} .et-bm input {
+                box-sizing: border-box; width: 100%; min-width: 0; height: 40px; padding: 0 14px; border: 1px solid transparent; border-radius: 14px; outline: none;
+                background: var(--et-surface); color: var(--et-text); font: inherit; font-size: 14px;
+              }
+              ${C} .et-bm input:focus { border-color: var(--et-accent); box-shadow: 0 0 0 3px var(--et-accent-soft); }
+              ${C} .et-bm button[type="submit"] { height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--et-accent); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+              ${C} .et-bm-error { margin: 8px 2px 0; color: #f87171; font-size: 12.5px; }
+              ${C} .et-bm-error[hidden] { display: none; }
+              ${C} .et-bm-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+              ${C} .et-bm-list:empty { display: none; }
+              ${C} .et-bm-list li { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 5px 6px 5px 12px; border-radius: 999px; background: var(--et-surface); color: var(--et-text); font-size: 12.5px; font-weight: 600; }
+              ${C} .et-bm-list li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+              ${C} .et-bm-list button { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--et-muted); font: inherit; font-size: 16px; line-height: 1; cursor: pointer; }
+              ${C} .et-bm-list button:hover { background: color-mix(in srgb, #f87171 22%, transparent); color: #f87171; }
+              @media (max-width: 640px) { ${C} .et-bm form { grid-template-columns: 1fr; } }
               ${C} .et-link {
                 display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0;
                 padding: 12px 6px 10px; border-radius: 20px;
@@ -953,8 +979,39 @@
               ${C} .et-need span { color: var(--et-text); font-weight: 600; }
               ${C} .et-need span small { display: block; margin-top: 1px; color: var(--et-muted); font-size: 12px; font-weight: 500; }
               ${C} .et-need b { font-size: 32px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; background: linear-gradient(90deg, var(--et-accent), var(--et-accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-              ${C} .et-need b.is-bad { background: none; color: #f87171; font-size: 16px; }
-              ${C} .et-need b.is-ok { background: none; color: var(--et-ok); font-size: 16px; }
+              ${C} .et-need b { flex: none; white-space: nowrap; }
+              ${C} .et-need span { min-width: 0; }
+              ${C} .et-need b.is-bad { background: none; color: #f87171; }
+              ${C} .et-need b.is-ok { background: none; color: var(--et-ok); }
+              ${C} .et-need b.is-empty { background: none; color: var(--et-muted); }
+              ${C} .et-fields input.is-invalid { border-color: #f87171; box-shadow: 0 0 0 3px color-mix(in srgb, #f87171 22%, transparent); }
+
+              /* Takenlijst */
+              ${C} .et-todo { grid-column: span 12; }
+              ${C} .et-todo .et-label { justify-content: flex-start; }
+              ${C} .et-todo .et-label small { margin-left: auto; color: var(--et-muted); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+              ${C} .et-todo-form { display: flex; gap: 8px; margin-bottom: 12px; }
+              ${C} .et-todo-form input {
+                flex: 1; min-width: 0; height: 44px; box-sizing: border-box; padding: 0 16px; border: 1px solid transparent; border-radius: 22px; outline: none;
+                background: var(--et-surface-2); color: var(--et-text); font: inherit; font-size: 14.5px;
+              }
+              ${C} .et-todo-form input:focus { border-color: var(--et-accent); box-shadow: 0 0 0 3px var(--et-accent-soft); }
+              ${C} .et-todo-form button { flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--et-accent); color: #fff; font-family: inherit; font-size: 26px; font-weight: 400; line-height: 1; cursor: pointer; transition: border-radius 200ms ease; }
+              ${C} .et-todo-form button:active { border-radius: 14px; }
+              ${C} .et-todo-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 4px 12px; margin: 0; padding: 0; list-style: none; }
+              ${C} .et-todo-list li { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 6px 6px 8px; border-radius: 14px; }
+              ${C} .et-todo-list li:hover { background: var(--et-surface-2); }
+              ${C} .et-todo-list input[type="checkbox"] { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--et-accent); cursor: pointer; }
+              ${C} .et-todo-list label { display: block; flex: 1 1 0; width: auto; max-width: none; min-width: 0; margin: 0; padding: 0; font-weight: 500; text-transform: none; letter-spacing: 0; overflow-wrap: anywhere; color: var(--et-text); font-size: 14px; line-height: 1.35; cursor: pointer; }
+              ${C} .et-todo-list li.is-done label { color: var(--et-muted); text-decoration: line-through; }
+              ${C} .et-todo-list button { flex: none; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--et-muted); font: inherit; font-size: 17px; line-height: 1; text-decoration: none; cursor: pointer; opacity: 0; }
+              ${C} .et-todo-list li:hover button, ${C} .et-todo-list button:focus-visible { opacity: 1; }
+              ${C} .et-todo-list button:hover { background: color-mix(in srgb, #f87171 22%, transparent); color: #f87171; }
+              @media (hover: none) { ${C} .et-todo-list button { opacity: 1; } }
+              ${C} .et-todo-empty { margin: 4px 2px 0; color: var(--et-muted); font-size: 13.5px; }
+              ${C} .et-todo-empty[hidden], ${C} .et-todo-clear[hidden] { display: none; }
+              ${C} .et-todo-clear { margin-top: 10px; padding: 6px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--et-muted); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+              ${C} .et-todo-clear:hover { background: var(--et-surface-2); color: var(--et-text); }
 
               /* Instagram */
               ${C} .et-ig { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 10px; border-radius: 24px; }
@@ -973,6 +1030,7 @@
                 ${C} .et-links { grid-template-columns: repeat(4, minmax(0, 1fr)); }
               }
               @media (max-width: 640px) {
+                ${C} .et-chip { max-width: 100%; white-space: normal; text-align: left; }
                 ${C} .et-timer, ${C} .et-calc { grid-column: span 12; }
                 ${C} .et-links { grid-template-columns: repeat(3, minmax(0, 1fr)); }
                 ${C} .et-hello h2 { font-size: 26px; }
@@ -1025,6 +1083,16 @@
                 <a class="et-link" href="https://mbowebshop.nl/Gebruikers/Licenties/" target="_blank" rel="noreferrer"><span style="--tile:#d97706">${icon("book")}</span><em>MboWebshop</em></a>
                 <a class="et-link" href="/resultaten"><span style="--tile:#059669">${icon("chart")}</span><em>Cijfers</em></a>
                 <a class="et-link" href="/agenda"><span style="--tile:#db2777">${icon("calendar")}</span><em>Agenda</em></a>
+                <button class="et-link is-add" type="button" aria-expanded="false" title="Eigen snelkoppeling toevoegen of verwijderen"><span>+</span><em>Toevoegen</em></button>
+                <div class="et-bm" hidden>
+                  <form novalidate>
+                    <input class="et-bm-name" type="text" maxlength="24" placeholder="Naam" aria-label="Naam" autocomplete="off">
+                    <input class="et-bm-url" type="text" inputmode="url" maxlength="500" placeholder="Link, bv. itslearning.com" aria-label="Link" autocomplete="off">
+                    <button type="submit">Toevoegen</button>
+                  </form>
+                  <p class="et-bm-error" role="alert" hidden></p>
+                  <ul class="et-bm-list" aria-label="Eigen snelkoppelingen"></ul>
+                </div>
               </nav>
             ` : ""}
 
@@ -1066,12 +1134,25 @@
               <section class="et-card et-calc">
                 <h3 class="et-label">${icon("target")} Wat moet ik halen?</h3>
                 <div class="et-fields">
-                  <label>Huidig gemiddelde<input type="number" id="et-calc-avg" min="1" max="10" step=".1" value="6.5"></label>
-                  <label>Weging tot nu<input type="number" id="et-calc-weights" min="1" step="1" value="3"></label>
-                  <label>Gewenst gemiddelde<input type="number" id="et-calc-target" min="1" max="10" step=".1" value="7.0"></label>
-                  <label>Weging toets<input type="number" id="et-calc-future" min="1" step="1" value="1"></label>
+                  <label>Huidig gemiddelde<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-avg" value="6,5"></label>
+                  <label title="Alle wegingen van je cijfers tot nu toe bij elkaar opgeteld">Totale weging tot nu<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-weights" value="3"></label>
+                  <label>Gewenst gemiddelde<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-target" value="7,0"></label>
+                  <label>Weging volgende toets<input type="text" inputmode="decimal" autocomplete="off" id="et-calc-future" value="1"></label>
                 </div>
-                <div class="et-need"><span>Je hebt nodig<small id="et-calc-hint"></small></span><b id="et-calc-needed">8,5</b></div>
+                <div class="et-need"><span>Je hebt nodig<small id="et-calc-hint"></small></span><b id="et-calc-needed" aria-live="polite">8,5</b></div>
+              </section>
+            ` : ""}
+
+            ${showTodo ? `
+              <section class="et-card et-todo">
+                <h3 class="et-label">${icon("check")} Taken <small class="et-todo-count"></small></h3>
+                <form class="et-todo-form" novalidate>
+                  <input type="text" maxlength="140" placeholder="Nieuwe taak, bv. verslag PJ inleveren" aria-label="Nieuwe taak" autocomplete="off">
+                  <button type="submit" title="Taak toevoegen" aria-label="Taak toevoegen">+</button>
+                </form>
+                <ul class="et-todo-list"></ul>
+                <p class="et-todo-empty">Nog geen taken. Typ er hierboven een en druk op Enter.</p>
+                <button class="et-todo-clear" type="button" hidden>Afgevinkte taken wissen</button>
               </section>
             ` : ""}
           `;
@@ -1314,6 +1395,165 @@
             updateDisplay();
           }
 
+          // Takenlijst, bewaard in de extensie-opslag
+          if (showTodo) {
+            const card = container.querySelector(".et-todo");
+            const form = card.querySelector(".et-todo-form");
+            const field = form.querySelector("input");
+            const listEl = card.querySelector(".et-todo-list");
+            const emptyEl = card.querySelector(".et-todo-empty");
+            const clearButton = card.querySelector(".et-todo-clear");
+            const countEl = card.querySelector(".et-todo-count");
+            const MAX_TODOS = 50;
+            let todos = (Array.isArray(settings.eduarteTodos) ? settings.eduarteTodos : [])
+              .map((item) => ({ id: String(item?.id || ""), text: String(item?.text || "").trim().slice(0, 140), done: item?.done === true }))
+              .filter((item) => item.id && item.text)
+              .slice(0, MAX_TODOS);
+
+            const saveTodos = () => {
+              chrome.storage.local.set({ eduarteTodos: todos });
+              renderTodos();
+            };
+            const renderTodos = () => {
+              // Open taken eerst, afgevinkte onderaan
+              const ordered = [...todos.filter((item) => !item.done), ...todos.filter((item) => item.done)];
+              listEl.replaceChildren(...ordered.map((item) => {
+                const li = document.createElement("li");
+                li.classList.toggle("is-done", item.done);
+                const box = document.createElement("input");
+                box.type = "checkbox";
+                box.checked = item.done;
+                box.id = `et-todo-${item.id}`;
+                box.addEventListener("change", () => {
+                  todos = todos.map((todo) => todo.id === item.id ? { ...todo, done: box.checked } : todo);
+                  saveTodos();
+                });
+                const label = document.createElement("label");
+                label.htmlFor = box.id;
+                label.textContent = item.text;
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.textContent = "×";
+                remove.title = "Taak verwijderen";
+                remove.setAttribute("aria-label", `Taak verwijderen: ${item.text}`);
+                remove.addEventListener("click", () => {
+                  todos = todos.filter((todo) => todo.id !== item.id);
+                  saveTodos();
+                });
+                li.append(box, label, remove);
+                return li;
+              }));
+              const open = todos.filter((item) => !item.done).length;
+              emptyEl.hidden = todos.length > 0;
+              clearButton.hidden = open === todos.length;
+              countEl.textContent = todos.length ? `${open} open` : "";
+            };
+            form.addEventListener("submit", (event) => {
+              event.preventDefault();
+              const text = field.value.trim().slice(0, 140);
+              if (!text || todos.length >= MAX_TODOS) return;
+              todos = [...todos, { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, text, done: false }];
+              field.value = "";
+              saveTodos();
+            });
+            clearButton.addEventListener("click", () => {
+              todos = todos.filter((item) => !item.done);
+              saveTodos();
+            });
+            renderTodos();
+          }
+
+          // Eigen snelkoppelingen (bladwijzers), bewaard in de extensie-opslag
+          if (showShortcuts) {
+            const nav = container.querySelector(".et-links");
+            const addButton = nav.querySelector(".is-add");
+            const box = nav.querySelector(".et-bm");
+            const form = box.querySelector("form");
+            const errorEl = box.querySelector(".et-bm-error");
+            const listEl = box.querySelector(".et-bm-list");
+            const MAX_BOOKMARKS = 12;
+            const TILE_COLORS = ["#6366f1", "#0891b2", "#16a34a", "#ca8a04", "#dc2626", "#9333ea", "#0d9488", "#e11d48"];
+            // Alleen gewone weblinks: geen javascript:, data: en dergelijke
+            const cleanUrl = (value) => {
+              const raw = String(value || "").trim();
+              if (!raw || /\s/.test(raw)) return null;
+              try {
+                const url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`);
+                return (url.protocol === "https:" || url.protocol === "http:") && url.hostname.includes(".") ? url.href : null;
+              } catch { return null; }
+            };
+            let bookmarks = (Array.isArray(settings.eduarteBookmarks) ? settings.eduarteBookmarks : [])
+              .map((item) => ({ name: String(item?.name || "").trim().slice(0, 24), url: cleanUrl(item?.url) }))
+              .filter((item) => item.name && item.url)
+              .slice(0, MAX_BOOKMARKS);
+
+            const renderBookmarks = () => {
+              nav.querySelectorAll(".et-link.is-custom").forEach((el) => el.remove());
+              bookmarks.forEach((item, index) => {
+                const link = document.createElement("a");
+                link.className = "et-link is-custom";
+                link.href = item.url;
+                link.target = "_blank";
+                link.rel = "noreferrer noopener";
+                link.title = item.url;
+                const tile = document.createElement("span");
+                const hash = [...item.name].reduce((sum, char) => sum + char.codePointAt(0), 0);
+                tile.style.setProperty("--tile", TILE_COLORS[hash % TILE_COLORS.length]);
+                tile.textContent = [...item.name][0];
+                const label = document.createElement("em");
+                label.textContent = item.name;
+                link.append(tile, label);
+                addButton.before(link);
+              });
+              listEl.replaceChildren(...bookmarks.map((item, index) => {
+                const li = document.createElement("li");
+                const name = document.createElement("span");
+                name.textContent = item.name;
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.textContent = "×";
+                remove.title = `${item.name} verwijderen`;
+                remove.setAttribute("aria-label", remove.title);
+                remove.addEventListener("click", () => {
+                  bookmarks = bookmarks.filter((_, i) => i !== index);
+                  saveBookmarks();
+                });
+                li.append(name, remove);
+                return li;
+              }));
+            };
+            const saveBookmarks = () => {
+              chrome.storage.local.set({ eduarteBookmarks: bookmarks });
+              renderBookmarks();
+            };
+            const showError = (text) => { errorEl.textContent = text; errorEl.hidden = !text; };
+
+            addButton.addEventListener("click", () => {
+              box.hidden = !box.hidden;
+              addButton.setAttribute("aria-expanded", String(!box.hidden));
+              showError("");
+              if (!box.hidden) form.querySelector(".et-bm-name").focus();
+            });
+            form.addEventListener("submit", (event) => {
+              event.preventDefault();
+              const nameInput = form.querySelector(".et-bm-name");
+              const urlInput = form.querySelector(".et-bm-url");
+              const url = cleanUrl(urlInput.value);
+              if (!url) return showError("Vul een geldige link in, bijvoorbeeld itslearning.com.");
+              let name = nameInput.value.trim().slice(0, 24);
+              if (!name) name = new URL(url).hostname.replace(/^www\./, "").split(".")[0];
+              if (bookmarks.length >= MAX_BOOKMARKS) return showError(`Je kunt maximaal ${MAX_BOOKMARKS} eigen snelkoppelingen toevoegen.`);
+              if (bookmarks.some((item) => item.url === url)) return showError("Deze link staat er al tussen.");
+              bookmarks = [...bookmarks, { name, url }];
+              nameInput.value = "";
+              urlInput.value = "";
+              showError("");
+              saveBookmarks();
+              nameInput.focus();
+            });
+            renderBookmarks();
+          }
+
           // Snelle Cijfercalculator logica
           if (showQuickCalc) {
             const avgInput = container.querySelector("#et-calc-avg");
@@ -1323,28 +1563,62 @@
             const neededOutput = container.querySelector("#et-calc-needed");
             const hintOutput = container.querySelector("#et-calc-hint");
 
-            function calcNeeded() {
-              const curAvg = parseFloat(avgInput.value);
-              const curWeights = parseFloat(weightsInput.value);
-              const target = parseFloat(targetInput.value);
-              const futureWeight = parseFloat(futureInput.value);
-              neededOutput.className = "";
-              hintOutput.textContent = isNaN(target) ? "" : `voor een ${target.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gemiddeld`;
+            // Komma en punt werken allebei ("6,5" en "6.5")
+            const readNumber = (input) => {
+              const raw = input.value.trim().replace(",", ".");
+              return /^\d+(\.\d*)?$|^\.\d+$/.test(raw) ? Number(raw) : NaN;
+            };
+            const nl = (value, digits = 1) => value.toLocaleString("nl-NL", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+            const STORE_KEY = "eduarteToolsQuickCalc";
+            const fields = { avg: avgInput, weights: weightsInput, target: targetInput, future: futureInput };
 
-              if ([curAvg, curWeights, target, futureWeight].some(isNaN) || futureWeight <= 0) {
+            // Onthoud wat je invulde tot je volgende bezoek
+            try {
+              const saved = JSON.parse(window.localStorage.getItem(STORE_KEY) || "null");
+              if (saved) Object.entries(fields).forEach(([key, input]) => { if (typeof saved[key] === "string" && saved[key]) input.value = saved[key]; });
+            } catch { /* opslag niet beschikbaar: standaardwaarden blijven staan */ }
+
+            function calcNeeded() {
+              const curAvg = readNumber(avgInput);
+              const curWeights = readNumber(weightsInput);
+              const target = readNumber(targetInput);
+              const futureWeight = readNumber(futureInput);
+              const valid = {
+                avg: curAvg >= 1 && curAvg <= 10,
+                weights: curWeights > 0,
+                target: target >= 1 && target <= 10,
+                future: futureWeight > 0,
+              };
+              Object.entries(fields).forEach(([key, input]) => input.classList.toggle("is-invalid", input.value.trim() !== "" && !valid[key]));
+              neededOutput.className = "";
+
+              if (!Object.values(valid).every(Boolean)) {
                 neededOutput.textContent = "—";
+                neededOutput.className = "is-empty";
+                hintOutput.textContent = !valid.avg || !valid.target ? "vul cijfers tussen 1 en 10 in" : "vul een weging groter dan 0 in";
                 return;
               }
 
+              try {
+                window.localStorage.setItem(STORE_KEY, JSON.stringify(Object.fromEntries(Object.entries(fields).map(([key, input]) => [key, input.value.trim()]))));
+              } catch { /* niet erg */ }
+
               const needed = (target * (curWeights + futureWeight) - curAvg * curWeights) / futureWeight;
-              if (needed > 10) {
-                neededOutput.textContent = `${needed.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} · onhaalbaar`;
+              // Naar boven afronden op één decimaal: met een 8,4 haal je een benodigde 8,41 net niet
+              const rounded = Math.ceil((needed - 1e-9) * 10) / 10;
+              const goal = `voor een ${nl(target)} gemiddeld`;
+              if (rounded > 10) {
+                const best = (curAvg * curWeights + 10 * futureWeight) / (curWeights + futureWeight);
+                neededOutput.textContent = nl(rounded);
                 neededOutput.className = "is-bad";
-              } else if (needed < 1) {
-                neededOutput.textContent = "Al gehaald!";
+                hintOutput.textContent = `niet haalbaar met één toets · met een 10 kom je op ${nl(Math.floor(best * 10 + 1e-9) / 10)}`;
+              } else if (rounded <= 1) {
+                neededOutput.textContent = nl(1);
                 neededOutput.className = "is-ok";
+                hintOutput.textContent = `elk cijfer is genoeg ${goal}`;
               } else {
-                neededOutput.textContent = needed.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                neededOutput.textContent = nl(rounded);
+                hintOutput.textContent = goal;
               }
             }
 
@@ -1420,6 +1694,22 @@
             transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease;
           }
           .panel.open { transform: translateX(0); opacity: 1; }
+          /* De knop zat over de inhoud van het open paneel heen; sluiten gaat met het kruisje */
+          .toggle[aria-expanded="true"] { opacity: 0; transform: scale(.6); pointer-events: none; }
+          /* Telefoon: paneel als blad onderaan, zodat de cijferlijst erboven zichtbaar en aan te tikken blijft */
+          @media (max-width: 700px) {
+            .panel {
+              top: auto; right: 8px; bottom: 8px; left: 8px; width: auto;
+              height: min(56vh, 520px); padding: 10px 18px 18px;
+              border-radius: 28px; box-shadow: 0 -6px 28px rgba(0,0,0,.35);
+              transform: translateY(calc(100% + 24px));
+            }
+            .panel.open { transform: translateY(0); }
+            .panel::before { content: ""; display: block; width: 36px; height: 4px; margin: 0 auto 10px; border-radius: 999px; background: var(--grade-outline); }
+            .head { margin-bottom: 10px; }
+            .intro { display: none; }
+            .toggle { right: 14px; bottom: 14px; }
+          }
           .head { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin-bottom: 18px; }
           h2 { margin: 0; font-size: 20px; letter-spacing: -.03em; }
           .eyebrow { margin: 0 0 3px; color: var(--grade-primary); font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
@@ -1432,7 +1722,34 @@
           .tab { flex:1; min-width:0; min-height:36px; border:0; border-radius:999px; color:var(--grade-on-surface-variant); background:transparent; cursor:pointer; font:600 11px system-ui,sans-serif; }
           .tab[aria-selected="true"] { color:var(--grade-on-primary); background:var(--grade-primary); }
           .view[hidden] { display:none; }
-          .rows { display: grid; gap: 7px; }
+          .rows { display: none; }
+          .cc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+          .cc-title { margin: 0; color: var(--grade-on-surface); font-size: 15px; font-weight: 700; }
+          .cc-add { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--grade-outline); border-radius: 50%; background: var(--grade-surface-high); color: var(--grade-on-surface); font: 400 22px/1 inherit; cursor: pointer; transition: border-radius .2s, background-color .15s, transform .2s; }
+          .cc-add:hover { border-color: var(--grade-primary); }
+          .cc-add[aria-expanded="true"] { border-radius: 12px; background: var(--grade-primary); color: var(--grade-on-primary); transform: rotate(45deg); }
+          .cc-empty { margin: 4px 0 12px; color: var(--grade-on-surface-variant); font-size: 13px; line-height: 1.5; }
+          .cc-empty[hidden], .cc-form[hidden], .cc-body[hidden], .cc-error[hidden] { display: none; }
+          .cc-form { margin: 4px 0 12px; padding: 12px; border: 1px solid var(--grade-outline); border-radius: 20px; background: var(--grade-surface-high); }
+          .cc-form p { margin: 0 0 8px; color: var(--grade-on-surface-variant); font-size: 12px; }
+          .cc-form > div { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
+          .cc-form .cc-error { margin: 8px 0 0; color: #f87171; }
+          .entries { display: grid; gap: 2px; max-height: 240px; overflow: auto; }
+          .entry { display: block; width: 100%; margin: 0; padding: 7px 10px; overflow: hidden; border: 0; border-radius: 10px; background: transparent; color: var(--grade-on-surface); font: inherit; font-size: 13px; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+          .entry b { font-variant-numeric: tabular-nums; }
+          .entry span { color: var(--grade-on-surface-variant); }
+          .entry:hover, .entry:focus-visible { background: color-mix(in srgb, #f87171 18%, transparent); text-decoration: line-through; outline: none; }
+          hr { height: 1px; margin: 14px 0; border: 0; background: var(--grade-outline); }
+          .cc-body .metrics { display: flex; gap: 8px; margin-top: 0; }
+          .cc-body .metric { flex: 1; padding: 0; border: 0; border-radius: 0; background: transparent; }
+          .cc-body .metric span { display: block; margin-bottom: 2px; font-size: 11px; }
+          .cc-body .metric b { font-size: 20px; }
+          .cc-body .metrics.two { margin-top: 14px; }
+          .cc-question { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--grade-on-surface); font-size: 13px; line-height: 1.35; }
+          .cc-question + .cc-question { margin-top: 8px; }
+          .cc-question span { flex: 2; text-wrap: balance; }
+          .cc-question input { flex: 1; min-width: 0; margin: 0; }
+          .cc-body .prediction { margin-top: 0; }
           .row { display:grid; grid-template-columns: 1fr 1fr 32px; gap: 7px; animation: enter .25s both; }
           input { width:100%; min-width: 0; min-height: 40px; padding: 9px 10px; border: 1px solid var(--grade-outline); border-radius: 14px 14px 5px 14px; outline: 0; color:var(--grade-on-surface); background: var(--grade-surface-high); font: inherit; }
           input:focus { border: 2px solid var(--grade-primary); padding: 8px 9px; }
@@ -1460,16 +1777,42 @@
           .grade-list-item span { min-width:0; overflow:hidden; color:var(--grade-on-surface-variant); text-overflow:ellipsis; white-space:nowrap; }
           .grade-list-item b { color:var(--grade-on-surface); font-variant-numeric:tabular-nums; }
           .sort { min-height:38px; padding:0 12px; border:1px solid var(--grade-outline); border-radius:999px; color:var(--grade-on-surface); background:var(--grade-surface-high); font:inherit; }
+          .prediction { margin-top: 14px; }
+          .prediction[hidden] { display: none; }
+          .advice { margin: 0 0 10px; color: var(--grade-on-surface); font-size: 13px; line-height: 1.45; text-wrap: balance; }
+          .advice.is-warn { color: #f87171; }
+          .chart { position: relative; height: 150px; overflow: hidden; border: 1px solid var(--grade-outline); border-radius: 22px; background: var(--grade-surface-high); cursor: crosshair; touch-action: none; }
+          .chart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+          .chart-dot { position: absolute; z-index: 1; display: none; width: 10px; height: 10px; border-radius: 50%; background: var(--grade-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--grade-primary) 30%, transparent); transform: translate(-50%, -50%); pointer-events: none; }
+          .chart-tip { position: absolute; z-index: 2; display: none; padding: 3px 8px; border-radius: 999px; background: var(--grade-surface); color: var(--grade-on-surface); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
+          .chart-tip.is-ok { color: #34d399; }
+          .chart-tip.is-warn { color: #f87171; }
+          .chart-axis { display: flex; justify-content: space-between; gap: 8px; margin-top: 5px; color: var(--grade-on-surface-variant); font-size: 10px; font-variant-numeric: tabular-nums; }
           .backup-description { color:var(--grade-on-surface-variant); font-size:12px; line-height:1.5; }
           .message { min-height: 36px; margin: 13px 0 0; }
           @keyframes enter { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+          .collapse, .mini-summary { display: none; }
+          /* Telefoon: het blad kan inklappen tot een smalle balk, zodat je cijfers in de lijst kunt aantikken */
+          @media (max-width: 700px) {
+            .panel { transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease, height .28s cubic-bezier(.22,1,.36,1); }
+            .head { margin-bottom: 10px; cursor: pointer; }
+            .head-text { flex: 1; min-width: 0; }
+            .collapse { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--grade-outline); border-radius: 50%; background: var(--grade-surface-high); color: var(--grade-on-surface); cursor: pointer; }
+            .collapse svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s ease; }
+            .panel.mini { height: 84px; overflow: hidden; }
+            .panel.mini .collapse svg { transform: rotate(180deg); }
+            .panel.mini .eyebrow, .panel.mini h2 { display: none; }
+            .panel.mini .mini-summary { display: block; margin: 0; overflow: hidden; color: var(--grade-on-surface); font-size: 14px; font-weight: 700; line-height: 1.3; }
+            .panel.mini .mini-summary small { display: block; overflow: hidden; color: var(--grade-on-surface-variant); font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+            .panel.mini .head { margin-bottom: 40px; }
+          }
           @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
         </style>
         <button class="toggle" aria-label="Open cijfercalculator" title="Cijfercalculator" aria-expanded="false">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 2v4h10V4H7Zm0 6v2h2v-2H7Zm4 0v2h2v-2h-2Zm4 0v2h2v-2h-2ZM7 14v2h2v-2H7Zm4 0v2h2v-2h-2Zm4 0v6h2v-6h-2ZM7 18v2h2v-2H7Zm4 0v2h2v-2h-2Z"/></svg>
         </button>
         <aside class="panel" aria-hidden="true">
-          <div class="head"><div><p class="eyebrow">Eduarte Tools</p><h2>Cijferoverzicht</h2></div><button class="close" aria-label="Sluiten">×</button></div>
+          <div class="head"><div class="head-text"><p class="eyebrow">Eduarte Tools</p><h2>Cijferoverzicht</h2><p class="mini-summary"></p></div><button class="collapse" type="button" aria-label="Paneel inklappen" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><button class="close" aria-label="Sluiten">×</button></div>
           <p class="intro">Selecteer cijfers uit je cijferlijst of voeg ze hieronder toe. De berekening wordt meteen bijgewerkt.</p>
           <div class="tabs" role="tablist" aria-label="Cijfertools">
             <button class="tab" type="button" role="tab" data-tab="calculator" aria-selected="true">Rekenen</button>
@@ -1478,10 +1821,36 @@
             <button class="tab" type="button" role="tab" data-tab="backup" aria-selected="false">Back-up</button>
           </div>
           <section class="view" data-view="calculator">
-            <div class="rows"></div>
-            <div class="actions"><button class="action" data-action="add">+ Cijfer</button><button class="action primary" data-action="scan">Scannen</button></div>
-            <div class="settings"><label>Doelgemiddelde<input class="target" type="number" min="${gradeMinimum}" max="${gradeMaximum}" step=".1" value="${passThreshold}"></label><label>Weging volgend cijfer<input class="future" type="number" min=".1" step=".1" placeholder="Auto"></label></div>
-            <div class="metrics"><div class="metric"><b class="average">—</b><span>Gewogen gemiddelde</span></div><div class="metric"><b class="median">—</b><span>Mediaan</span></div><div class="metric"><b class="total-weight">—</b><span>Totale weging</span></div><div class="metric"><b class="needed">—</b><span>Benodigd cijfer</span></div><div class="metric"><b class="result">—</b><span>Nieuw gemiddelde</span></div></div>
+            <div class="cc-head">
+              <h3 class="cc-title">Cijfercalculator</h3>
+              <button class="cc-add" type="button" data-action="add" title="Cijfer handmatig toevoegen" aria-label="Cijfer handmatig toevoegen" aria-expanded="false">+</button>
+            </div>
+            <p class="cc-empty">Bereken hier welk cijfer je moet halen of wat je gemiddelde zal zijn.<br><br>Klik op cijfers in je cijferlijst of voeg ze met + handmatig toe om te beginnen.</p>
+            <form class="cc-form" hidden novalidate>
+              <p>Voer het cijfer en de weging in.</p>
+              <div><input class="cc-grade" type="text" inputmode="decimal" autocomplete="off" placeholder="Cijfer" aria-label="Cijfer"><input class="cc-weight" type="text" inputmode="decimal" autocomplete="off" placeholder="Weging" aria-label="Weging"><button class="action primary" type="submit">Toevoegen</button></div>
+              <p class="cc-error" role="alert" hidden></p>
+            </form>
+            <div class="entries"></div>
+            <div class="rows" hidden></div>
+            <div class="actions"><button class="action" data-action="scan">Cijferlijst scannen</button></div>
+            <div class="cc-body" hidden>
+              <hr>
+              <div class="metrics"><div class="metric"><span title="Gewogen gemiddelde">Gemiddelde</span><b class="average">—</b></div><div class="metric"><span>Mediaan</span><b class="median">—</b></div><div class="metric"><span>Totale weging</span><b class="total-weight">—</b></div></div>
+              <hr>
+              <label class="cc-question"><span>Hoe vaak telt het volgende cijfer mee?</span><input class="future" type="number" min=".1" step=".1" placeholder="1x"></label>
+              <label class="cc-question"><span>Welk gemiddelde wil je halen?</span><input class="target" type="number" min="${gradeMinimum}" max="${gradeMaximum}" step=".1" value="${passThreshold}"></label>
+              <hr>
+            <div class="prediction" hidden>
+              <p class="advice"></p>
+              <div class="chart" role="img" aria-label="Grafiek: cijfer voor je volgende toets tegen je nieuwe gemiddelde">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+                <i class="chart-dot"></i><span class="chart-tip"></span>
+              </div>
+              <div class="chart-axis"><span class="axis-min"></span><span>volgend cijfer → nieuw gemiddelde</span><span class="axis-max"></span></div>
+            </div>
+              <div class="metrics two"><div class="metric"><span>Benodigd cijfer</span><b class="needed">—</b></div><div class="metric"><span>Nieuw gemiddelde</span><b class="result">—</b></div></div>
+            </div>
             <div class="actions"><button class="action" data-action="export">CSV exporteren</button></div>
           </section>
           <section class="view" data-view="statistics" hidden>
@@ -1525,6 +1894,36 @@
       const format = (value) => Number.isFinite(value) ? value.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—";
       const sourceElements = new Map();
 
+      // Lijst "Cijfers in berekening", zoals in Study Tools: klik op een regel om het cijfer te verwijderen
+      function renderEntries(entries) {
+        const list = shadow.querySelector(".entries");
+        shadow.querySelector(".cc-title").textContent = entries.length ? `Cijfers in berekening (${entries.length})` : "Cijfercalculator";
+        shadow.querySelector(".cc-empty").hidden = entries.length > 0;
+        const summaryEl = shadow.querySelector(".mini-summary");
+        const weightSum = entries.reduce((sum, entry) => sum + entry.weight, 0);
+        summaryEl.replaceChildren();
+        const summaryTitle = document.createTextNode(entries.length
+          ? `${entries.length} ${entries.length === 1 ? "cijfer" : "cijfers"} · gemiddelde ${format(entries.reduce((sum, entry) => sum + entry.result * entry.weight, 0) / weightSum)}`
+          : "Cijfercalculator");
+        const summaryHint = document.createElement("small");
+        summaryHint.textContent = entries.length ? "Tik om de berekening te openen" : "Tik op cijfers in je lijst om ze toe te voegen";
+        summaryEl.append(summaryTitle, summaryHint);
+        shadow.querySelector(".cc-body").hidden = entries.length === 0;
+        list.replaceChildren(...entries.map(({ result, weight, row, manual, title }) => {
+          const entry = document.createElement("button");
+          entry.type = "button";
+          entry.className = "entry";
+          entry.title = "Verwijderen";
+          const grade = document.createElement("b");
+          grade.textContent = result.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+          const rest = document.createElement("span");
+          rest.textContent = ` (${weight.toLocaleString("nl-NL", { maximumFractionDigits: 2 })}x) — ${manual ? "Handmatig toegevoegd" : title}`;
+          entry.append(grade, rest);
+          entry.addEventListener("click", () => row.querySelector(".icon").click());
+          return entry;
+        }));
+      }
+
       function addRow(grade = "", weight = "1", sourceKey = "", title = "") {
         const row = document.createElement("div");
         row.className = "row";
@@ -1545,6 +1944,8 @@
           result: row.querySelector(".grade").value.trim() === "" ? NaN : Number(row.querySelector(".grade").value),
           weight: row.querySelector(".weight").value.trim() === "" ? NaN : Number(row.querySelector(".weight").value),
           title: row.dataset.title || `Cijfer ${index + 1}`,
+          manual: !row.dataset.title,
+          row,
           index,
         }));
         const validValues = values.filter(({ result, weight }) =>
@@ -1553,9 +1954,11 @@
         );
         renderStatistics(validValues);
         renderList(validValues);
+        renderEntries(validValues);
         if (!validValues.length) {
           ["average", "median", "total-weight", "needed", "result"].forEach((name) => input(name).textContent = "—");
           message.textContent = "Voeg cijfers toe of scan je cijferlijst.";
+          renderPrediction(null, 0, passThreshold);
           return;
         }
         const target = Number(input("target").value);
@@ -1563,10 +1966,16 @@
         const preliminary = calculator.calculateGradeSummary(validValues, target, 1, gradeMinimum, gradeMaximum);
         const futureInput = input("future").value.trim();
         const future = futureInput ? Number(futureInput) : (preliminary.medianWeight || 1);
+        input("future").placeholder = `${(preliminary.medianWeight || 1).toLocaleString("nl-NL", { maximumFractionDigits: 2 })}x`;
         const summary = calculator.calculateGradeSummary(validValues, target, future, gradeMinimum, gradeMaximum);
         input("average").textContent = format(summary.weightedAverage);
         input("median").textContent = format(summary.median);
         input("total-weight").textContent = `${format(summary.totalWeight)}×`;
+        renderPrediction(
+          summary,
+          Number.isFinite(future) && future > 0 ? future : 0,
+          Number.isFinite(target) && target >= gradeMinimum && target <= gradeMaximum ? target : passThreshold
+        );
         if (summary.needed === undefined) {
           input("needed").textContent = "—";
           input("result").textContent = "—";
@@ -1583,6 +1992,92 @@
             ? `Je ligt op koers voor een gemiddelde van ${format(target)}; een ${format(gradeMinimum)} is voldoende.`
             : `${summary.currentlyPassing ? "Je staat voldoende. " : ""}Je hebt minimaal een ${format(summary.roundedNeeded)} nodig voor ${format(target)}.`;
       }
+
+      // Voorspelling met grafiek, overgenomen van de cijfercalculator van Study Tools (MIT, Quinten Althues):
+      // nieuw gemiddelde = helling × volgend cijfer + snijpunt
+      const chart = shadow.querySelector(".chart");
+      let line = null;
+      function renderPrediction(summary, future, goal) {
+        const box = shadow.querySelector(".prediction");
+        const advice = shadow.querySelector(".advice");
+        if (!summary || !(future > 0)) {
+          box.hidden = true;
+          line = null;
+          return;
+        }
+        const weightedTotal = summary.weightedAverage * summary.totalWeight;
+        const slope = future / (summary.totalWeight + future);
+        const intercept = weightedTotal / (summary.totalWeight + future);
+        const span = gradeMaximum - gradeMinimum;
+        const norm = (value) => ((value - gradeMinimum) / span) * 100;
+        line = { slope, intercept };
+        box.hidden = false;
+
+        const one = (value) => value.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        const weight = future.toLocaleString("nl-NL", { maximumFractionDigits: 2 });
+        const needed = (goal * (summary.totalWeight + future) - weightedTotal) / future;
+        const goalText = goal === passThreshold ? "voldoende" : `op een ${one(goal)}`;
+        advice.className = "advice";
+        if (needed > gradeMaximum) {
+          advice.textContent = `Met een cijfer dat ${weight}× meetelt, kun je niet hoger dan een ${format(slope * gradeMaximum + intercept)} komen te staan.`;
+          advice.classList.add("is-warn");
+        } else if (needed < gradeMinimum) {
+          advice.textContent = `Met een cijfer dat ${weight}× meetelt, kun je niet lager dan een ${format(slope * gradeMinimum + intercept)} komen te staan.`;
+        } else {
+          const atLeast = one(Math.ceil((needed - 1e-9) * 10) / 10);
+          advice.textContent = `Haal ten minste een ${atLeast} die ${weight}× meetelt om ${goalText} ${summary.weightedAverage < goal ? "te komen" : "te blijven"} staan.`;
+        }
+
+        const grid = Array.from({ length: Math.max(0, Math.round(span) - 1) }, (_, index) => {
+          const at = ((index + 1) / Math.round(span)) * 100;
+          return `<line x1="${at}" y1="0" x2="${at}" y2="100"/><line x1="0" y1="${at}" x2="100" y2="${at}"/>`;
+        }).join("");
+        const threshold = norm(goal);
+        line.goal = goal;
+        chart.querySelector("svg").innerHTML = `
+          <g stroke="var(--grade-outline)" stroke-width=".5" vector-effect="non-scaling-stroke" opacity=".6">${grid}</g>
+          <rect x="0" y="0" width="${threshold}" height="100" fill="#f87171" fill-opacity=".07"/>
+          <rect x="0" y="${100 - threshold}" width="100" height="${threshold}" fill="#f87171" fill-opacity=".07"/>
+          <line x1="0" y1="${100 - norm(slope * gradeMinimum + intercept)}" x2="100" y2="${100 - norm(slope * gradeMaximum + intercept)}"
+            stroke="var(--grade-primary)" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+        shadow.querySelector(".axis-min").textContent = one(gradeMinimum);
+        shadow.querySelector(".axis-max").textContent = one(gradeMaximum);
+        hideChartTip();
+      }
+
+      function hideChartTip() {
+        chart.querySelector(".chart-dot").style.display = "none";
+        chart.querySelector(".chart-tip").style.display = "none";
+      }
+
+      function showChartTip(clientX) {
+        if (!line) return;
+        const rect = chart.getBoundingClientRect();
+        if (!rect.width) return;
+        const span = gradeMaximum - gradeMinimum;
+        // Op tienden van een cijfer vastklikken
+        const raw = gradeMinimum + Math.min(1, Math.max(0, (clientX - rect.left) / rect.width)) * span;
+        const grade = Math.round(raw * 10) / 10;
+        const average = line.slope * grade + line.intercept;
+        const x = ((grade - gradeMinimum) / span) * 100;
+        const y = 100 - ((average - gradeMinimum) / span) * 100;
+        const dot = chart.querySelector(".chart-dot");
+        const tip = chart.querySelector(".chart-tip");
+        dot.style.display = "block";
+        dot.style.left = `${x}%`;
+        dot.style.top = `${y}%`;
+        tip.style.display = "block";
+        tip.textContent = `${grade.toLocaleString("nl-NL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ➜ ${format(average)}`;
+        tip.className = `chart-tip ${average >= line.goal - 1e-9 ? "is-ok" : "is-warn"}`;
+        const half = (tip.offsetWidth / 2 / rect.width) * 100;
+        tip.style.left = `${Math.min(100 - half, Math.max(half, x))}%`;
+        tip.style.top = `${y}%`;
+        tip.style.transform = (y / 100) * rect.height - tip.offsetHeight - 12 < 0 ? "translate(-50%, 40%)" : "translate(-50%, -140%)";
+      }
+
+      chart.addEventListener("pointermove", (event) => showChartTip(event.clientX));
+      chart.addEventListener("pointerdown", (event) => showChartTip(event.clientX));
+      chart.addEventListener("pointerleave", hideChartTip);
 
       function renderStatistics(entries) {
         const statistics = globalThis.EduarteGradeCalculator.calculateGradeStatistics(
@@ -1777,17 +2272,78 @@
       }
 
       const toggle = shadow.querySelector(".toggle");
+      // Telefoon: ingeklapt blad + ruimte onder de pagina, zodat de hele cijferlijst boven het blad uit kan scrollen
+      const phone = window.matchMedia("(max-width: 700px)");
+      const collapseButton = shadow.querySelector(".collapse");
+      const SPACER_ID = "eduarte-tools-grades-spacer";
+      const updateSpacer = () => {
+        document.getElementById(SPACER_ID)?.remove();
+        if (!phone.matches || !panel.classList.contains("open")) return;
+        const spacer = document.createElement("style");
+        spacer.id = SPACER_ID;
+        const room = panel.classList.contains("mini") ? "110px" : "60vh";
+        spacer.textContent = `.content-wrapper, .l-flex-content > .content, main { padding-bottom: ${room} !important; }`;
+        document.head.appendChild(spacer);
+      };
+      const setMini = (mini) => {
+        panel.classList.toggle("mini", mini);
+        if (mini) panel.scrollTop = 0;
+        collapseButton.setAttribute("aria-expanded", String(!mini));
+        collapseButton.setAttribute("aria-label", mini ? "Paneel uitklappen" : "Paneel inklappen");
+        updateSpacer();
+      };
       toggle.addEventListener("click", () => {
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
         toggle.setAttribute("aria-expanded", "true");
+        // Op een telefoon begint het blad ingeklapt: eerst cijfers aantikken, dan openklappen
+        setMini(phone.matches);
       });
-      shadow.querySelector(".close").addEventListener("click", () => {
-        panel.classList.remove("open");
+      shadow.querySelector(".close").addEventListener("click", (event) => {
+        event.stopPropagation();
+        panel.classList.remove("open", "mini");
         panel.setAttribute("aria-hidden", "true");
         toggle.setAttribute("aria-expanded", "false");
+        updateSpacer();
       });
-      shadow.querySelector('[data-action="add"]').addEventListener("click", () => { addRow(); calculate(); });
+      shadow.querySelector(".head").addEventListener("click", () => {
+        if (phone.matches) setMini(!panel.classList.contains("mini"));
+      });
+      phone.addEventListener?.("change", () => setMini(phone.matches && panel.classList.contains("mini")));
+      // Handmatig toevoegen: klein formulier in plaats van losse lege rijen
+      const addButton = shadow.querySelector('[data-action="add"]');
+      const addForm = shadow.querySelector(".cc-form");
+      const addError = shadow.querySelector(".cc-error");
+      const readDecimal = (field) => {
+        const raw = field.value.trim().replace(",", ".");
+        return /^\d+(\.\d*)?$|^\.\d+$/.test(raw) ? Number(raw) : NaN;
+      };
+      addButton.addEventListener("click", () => {
+        addForm.hidden = !addForm.hidden;
+        addButton.setAttribute("aria-expanded", String(!addForm.hidden));
+        addError.hidden = true;
+        if (!addForm.hidden) input("cc-grade").focus();
+      });
+      addForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const grade = readDecimal(input("cc-grade"));
+        const weight = input("cc-weight").value.trim() === "" ? 1 : readDecimal(input("cc-weight"));
+        if (!(grade >= gradeMinimum && grade <= gradeMaximum)) {
+          addError.textContent = `Voer een geldig cijfer in tussen ${format(gradeMinimum)} en ${format(gradeMaximum)}.`;
+          addError.hidden = false;
+          return;
+        }
+        if (!(weight > 0)) {
+          addError.textContent = "Voer een weging groter dan 0 in.";
+          addError.hidden = false;
+          return;
+        }
+        addError.hidden = true;
+        addRow(String(grade), String(weight));
+        input("cc-grade").value = "";
+        input("cc-grade").focus();
+        calculate();
+      });
       shadow.querySelector('[data-action="scan"]').addEventListener("click", scan);
       shadow.querySelector('[data-action="export"]').addEventListener("click", exportCsv);
       shadow.querySelector('[data-action="backup-export"]').addEventListener("click", exportBackup);
@@ -1805,7 +2361,6 @@
       }));
       input("target").addEventListener("input", calculate);
       input("future").addEventListener("input", calculate);
-      addRow();
       calculate();
       const stopWatchingResults = globalThis.EduarteApi.watchGrades(document, (grades) => {
         if (!grades.length || root.dataset.resultsFound) return;
