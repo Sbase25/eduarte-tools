@@ -1509,139 +1509,7 @@
       min-height: 100vh !important;
     }
 
-    /* Menu links als zwevend paneel, in de stijl van een modern contextmenu */
-    nav.navigation,
-    nav.navigation.navigation--student,
-    .sidebar {
-      box-sizing: border-box !important;
-      height: calc(100vh - 20px) !important;
-      margin: 10px 0 10px 10px !important;
-      border: 1px solid color-mix(in srgb, ${text} 9%, transparent) !important;
-      border-radius: 18px !important;
-      background: color-mix(in srgb, ${surface} 97%, ${text} 3%) !important;
-      box-shadow: 0 1px 0 color-mix(in srgb, ${text} 6%, transparent) inset, 0 16px 40px -12px rgba(0,0,0,.55) !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-    }
-
-    nav.navigation.navigation--student .navigation-header {
-      border-bottom: 0 !important;
-    }
-
-    nav.navigation.navigation--student .navigation-items--main,
-    nav.navigation.navigation--student .navigation-footer ul {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 1px !important;
-      margin: 0 !important;
-      padding: 6px 8px !important;
-    }
-
-    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul)::before {
-      display: block !important;
-      padding: 6px 12px 6px !important;
-      color: color-mix(in srgb, ${text} 42%, transparent) !important;
-      font-size: 10.5px !important;
-      font-weight: 700 !important;
-      letter-spacing: .08em !important;
-      text-transform: uppercase !important;
-    }
-
-    nav.navigation.navigation--student .navigation-items--main::before { content: "Menu" !important; }
-    nav.navigation.navigation--student .navigation-footer ul::before { content: "Account" !important; }
-
-    nav.navigation.navigation--student .navigation-footer {
-      width: auto !important;
-      margin: auto 10px 0 !important;
-      padding: 4px 0 6px !important;
-      border-top: 1px solid color-mix(in srgb, ${text} 8%, transparent) !important;
-    }
-
-    nav.navigation.navigation--student .navigation-footer ul {
-      width: 100% !important;
-      box-sizing: border-box !important;
-      padding-inline: 0 !important;
-    }
-
-    /* Eduarte zet lege <li>'s tussen de items; die gaven ongelijke tussenruimtes */
-    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li {
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-
-    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li:not(:has(a)) {
-      display: none !important;
-    }
-
-    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li > a {
-      display: flex !important;
-      align-items: center !important;
-      gap: 12px !important;
-      box-sizing: border-box !important;
-      width: 100% !important;
-      min-height: 36px !important;
-      height: 36px !important;
-      padding: 0 10px !important;
-      font-size: 13.5px !important;
-      transition: background-color 120ms ease, color 120ms ease !important;
-    }
-
-    nav.navigation.navigation--student :is(.navigation-items--main, .navigation-footer ul) > li > a > svg {
-      flex: 0 0 24px !important;
-      width: 24px !important;
-      height: 24px !important;
-      margin: 0 !important;
-      overflow: visible !important;
-      transform: scale(.84) !important;
-    }
-
-    nav.navigation.navigation--student a,
-    nav.navigation.navigation--student .navigation-items--main > li > a {
-      min-height: 36px !important;
-      margin: 0 !important;
-      padding-inline: 10px !important;
-      border: 0 !important;
-      border-radius: 9px !important;
-      color: color-mix(in srgb, ${text} 66%, transparent) !important;
-      font-weight: 600 !important;
-    }
-
-    nav.navigation.navigation--student .navigation-items--main > li > a .icon,
-    nav.navigation.navigation--student .navigation-items--main > li > a > svg,
-    nav.navigation.navigation--student .navigation-items--main > li > a > i {
-      color: inherit !important;
-      filter: none !important;
-    }
-
-    nav.navigation.navigation--student a:hover,
-    nav.navigation.navigation--student .navigation-items--main > li > a:hover {
-      transform: none !important;
-      border: 0 !important;
-      background: color-mix(in srgb, ${text} 8%, transparent) !important;
-      color: ${text} !important;
-    }
-
-    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a,
-    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] {
-      border: 0 !important;
-      background: color-mix(in srgb, ${accent} 14%, transparent) !important;
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, ${accent} 22%, transparent) !important;
-      color: ${text} !important;
-    }
-
-    nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a :is(.icon, svg, i),
-    nav.navigation.navigation--student .navigation-items--main > li > a[aria-current="page"] :is(.icon, svg, i) {
-      transform: none !important;
-      color: ${accent} !important;
-      filter: none !important;
-    }
-
-    nav.navigation.navigation--student .navigation-header img,
-    nav.navigation.navigation--student .navigation-brand img,
-    nav.navigation.navigation--student .navigation-header svg,
-    nav.navigation.navigation--student .navigation-brand svg {
-      filter: none !important;
-    }
+    ${buildNavigationCSS({ accent, surface, text, animations: s.animations })}
 
     header.header,
     .header,
@@ -1755,6 +1623,376 @@
     `;
   }
 
+  // Geschulpte cirkel ("cookie") uit de Material 3 Expressive-vormen, als clip-path
+  function scallopedShape(lobes = 12, depth = 0.055, steps = 120) {
+    const points = [];
+    for (let i = 0; i < steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      const radius = 50 * (1 - depth + depth * Math.cos(lobes * angle));
+      points.push(`${(50 + radius * Math.cos(angle)).toFixed(1)}% ${(50 + radius * Math.sin(angle)).toFixed(1)}%`);
+    }
+    return `polygon(${points.join(", ")})`;
+  }
+
+  // Menu links ("het contextmenu") in Material 3 Expressive-stijl: tonale vlakken, pilvormige
+  // items, een actieve indicator die erin veert en een vorm die meegeeft als je klikt.
+  // Opbouw van Eduarte: nav > .navigation-header, .navigation-items > ul.navigation-items--main,
+  // .navigation-footer > ul. De indicator zit in a::before; a::after is van Eduarte (meldingstip).
+  function buildNavigationCSS({ accent, surface, text, animations = true }) {
+    const NAV = ":root nav.navigation.navigation--student";
+    const LIST = ":is(.navigation-items--main, .navigation-footer ul)";
+    const ITEM = `${NAV} ${LIST} > li > a`;
+    const SELECTED = `${NAV} :is(.navigation-items--main > li:is(.is-selected, .is-active, .active) > a, .navigation-items--main > li > a[aria-current="page"], .navigation-footer ul > li > a:is(.is-selected, [aria-current="page"]), .navigation-footer ul > li.is-selected > a)`;
+    const noMotion = `
+      ${NAV} a, ${NAV} a::before, ${NAV} a > * {
+        animation: none !important;
+        transition: none !important;
+      }`;
+
+    return `
+    /* Menu links als zwevend paneel, in de stijl van een modern contextmenu (Material 3 Expressive) */
+    nav.navigation,
+    nav.navigation.navigation--student,
+    .sidebar {
+      --et-nav-container: color-mix(in srgb, ${surface} 96%, ${text} 4%);
+      --et-nav-island: color-mix(in srgb, ${surface} 91%, ${text} 9%);
+      --et-nav-on: ${text};
+      --et-nav-on-variant: color-mix(in srgb, ${text} 72%, transparent);
+      --et-nav-active: color-mix(in srgb, ${accent} 26%, ${surface});
+      --et-nav-active-icon: color-mix(in srgb, ${accent} 82%, ${text});
+      --et-nav-spring: cubic-bezier(.34, 1.45, .64, 1);
+      box-sizing: border-box !important;
+      height: calc(100vh - 20px) !important;
+      margin: 10px 0 10px 10px !important;
+      border: 1px solid color-mix(in srgb, ${text} 7%, transparent) !important;
+      border-radius: 28px !important;
+      background: var(--et-nav-container) !important;
+      box-shadow: 0 16px 40px -16px rgba(0,0,0,.5) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* Echte veer (met een klein beetje doorschieten) waar de browser linear() kent */
+    @supports (transition-timing-function: linear(0, 1)) {
+      nav.navigation,
+      nav.navigation.navigation--student,
+      .sidebar {
+        --et-nav-spring: linear(0, .13 6.2%, .397 12.5%, .671 18.8%, .885 25%, 1.019 31.2%, 1.082 37.5%, 1.094 43.8%, 1.079 50%, 1.052 56.2%, 1.027 62.5%, 1.008 68.8%, .997 75%, .992 81.2%, .993 93.8%, 1);
+      }
+    }
+
+    ${NAV} .navigation-header {
+      align-self: stretch !important;
+      width: auto !important;
+      min-height: 0 !important;
+      gap: 12px !important;
+      padding: 18px 14px 10px 18px !important;
+      border-bottom: 0 !important;
+    }
+
+    ${NAV} .navigation-header a {
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 12px !important;
+      border: 0 !important;
+      border-radius: 12px !important;
+      background: transparent !important;
+      color: var(--et-nav-on) !important;
+    }
+
+    /* Logo in een geschulpte Material-vorm; draait een slag bij aanwijzen */
+    ${NAV} .navigation-header--logo :is(img, svg) {
+      box-sizing: border-box !important;
+      width: 44px !important;
+      height: 44px !important;
+      padding: 9px !important;
+      background: var(--et-nav-island) !important;
+      clip-path: ${scallopedShape()} !important;
+      filter: none !important;
+      transition: transform 700ms var(--et-nav-spring) !important;
+    }
+
+    ${NAV} .navigation-header--logo:hover :is(img, svg) {
+      transform: rotate(60deg) !important;
+    }
+
+    /* Sluitknop van het menu op smalle schermen */
+    ${NAV} .navigation-header--close-navigation {
+      margin-left: auto !important;
+    }
+
+    ${NAV} .navigation-header--close-navigation a {
+      display: grid !important;
+      place-items: center !important;
+      width: 40px !important;
+      height: 40px !important;
+      border-radius: 20px !important;
+      background: var(--et-nav-island) !important;
+    }
+
+    ${NAV} .navigation-header--title {
+      min-width: 0 !important;
+      overflow: hidden !important;
+      color: var(--et-nav-on) !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      letter-spacing: -.01em !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    ${NAV} :is(.navigation-header--logo, .navigation-header--logo a) {
+      min-width: 0 !important;
+    }
+
+    /* Met de sluitknop erbij (smal scherm) alles een maatje kleiner, zodat het op één regel past */
+    ${NAV}.is-open :is(.navigation-header, .navigation-header a) {
+      gap: 8px !important;
+    }
+
+    ${NAV}.is-open .navigation-header--logo :is(img, svg) {
+      width: 36px !important;
+      height: 36px !important;
+      padding: 7px !important;
+    }
+
+    ${NAV}.is-open .navigation-header--title {
+      font-size: 15px !important;
+    }
+
+    ${NAV}.is-open .navigation-header--close-navigation a {
+      width: 36px !important;
+      height: 36px !important;
+    }
+
+    /* Eduarte tekent lijnen boven en onder de lijst; ruimte en vlakken doen dat werk nu */
+    ${NAV} .navigation-items {
+      align-self: stretch !important;
+      width: auto !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+    }
+
+    ${NAV} ${LIST} {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 4px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 12px 12px !important;
+      list-style: none !important;
+    }
+
+    ${NAV} ${LIST}::before {
+      display: block !important;
+      padding: 8px 16px 6px !important;
+      color: color-mix(in srgb, var(--et-nav-on) 52%, transparent) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 16px !important;
+      letter-spacing: .02em !important;
+      text-transform: none !important;
+    }
+
+    ${NAV} .navigation-items--main::before { content: "Menu" !important; }
+    ${NAV} .navigation-footer ul::before { content: "Account" !important; }
+
+    /* Profiel en Uitloggen als eigen eilandje onderaan */
+    ${NAV} .navigation-footer {
+      align-self: stretch !important;
+      width: auto !important;
+      margin: auto 8px 8px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 22px !important;
+      background: var(--et-nav-island) !important;
+    }
+
+    ${NAV} .navigation-footer ul {
+      gap: 2px !important;
+      padding: 2px 6px 6px !important;
+    }
+
+    ${NAV} .navigation-footer ul::before {
+      padding: 10px 14px 4px !important;
+    }
+
+    /* Eduarte zet lege <li>'s tussen de items; die gaven ongelijke tussenruimtes */
+    ${NAV} ${LIST} > li {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    ${NAV} ${LIST} > li:not(:has(a)) {
+      display: none !important;
+    }
+
+    /* Overige links in het menu (bijv. subitems) */
+    ${NAV} a {
+      min-height: 40px !important;
+      margin: 0 !important;
+      border: 0 !important;
+      border-radius: 20px !important;
+      color: var(--et-nav-on-variant) !important;
+      font-weight: 600 !important;
+      transform: none !important;
+    }
+
+    ${NAV} a:hover {
+      border: 0 !important;
+      background: color-mix(in srgb, var(--et-nav-on) 8%, transparent) !important;
+      color: var(--et-nav-on) !important;
+      transform: none !important;
+    }
+
+    ${NAV} .navigation-header--logo a:hover {
+      background: transparent !important;
+    }
+
+    ${NAV} .navigation-items--sub {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2px !important;
+      margin: 0 !important;
+      padding: 0 12px 12px !important;
+    }
+
+    ${NAV} .navigation-items--sub a {
+      display: flex !important;
+      align-items: center !important;
+      padding: 0 16px 0 52px !important;
+      font-size: 13.5px !important;
+    }
+
+    ${NAV} .navigation-items--sub li.is-selected > a {
+      background: var(--et-nav-active) !important;
+      color: var(--et-nav-on) !important;
+    }
+
+    /* Menu-item: pil van 48px; de kleur zit in ::before zodat die los van de tekst kan bewegen */
+    ${ITEM} {
+      position: relative !important;
+      isolation: isolate !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 48px !important;
+      min-height: 48px !important;
+      margin: 0 !important;
+      padding: 0 20px 0 16px !important;
+      overflow: hidden !important;
+      border: 0 !important;
+      border-radius: 24px !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: var(--et-nav-on-variant) !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      white-space: nowrap !important;
+      transform: none !important;
+      transition: border-radius 260ms var(--et-nav-spring), color 150ms linear !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    ${NAV} .navigation-footer ul > li > a {
+      height: 44px !important;
+      min-height: 44px !important;
+      padding: 0 16px 0 14px !important;
+      border-radius: 22px !important;
+    }
+
+    ${ITEM}::before {
+      content: "" !important;
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: -1 !important;
+      border-radius: inherit !important;
+      background: var(--et-nav-on);
+      opacity: 0;
+      pointer-events: none !important;
+      transition: opacity 150ms linear;
+    }
+
+    ${ITEM}:hover {
+      background: transparent !important;
+      color: var(--et-nav-on) !important;
+    }
+
+    ${ITEM}:hover::before { opacity: .08; }
+
+    /* Indrukken: de pil wordt even hoekiger en veert daarna terug */
+    ${ITEM}:active { border-radius: 14px !important; }
+    ${ITEM}:active::before { opacity: .12; }
+
+    ${ITEM} > :is(svg, i) {
+      flex: 0 0 24px !important;
+      width: 24px !important;
+      height: 24px !important;
+      margin: 0 !important;
+      overflow: visible !important;
+    }
+
+    ${ITEM} :is(svg, i, .icon) {
+      color: inherit !important;
+      filter: none !important;
+      transform: none !important;
+      transition: transform 320ms var(--et-nav-spring) !important;
+    }
+
+    ${ITEM}:hover :is(svg, i, .icon) { transform: scale(1.1) !important; }
+    ${ITEM}:active :is(svg, i, .icon) { transform: scale(.94) !important; }
+
+    /* Huidige pagina: gevulde tonale pil, vettere tekst, icoon in de accentkleur */
+    ${SELECTED} {
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: var(--et-nav-on) !important;
+      font-weight: 700 !important;
+    }
+
+    ${SELECTED}::before {
+      background: var(--et-nav-active);
+      opacity: 1;
+      animation: et-nav-indicator 460ms var(--et-nav-spring) both;
+    }
+
+    ${SELECTED}:hover::before {
+      background: color-mix(in srgb, var(--et-nav-active) 90%, var(--et-nav-on));
+      opacity: 1;
+    }
+
+    ${SELECTED} :is(svg, i, .icon) {
+      color: var(--et-nav-active-icon) !important;
+      transform: none !important;
+    }
+
+    @keyframes et-nav-indicator {
+      from { opacity: 0; transform: scaleX(.7); }
+    }
+
+    /* Meldingstip van Eduarte (li.has-notice) iets groter en op de nieuwe plek */
+    ${NAV} .navigation-items--main > li.has-notice > a { padding-right: 40px !important; }
+    ${NAV} .navigation-items--main > li.has-notice > a::after {
+      top: 50% !important;
+      right: 18px !important;
+      width: 8px !important;
+      height: 8px !important;
+      margin-top: -4px !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {${noMotion}
+    }
+    ${animations ? "" : noMotion}
+    `;
+  }
+
   // Aurora: gekleurd licht op de achtergrond met glazen menu, kaarten en agenda
   function buildAuroraCSS(accent) {
     const glass = "background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.13) !important; backdrop-filter: blur(24px) saturate(160%) !important; -webkit-backdrop-filter: blur(24px) saturate(160%) !important;";
@@ -1774,12 +2012,9 @@
 
     html body nav.navigation.navigation--student {
       ${glass}
+      --et-nav-active: color-mix(in srgb, ${accent} 30%, transparent);
+      --et-nav-island: rgba(255,255,255,.07);
       box-shadow: 0 20px 40px -20px rgba(0,0,0,.6) !important;
-    }
-
-    html body nav.navigation.navigation--student .navigation-items--main > li:is(.is-selected, .is-active, .active) > a {
-      background: color-mix(in srgb, ${accent} 24%, transparent) !important;
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, ${accent} 35%, transparent) !important;
     }
 
     header.header, header.header:has(> .header-tabs) {
@@ -1790,6 +2025,14 @@
 
     #eduarte-tools-portal-actions .et-portal-action {
       ${glass}
+    }
+
+    /* De profielknop heeft zijn eigen geschulpte vorm; geen glazen cirkel erachter */
+    #eduarte-tools-portal-actions .et-portal-avatar {
+      border: 0 !important;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
 
     #eduarte-tools-widgets-container {
@@ -1895,6 +2138,7 @@
         surface: effectiveSurface,
         text: effectiveText,
         border: effectiveBorder,
+        animations: s.animations !== false,
       });
     }
 
@@ -1975,6 +2219,7 @@
           customEnabled: !!data.eduarteCustomTheme,
           custom: data.eduarteCustomColors || null,
           portalLayout: data.eduartePortalLayoutEnabled !== false,
+          animations: data.eduarteAnimations !== false,
         });
       }
     );
