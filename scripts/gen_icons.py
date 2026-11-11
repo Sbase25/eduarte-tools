@@ -2,7 +2,10 @@
 een diagonale blauw->magenta gradient, een wit "studiebuddy"-silhouet
 (afgeronde hoodie/geest-vorm) en een wit maansikkeltje rechtsboven -
 in dezelfde stijl als het aangeleverde referentielogo."""
+from pathlib import Path
 from PIL import Image, ImageDraw, ImageChops
+
+ICONS_DIR = Path(__file__).resolve().parent.parent / "icons"
 
 TOP_LEFT = (45, 103, 185)      # blauw
 BOTTOM_RIGHT = (188, 60, 188)  # magenta/paars
@@ -84,6 +87,6 @@ def make_icon(size):
 
 if __name__ == "__main__":
     for icon_size in (16, 48, 128):
-        make_icon(icon_size).save(f"icons/icon{icon_size}.png")
+        make_icon(icon_size).save(ICONS_DIR / f"icon{icon_size}.png")
 
     print("Iconen gegenereerd")

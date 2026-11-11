@@ -132,6 +132,20 @@ leest wat de pagina zelf al toont. Ze richt zich op wat robuust en breed
 toepasbaar is: theming via Eduarte's eigen CSS-tokensysteem, aangevuld met
 een eigen startdashboard en cijfertools.
 
+## Mapindeling
+
+| Pad | Wat |
+| --- | --- |
+| `manifest.json`, `*.js`, `location-tracker.html` | De extensie zelf (content- en achtergrondscripts). Deze map laad je als uitgepakte extensie. |
+| `popup-app/` | Bron van het instellingenvenster (Vue + Vite). `npm run build --prefix popup-app` schrijft naar `popup-dist/`. |
+| `popup-dist/` | Gebouwde popup; wordt meegeleverd in de extensie. |
+| `icons/`, `assets/` | Iconen en de meegeleverde achtergrond. |
+| `test/` | Tests (`npm test`). |
+| `scripts/` | `build-firefox.mjs` (Firefox-pakket) en `gen_icons.py` (iconen genereren). |
+| `calendar-server/` | De server voor het agenda-abonnement. |
+| `docs/` | De website op GitHub Pages. |
+| `.github/workflows/` | Publicatie naar de Chrome Web Store bij een push naar `main`. |
+
 ## Bijdragen
 
 Heb je toegang tot een andere Eduarte-omgeving en werkt iets niet? Open een
