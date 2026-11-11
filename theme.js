@@ -2711,10 +2711,31 @@
     });
   }
 
+  // De opgebouwde thema-CSS van de vorige pagina wordt bewaard en bij de volgende pagina meteen
+  // toegepast. De instellingen komen pas na een asynchrone leesactie binnen; zonder deze cache
+  // zie je bij elke paginawissel kort Eduarte's eigen lichte opmaak.
+  const THEME_CSS_CACHE_KEY = "eduarteToolsThemeCss";
+
+  function applyCachedTheme() {
+    let css = "";
+    try { css = window.localStorage.getItem(THEME_CSS_CACHE_KEY) || ""; } catch { return; }
+    if (!css || document.getElementById(STYLE_ID)) return;
+    const el = document.createElement("style");
+    el.id = STYLE_ID;
+    el.textContent = css;
+    // <head> bestaat op document_start nog niet; getOrCreateStyleEl verplaatst hem er later heen
+    (document.head || document.documentElement).appendChild(el);
+  }
+
   function applyTheme(s) {
+    const css = buildCSS(s);
+    try {
+      if (css.length < 1500000) window.localStorage.setItem(THEME_CSS_CACHE_KEY, css);
+      else window.localStorage.removeItem(THEME_CSS_CACHE_KEY);
+    } catch { /* opslag vol of niet beschikbaar: dan alleen geen cache */ }
     withHead((head) => {
       const styleEl = getOrCreateStyleEl(head);
-      styleEl.textContent = buildCSS(s);
+      if (styleEl.textContent !== css) styleEl.textContent = css;
     });
   }
 
@@ -2864,6 +2885,7 @@
     });
   }
 
+  applyCachedTheme();
   showSplash();
   chrome.storage.local.get(["eduarteSplashEnabled", "eduarteAnimations"], (data) => {
     rememberSplashState({ enabled: data.eduarteSplashEnabled !== false, animations: data.eduarteAnimations !== false });

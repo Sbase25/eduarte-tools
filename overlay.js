@@ -341,6 +341,34 @@
           object-fit: cover;
           clip-path: ${scallopedShape()};
         }
+        /* Eigen profielfoto: cameraknopje bij de foto + klein menu */
+        #${TOOLBAR_ID} .et-avatar-wrap { position: relative; display: inline-flex; }
+        #${TOOLBAR_ID} .et-avatar-edit {
+          position: absolute; right: -5px; bottom: -5px; z-index: 2;
+          display: grid; place-items: center; width: 22px; height: 22px; padding: 0;
+          border: 2px solid var(--et-tb-surface, #111); border-radius: 50%;
+          background: var(--et-tb-text, #fff); color: var(--et-tb-surface, #111);
+          cursor: pointer; opacity: 0; transform: scale(.7);
+          transition: opacity 150ms ease, transform 200ms ease;
+        }
+        #${TOOLBAR_ID} .et-avatar-edit svg { display: block !important; width: 12px !important; height: 12px !important; fill: none !important; stroke: var(--et-tb-surface, #111) !important; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+        #${TOOLBAR_ID} .et-avatar-wrap:hover .et-avatar-edit,
+        #${TOOLBAR_ID} .et-avatar-edit:focus-visible,
+        #${TOOLBAR_ID} .et-avatar-edit[aria-expanded="true"] { opacity: 1; transform: none; }
+        @media (hover: none) { #${TOOLBAR_ID} .et-avatar-edit { opacity: 1; transform: none; } }
+        #${TOOLBAR_ID} .et-avatar-menu {
+          position: absolute; top: calc(100% + 12px); right: 0; z-index: 30;
+          display: grid; gap: 2px; min-width: 190px; padding: 6px;
+          border: 1px solid color-mix(in srgb, var(--et-tb-text, #fff) 14%, transparent); border-radius: 18px;
+          background: var(--et-tb-surface, #16181d); box-shadow: 0 12px 32px rgba(0,0,0,.35);
+        }
+        #${TOOLBAR_ID} .et-avatar-menu[hidden], #${TOOLBAR_ID} .et-avatar-menu [hidden] { display: none; }
+        #${TOOLBAR_ID} .et-avatar-menu button {
+          padding: 10px 14px; border: 0; border-radius: 12px; background: transparent;
+          color: var(--et-tb-text, #fff); font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer;
+        }
+        #${TOOLBAR_ID} .et-avatar-menu button:hover { background: color-mix(in srgb, var(--et-tb-text, #fff) 10%, transparent); }
+        #${TOOLBAR_ID} .et-avatar-error { margin: 2px 0 0; padding: 6px 14px; color: #f87171; font-size: 12.5px; line-height: 1.35; }
         #${TOOLBAR_ID} .et-portal-popover {
           position: absolute;
           z-index: 2147483645;
@@ -456,7 +484,16 @@
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22a2.25 2.25 0 0 0 2.2-1.75H9.8A2.25 2.25 0 0 0 12 22Zm7-5-1.6-2.1V10a5.4 5.4 0 0 0-4.4-5.3V4a1 1 0 0 0-2 0v.7A5.4 5.4 0 0 0 6.6 10v4.9L5 17v1h14v-1Z"/></svg>
           <span class="et-portal-count" aria-hidden="true"></span>
         </button>
-        <a class="et-portal-action et-portal-avatar" aria-label="Profiel" title="Profiel"></a>
+        <span class="et-avatar-wrap">
+          <a class="et-portal-action et-portal-avatar" aria-label="Profiel" title="Profiel"></a>
+          <button class="et-avatar-edit" type="button" aria-label="Profielfoto wijzigen" title="Profielfoto wijzigen" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4Z"/><circle cx="12" cy="13" r="3.2"/></svg></button>
+          <div class="et-avatar-menu" hidden>
+            <button type="button" data-avatar="pick">Foto kiezen…</button>
+            <button type="button" data-avatar="remove" hidden>Foto verwijderen</button>
+            <p class="et-avatar-error" role="alert" hidden></p>
+          </div>
+          <input class="et-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+        </span>
         <form class="et-portal-search" role="search" aria-label="Zoeken in Eduarte">
           <input type="search" placeholder="Zoek een pagina, les, docent of tekst…" aria-label="Zoekterm" autocomplete="off">
           <ul class="et-search-results" role="listbox"></ul>
@@ -491,14 +528,84 @@
         profile.href = "#";
         profile.addEventListener("click", (event) => event.preventDefault());
       }
-      if (profileImage?.src) {
-        const image = document.createElement("img");
-        image.src = profileImage.src;
-        image.alt = "";
-        profile.replaceChildren(image);
-      } else {
-        profile.textContent = initials;
-      }
+      // Eigen profielfoto (alleen in deze browser bewaard) gaat voor op de foto of initialen van Eduarte
+      const AVATAR_KEY = "eduarteAvatar";
+      const isAvatar = (value) => typeof value === "string" && /^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(value) && value.length < 400000;
+      const avatarEdit = actions.querySelector(".et-avatar-edit");
+      const avatarMenu = actions.querySelector(".et-avatar-menu");
+      const avatarFile = actions.querySelector(".et-avatar-file");
+      const avatarError = actions.querySelector(".et-avatar-error");
+      const avatarRemove = avatarMenu.querySelector('[data-avatar="remove"]');
+      const showAvatar = (custom) => {
+        const src = isAvatar(custom) ? custom : profileImage?.src;
+        if (src) {
+          const image = document.createElement("img");
+          image.src = src;
+          image.alt = "";
+          profile.replaceChildren(image);
+        } else {
+          profile.replaceChildren(document.createTextNode(initials));
+        }
+        avatarRemove.hidden = !isAvatar(custom);
+      };
+      showAvatar(null);
+      chrome.storage.local.get([AVATAR_KEY], (data) => showAvatar(data?.[AVATAR_KEY]));
+
+      const closeAvatarMenu = () => {
+        avatarMenu.hidden = true;
+        avatarEdit.setAttribute("aria-expanded", "false");
+      };
+      const openAvatarMenu = () => {
+        avatarError.hidden = true;
+        avatarMenu.hidden = false;
+        avatarEdit.setAttribute("aria-expanded", "true");
+      };
+      avatarEdit.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (avatarMenu.hidden) openAvatarMenu(); else closeAvatarMenu();
+      });
+      // Ook met de rechtermuisknop (of lang indrukken op een telefoon) op de foto zelf
+      profile.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openAvatarMenu();
+      });
+      avatarMenu.addEventListener("click", (event) => event.stopPropagation());
+      document.addEventListener("click", closeAvatarMenu);
+      document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeAvatarMenu(); });
+      avatarMenu.querySelector('[data-avatar="pick"]').addEventListener("click", () => avatarFile.click());
+      avatarRemove.addEventListener("click", () => {
+        chrome.storage.local.remove(AVATAR_KEY);
+        showAvatar(null);
+        closeAvatarMenu();
+      });
+      avatarFile.addEventListener("change", () => {
+        const file = avatarFile.files?.[0];
+        avatarFile.value = "";
+        if (!file) return;
+        const fail = (text) => { avatarError.textContent = text; avatarError.hidden = false; };
+        if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) return fail("Kies een afbeelding (png, jpg, webp of gif).");
+        if (file.size > 15 * 1024 * 1024) return fail("Deze afbeelding is te groot (maximaal 15 MB).");
+        const url = URL.createObjectURL(file);
+        const picture = new Image();
+        picture.onload = () => {
+          // Vierkant uitsnijden vanuit het midden en verkleinen, zodat er maar een paar kB wordt bewaard
+          const size = 192;
+          const side = Math.min(picture.naturalWidth, picture.naturalHeight);
+          const canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          canvas.getContext("2d").drawImage(picture, (picture.naturalWidth - side) / 2, (picture.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+          URL.revokeObjectURL(url);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.86);
+          if (!isAvatar(dataUrl)) return fail("Deze afbeelding kon niet worden verwerkt.");
+          chrome.storage.local.set({ [AVATAR_KEY]: dataUrl });
+          showAvatar(dataUrl);
+          closeAvatarMenu();
+        };
+        picture.onerror = () => { URL.revokeObjectURL(url); fail("Deze afbeelding kon niet worden geopend."); };
+        picture.src = url;
+      });
       if (existingMessageLink?.href) {
         messageLink.href = existingMessageLink.href;
         messageLink.hidden = false;
