@@ -212,8 +212,6 @@
     "--border-radius-1600": "2.5rem",
   };
 
-  const HUMAN_WALLPAPER_URL = chrome.runtime.getURL("assets/wallpaper-human.jpg");
-  const HUMAN_ACCENT = "#0852a6";
 
   const FONT_MAP = {
     inter: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
@@ -2662,7 +2660,7 @@
     const effectiveSurface = useCustom ? s.custom.surface : (s.preset ? presetConfig.surface : (isDark ? "#1f2937" : "#ffffff"));
     const effectiveText = useCustom ? s.custom.text : (s.preset ? presetConfig.text : (isDark ? "#f9fafb" : "#0f172a"));
     const effectiveBorder = useCustom ? s.custom.border : (s.preset ? presetConfig.border : (isDark ? "#374151" : "#e2e8f0"));
-    const effectiveAccent = s.accent || (s.preset ? presetConfig.accent : (s.human ? HUMAN_ACCENT : "#2563eb"));
+    const effectiveAccent = s.accent || (s.preset ? presetConfig.accent : "#2563eb");
 
     const themeColors = {
       bg: effectiveBg,
@@ -2671,7 +2669,7 @@
       border: effectiveBorder,
     };
 
-    const hasWallpaper = !!s.wallpaperUrl || s.human;
+    const hasWallpaper = !!s.wallpaperUrl;
     const baseVars = deriveThemeTokens(themeColors, isDark);
     const vars = {
       ...baseVars,
@@ -2700,7 +2698,7 @@
     }
 
     if (hasWallpaper) {
-      const url = s.wallpaperUrl || HUMAN_WALLPAPER_URL;
+      const url = s.wallpaperUrl;
       css += buildWallpaperCSS(url, s.wallpaperBlur ?? 12, s.wallpaperOverlay ?? 55, effectiveAccent);
     }
 
@@ -2787,7 +2785,6 @@
         "eduarteDarkMode",
         "eduarteAccentColor",
         "eduarteModernStyle",
-        "eduarteHumanTheme",
         "eduarteWallpaperUrl",
         "eduarteWallpaperBlur",
         "eduarteWallpaperOverlay",
@@ -2805,7 +2802,6 @@
           dark: data.eduarteDarkMode !== false,
           accent: data.eduarteAccentColor || "",
           modern: data.eduarteModernStyle !== false,
-          human: !!data.eduarteHumanTheme,
           wallpaperUrl: data.eduarteWallpaperUrl || "",
           wallpaperBlur: data.eduarteWallpaperBlur,
           wallpaperOverlay: data.eduarteWallpaperOverlay,
@@ -2935,6 +2931,9 @@
     window.addEventListener("load", () => window.setTimeout(cacheSplashColors, 600), { once: true });
   }
 
+  // Het Human-thema is verwijderd; een oude instelling ruimen we op
+  chrome.storage.local.remove?.("eduarteHumanTheme");
+
   loadAndApply();
 
   chrome.storage.onChanged.addListener((changes, area) => {
@@ -2945,7 +2944,6 @@
       changes.eduarteDarkMode ||
       changes.eduarteAccentColor ||
       changes.eduarteModernStyle ||
-      changes.eduarteHumanTheme ||
       changes.eduarteWallpaperUrl ||
       changes.eduarteWallpaperBlur ||
       changes.eduarteWallpaperOverlay ||
