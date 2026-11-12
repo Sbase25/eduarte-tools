@@ -12,7 +12,9 @@ import "@material/web/slider/slider.js";
 import "@material/web/switch/switch.js";
 import "@material/web/textfield/outlined-text-field.js";
 import App from "./App.vue";
+import { followPortalTheme } from "./popupTheme.js";
 import "./variables.css";
 import "./shared.css";
 
+followPortalTheme();
 createApp(App).mount("#app");

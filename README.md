@@ -136,7 +136,7 @@ een eigen startdashboard en cijfertools.
 
 | Pad | Wat |
 | --- | --- |
-| `extension/` | De extensie zelf: `manifest.json`, de scripts, `icons/`, `assets/` en de gebouwde popup (`popup-dist/`). **Deze map laad je als uitgepakte extensie.** |
+| `extension/` | De extensie zelf: `manifest.json`, de scripts, `icons/` en de gebouwde popup (`popup-dist/`). **Deze map laad je als uitgepakte extensie.** |
 | `popup-app/` | Bron van het instellingenvenster (Vue + Vite). `npm run build --prefix popup-app` schrijft naar `extension/popup-dist/`. |
 | `test/` | Tests (`npm test`). |
 | `scripts/` | `build-firefox.mjs` (Firefox-pakket) en `gen_icons.py` (iconen genereren). |

@@ -1,5 +1,6 @@
 export const presets = [
   { key: "aurora", name: "Aurora (glas)", dark: true, accent: "#a78bfa", bg: "#0b0716", surface: "#1a1430", text: "#f5f3ff", border: "#3b2f5c" },
+  { key: "ocean", name: "Oceaan (glas)", dark: true, accent: "#22d3ee", bg: "#04121f", surface: "#0b2236", text: "#ecfeff", border: "#17405c" },
   { key: "graphite", name: "Grafiet", dark: true, accent: "#ff7a59", bg: "#0c0e13", surface: "#14171f", text: "#eceef3", border: "#252a37" },
   { key: "dark", name: "Donker", dark: true, accent: "#3b82f6", bg: "#111827", surface: "#1f2937", text: "#f9fafb", border: "#374151" },
   { key: "blue", name: "Blauw", dark: true, accent: "#38bdf8", bg: "#0b192c", surface: "#13253f", text: "#f0f9ff", border: "#1e3a5f" },

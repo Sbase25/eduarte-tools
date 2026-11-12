@@ -13,6 +13,14 @@
       text: "#f5f3ff",
       border: "#3b2f5c",
     },
+    ocean: {
+      dark: true,
+      accent: "#22d3ee",
+      bg: "#04121f",
+      surface: "#0b2236",
+      text: "#ecfeff",
+      border: "#17405c",
+    },
     graphite: {
       dark: true,
       accent: "#ff7a59",
@@ -212,8 +220,6 @@
     "--border-radius-1600": "2.5rem",
   };
 
-  const HUMAN_WALLPAPER_URL = chrome.runtime.getURL("assets/wallpaper-human.jpg");
-  const HUMAN_ACCENT = "#0852a6";
 
   const FONT_MAP = {
     inter: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
@@ -2046,9 +2052,42 @@
       -webkit-backdrop-filter: blur(12px) !important;
     }
 
+    /* Op een breed scherm is de bovenbalk hetzelfde soort zwevende paneel als het menu links:
+       zelfde afstand tot de rand, zelfde ronding, kleur, rand en schaduw. */
     @media (min-width: 960px) {
-      header.header {
-        left: calc(var(--navigation-width) + 10px) !important;
+      header.header,
+      header.header:has(> .header-tabs) {
+        left: calc(var(--navigation-width) + 20px) !important;
+        right: 10px !important;
+        width: auto !important;
+        margin: 10px 0 0 !important;
+        border: 1px solid color-mix(in srgb, ${text} 7%, transparent) !important;
+        border-radius: 28px !important;
+        background: color-mix(in srgb, ${surface} 96%, ${text} 4%) !important;
+        box-shadow: 0 16px 40px -16px rgba(0,0,0,.5) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      /* Agenda: de knoppenbalk hangt onder de (nu 10px lagere) bovenbalk, niet er half overheen */
+      html body:has(.agenda) .agenda-filter {
+        top: 84px !important;
+      }
+      html body:has(.agenda) .content:has(> .agenda-filter) {
+        padding-top: 97px !important;
+      }
+      html body:has(.agenda) .s5-filterbar-toggle {
+        margin-top: 15px !important;
+      }
+
+      /* Wat onder de balk door schuift vervaagt in de smalle strook erboven */
+      header.header::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: -12px -1px 100% -1px !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        pointer-events: none !important;
       }
     }
 
@@ -2526,15 +2565,26 @@
   }
 
   // Aurora: gekleurd licht op de achtergrond met glazen menu, kaarten en agenda
-  function buildAuroraCSS(accent) {
+  // Zelfde glas, andere lichten: per thema een eigen achtergrond (alles CSS, geen afbeelding)
+  const GLASS_BACKDROPS = {
+    aurora: {
+      base: "#0b0716",
+      accent2: "#f472b6",
+      lights: ["60% 50% at 15% 10%, rgba(168,85,247,.45)", "50% 50% at 90% 20%, rgba(236,72,153,.35)", "60% 60% at 60% 100%, rgba(59,130,246,.35)"],
+    },
+    ocean: {
+      base: "#04121f",
+      accent2: "#2dd4bf",
+      lights: ["65% 55% at 10% 0%, rgba(14,165,233,.50)", "50% 45% at 95% 15%, rgba(45,212,191,.32)", "70% 60% at 55% 105%, rgba(37,99,235,.45)", "40% 35% at 85% 70%, rgba(34,211,238,.18)"],
+    },
+  };
+
+  function buildAuroraCSS(accent, backdrop = GLASS_BACKDROPS.aurora) {
     const glass = "background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.13) !important; backdrop-filter: blur(24px) saturate(160%) !important; -webkit-backdrop-filter: blur(24px) saturate(160%) !important;";
     return `
     html:root:root, html:root body {
-      background-color: #0b0716 !important;
-      background-image:
-        radial-gradient(60% 50% at 15% 10%, rgba(168,85,247,.45), transparent 70%),
-        radial-gradient(50% 50% at 90% 20%, rgba(236,72,153,.35), transparent 70%),
-        radial-gradient(60% 60% at 60% 100%, rgba(59,130,246,.35), transparent 70%) !important;
+      background-color: ${backdrop.base} !important;
+      background-image: ${backdrop.lights.map((light) => `radial-gradient(${light}, transparent 70%)`).join(",\n        ")} !important;
       background-attachment: fixed !important;
     }
 
@@ -2555,6 +2605,14 @@
       backdrop-filter: none !important;
     }
 
+    /* Breed scherm: de bovenbalk is hetzelfde glazen paneel als het menu */
+    @media (min-width: 960px) {
+      html body header.header, html body header.header:has(> .header-tabs) {
+        ${glass}
+        box-shadow: 0 20px 40px -20px rgba(0,0,0,.6) !important;
+      }
+    }
+
     #eduarte-tools-portal-actions .et-portal-action {
       ${glass}
     }
@@ -2568,7 +2626,7 @@
     }
 
     #eduarte-tools-widgets-container {
-      --et-accent-2: #f472b6;
+      --et-accent-2: ${backdrop.accent2};
     }
 
     #eduarte-tools-widgets-container .et-card,
@@ -2621,7 +2679,7 @@
     const effectiveSurface = useCustom ? s.custom.surface : (s.preset ? presetConfig.surface : (isDark ? "#1f2937" : "#ffffff"));
     const effectiveText = useCustom ? s.custom.text : (s.preset ? presetConfig.text : (isDark ? "#f9fafb" : "#0f172a"));
     const effectiveBorder = useCustom ? s.custom.border : (s.preset ? presetConfig.border : (isDark ? "#374151" : "#e2e8f0"));
-    const effectiveAccent = s.accent || (s.preset ? presetConfig.accent : (s.human ? HUMAN_ACCENT : "#2563eb"));
+    const effectiveAccent = s.accent || (s.preset ? presetConfig.accent : "#2563eb");
 
     const themeColors = {
       bg: effectiveBg,
@@ -2630,7 +2688,7 @@
       border: effectiveBorder,
     };
 
-    const hasWallpaper = !!s.wallpaperUrl || s.human;
+    const hasWallpaper = !!s.wallpaperUrl;
     const baseVars = deriveThemeTokens(themeColors, isDark);
     const vars = {
       ...baseVars,
@@ -2659,7 +2717,7 @@
     }
 
     if (hasWallpaper) {
-      const url = s.wallpaperUrl || HUMAN_WALLPAPER_URL;
+      const url = s.wallpaperUrl;
       css += buildWallpaperCSS(url, s.wallpaperBlur ?? 12, s.wallpaperOverlay ?? 55, effectiveAccent);
     }
 
@@ -2678,8 +2736,8 @@
       css += buildPortalGlowCSS();
     }
 
-    if (presetKey === "aurora" && !useCustom && !hasWallpaper) {
-      css += buildAuroraCSS(effectiveAccent);
+    if (GLASS_BACKDROPS[presetKey] && !useCustom && !hasWallpaper) {
+      css += buildAuroraCSS(effectiveAccent, GLASS_BACKDROPS[presetKey]);
     }
 
     return css;
@@ -2746,7 +2804,6 @@
         "eduarteDarkMode",
         "eduarteAccentColor",
         "eduarteModernStyle",
-        "eduarteHumanTheme",
         "eduarteWallpaperUrl",
         "eduarteWallpaperBlur",
         "eduarteWallpaperOverlay",
@@ -2764,7 +2821,6 @@
           dark: data.eduarteDarkMode !== false,
           accent: data.eduarteAccentColor || "",
           modern: data.eduarteModernStyle !== false,
-          human: !!data.eduarteHumanTheme,
           wallpaperUrl: data.eduarteWallpaperUrl || "",
           wallpaperBlur: data.eduarteWallpaperBlur,
           wallpaperOverlay: data.eduarteWallpaperOverlay,
@@ -2894,6 +2950,9 @@
     window.addEventListener("load", () => window.setTimeout(cacheSplashColors, 600), { once: true });
   }
 
+  // Het Human-thema is verwijderd; een oude instelling ruimen we op
+  chrome.storage.local.remove?.("eduarteHumanTheme");
+
   loadAndApply();
 
   chrome.storage.onChanged.addListener((changes, area) => {
@@ -2904,7 +2963,6 @@
       changes.eduarteDarkMode ||
       changes.eduarteAccentColor ||
       changes.eduarteModernStyle ||
-      changes.eduarteHumanTheme ||
       changes.eduarteWallpaperUrl ||
       changes.eduarteWallpaperBlur ||
       changes.eduarteWallpaperOverlay ||
