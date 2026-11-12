@@ -13,6 +13,14 @@
       text: "#f5f3ff",
       border: "#3b2f5c",
     },
+    ocean: {
+      dark: true,
+      accent: "#22d3ee",
+      bg: "#04121f",
+      surface: "#0b2236",
+      text: "#ecfeff",
+      border: "#17405c",
+    },
     graphite: {
       dark: true,
       accent: "#ff7a59",
@@ -2557,15 +2565,26 @@
   }
 
   // Aurora: gekleurd licht op de achtergrond met glazen menu, kaarten en agenda
-  function buildAuroraCSS(accent) {
+  // Zelfde glas, andere lichten: per thema een eigen achtergrond (alles CSS, geen afbeelding)
+  const GLASS_BACKDROPS = {
+    aurora: {
+      base: "#0b0716",
+      accent2: "#f472b6",
+      lights: ["60% 50% at 15% 10%, rgba(168,85,247,.45)", "50% 50% at 90% 20%, rgba(236,72,153,.35)", "60% 60% at 60% 100%, rgba(59,130,246,.35)"],
+    },
+    ocean: {
+      base: "#04121f",
+      accent2: "#2dd4bf",
+      lights: ["65% 55% at 10% 0%, rgba(14,165,233,.50)", "50% 45% at 95% 15%, rgba(45,212,191,.32)", "70% 60% at 55% 105%, rgba(37,99,235,.45)", "40% 35% at 85% 70%, rgba(34,211,238,.18)"],
+    },
+  };
+
+  function buildAuroraCSS(accent, backdrop = GLASS_BACKDROPS.aurora) {
     const glass = "background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.13) !important; backdrop-filter: blur(24px) saturate(160%) !important; -webkit-backdrop-filter: blur(24px) saturate(160%) !important;";
     return `
     html:root:root, html:root body {
-      background-color: #0b0716 !important;
-      background-image:
-        radial-gradient(60% 50% at 15% 10%, rgba(168,85,247,.45), transparent 70%),
-        radial-gradient(50% 50% at 90% 20%, rgba(236,72,153,.35), transparent 70%),
-        radial-gradient(60% 60% at 60% 100%, rgba(59,130,246,.35), transparent 70%) !important;
+      background-color: ${backdrop.base} !important;
+      background-image: ${backdrop.lights.map((light) => `radial-gradient(${light}, transparent 70%)`).join(",\n        ")} !important;
       background-attachment: fixed !important;
     }
 
@@ -2607,7 +2626,7 @@
     }
 
     #eduarte-tools-widgets-container {
-      --et-accent-2: #f472b6;
+      --et-accent-2: ${backdrop.accent2};
     }
 
     #eduarte-tools-widgets-container .et-card,
@@ -2717,8 +2736,8 @@
       css += buildPortalGlowCSS();
     }
 
-    if (presetKey === "aurora" && !useCustom && !hasWallpaper) {
-      css += buildAuroraCSS(effectiveAccent);
+    if (GLASS_BACKDROPS[presetKey] && !useCustom && !hasWallpaper) {
+      css += buildAuroraCSS(effectiveAccent, GLASS_BACKDROPS[presetKey]);
     }
 
     return css;
