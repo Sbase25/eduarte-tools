@@ -34,6 +34,16 @@ function tone(ctx, { freq, start = 0, length = 0.15, type = "sine", volume = 0.1
 const EFFECTS = {
   click: (ctx) => tone(ctx, { freq: 520, length: 0.06, type: "triangle", volume: 0.08 }),
   reveal: (ctx) => [523, 659, 784, 1047].forEach((freq, i) => tone(ctx, { freq, start: i * 0.09, length: 0.22, type: "triangle" })),
+  // Walkout: aanzwellende roffel, dan een fanfare bij het omdraaien van de kaart
+  drum: (ctx) => {
+    tone(ctx, { freq: 70, length: 2.6, type: "sawtooth", volume: 0.05, slideTo: 190 });
+    for (let i = 0; i < 14; i += 1) tone(ctx, { freq: 110 + i * 6, start: i * (0.2 - i * 0.008), length: 0.07, type: "square", volume: 0.035 });
+  },
+  hint: (ctx) => tone(ctx, { freq: 660, length: 0.12, type: "triangle", volume: 0.09, slideTo: 880 }),
+  walkout: (ctx) => {
+    [523, 659, 784, 1047, 1319].forEach((freq, i) => tone(ctx, { freq, start: i * 0.08, length: 0.5, type: "triangle", volume: 0.11 }));
+    [262, 392].forEach((freq) => tone(ctx, { freq, start: 0.32, length: 0.9, type: "sawtooth", volume: 0.05 }));
+  },
   goal: (ctx) => [392, 494, 587, 784].forEach((freq, i) => tone(ctx, { freq, start: i * 0.07, length: 0.3, type: "square", volume: 0.07 })),
   save: (ctx) => tone(ctx, { freq: 300, length: 0.25, type: "sawtooth", volume: 0.09, slideTo: 140 }),
   miss: (ctx) => tone(ctx, { freq: 220, length: 0.35, type: "sine", volume: 0.1, slideTo: 90 }),
