@@ -15,7 +15,7 @@ const KEYS = [
   "eduarteShortcutsEnabled", "eduartePomodoroEnabled", "eduarteQuickCalcEnabled",
   "eduarteAnimationSpeed", "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum",
   "eduartePassThreshold", "eduarteShortcutKeysEnabled", "eduarteShortcuts", "eduarteBadgeEnabled",
-  "eduartePortalLayoutEnabled", "eduarteContextMenuEnabled",
+  "eduartePortalLayoutEnabled", "eduarteContextMenuEnabled", "eduarteHidePackGrades",
   "eduarteTodayEnabled", "eduarteCompactAgenda",
 ];
 
@@ -60,6 +60,7 @@ const DEFAULTS = {
   eduarteBadgeEnabled: true,
   eduartePortalLayoutEnabled: true,
   eduarteContextMenuEnabled: true,
+  eduarteHidePackGrades: true,
   eduarteTodayEnabled: true,
   eduarteCompactAgenda: true,
 };
