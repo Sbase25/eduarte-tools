@@ -234,7 +234,7 @@ onBeforeUnmount(() => { clearTimeout(revealTimer); clearWalkTimers(); });
           </div>
           <div class="wo-card-wrap">
             <div class="wo-card">
-              <div class="wo-face wo-back"><Icon>school</Icon><span>?</span></div>
+              <div class="wo-face wo-back"><Icon>school</Icon><b class="wo-q">?</b></div>
               <div class="wo-face wo-front">
                 <div class="card-top"><strong>{{ shownGrade }}</strong><span>{{ RARITY_NAMES[walkout.rarity].toUpperCase() }}</span></div>
                 <div class="card-art"><span class="art-glow"></span><Icon>school</Icon></div>
@@ -431,7 +431,7 @@ onBeforeUnmount(() => { clearTimeout(revealTimer); clearWalkTimers(); });
 .wo-face { position: absolute; inset: 0; display: flex; flex-direction: column; overflow: hidden; border: 1px solid color-mix(in srgb, var(--tier) 62%, #ffffff66); border-radius: 26px 26px 9px 26px; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
 .wo-back { align-items: center; justify-content: center; gap: 12px; color: var(--tier); background: repeating-linear-gradient(135deg, #ffffff07 0 11px, transparent 11px 22px), linear-gradient(150deg, #23232d, #111217); box-shadow: 0 0 62px color-mix(in srgb, var(--tier) 50%, transparent), inset 0 0 44px color-mix(in srgb, var(--tier) 24%, transparent); transform: rotateY(180deg); }
 .wo-back :deep(.icon) { font-size: 62px; opacity: .85; }
-.wo-back span { font: 900 46px/1 system-ui, sans-serif; text-shadow: 0 0 22px var(--tier); animation: promptPulse 1s ease-in-out infinite; }
+.wo-q { font: 900 46px/1 system-ui, sans-serif; text-shadow: 0 0 22px var(--tier); animation: promptPulse 1s ease-in-out infinite; }
 .wo-front { --accent: var(--tier); padding: 16px 15px 14px; color: #f7f5ef; background: radial-gradient(ellipse at 50% 36%, color-mix(in srgb, var(--tier) 32%, transparent), transparent 58%), linear-gradient(150deg, color-mix(in srgb, var(--tier) 24%, #272832), #17181e 78%); box-shadow: 0 24px 60px #000b, 0 0 74px color-mix(in srgb, var(--tier) 42%, transparent), inset 0 1px #ffffff40; }
 .tier-special .wo-front { background: radial-gradient(ellipse at 50% 36%, #c9a3ff55, transparent 58%), linear-gradient(150deg, #48318a, #12314d 80%); }
 .wo-front::after { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 36%, #ffffff55 50%, transparent 64%); content: ""; transform: translateX(-130%); }
