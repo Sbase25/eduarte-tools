@@ -750,7 +750,9 @@
             }
             const result = Notify.diff(nextState, kind, items);
             nextState = result.state;
-            created.push(...result.created.map((item) => Notify.toNotification(item)));
+            let hideGrade = false;
+            try { hideGrade = window.localStorage.getItem("eduarteToolsHideGrades") !== "0"; } catch { /* geen opslag */ }
+            created.push(...result.created.map((item) => Notify.toNotification(item, Date.now(), { hideGrade })));
           });
           chrome.storage.local.set({ [NOTIFY_STATE_KEY]: nextState });
           if (created.length) {

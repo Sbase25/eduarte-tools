@@ -12,6 +12,7 @@ function fmt(n) {
 
 <template>
   <SwitchInput v-model="s.eduarteGradesEnabled" title="Cijferoverzicht verbeteren" subtitle="Toon de Study Tools-achtige calculator als overlay op /resultaten." />
+  <SwitchInput v-model="s.eduarteHidePackGrades" title="Nieuwe cijfers verbergen tot je een pack opent" subtitle="Een nieuw cijfer op Resultaten blijft een vraagteken tot je het met een pack onthult. Zet dit uit om cijfers meteen te zien." />
   <div class="setting">
     <h3 class="setting-title">Ondergrens cijfers</h3>
     <MaterialSlider v-model="s.eduarteGradeMinimum" min="0" max="10" step=".1" label="Ondergrens cijfers" />

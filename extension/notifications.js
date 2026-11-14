@@ -135,8 +135,12 @@
   }
 
   // Maakt van een gevonden item de melding zoals die in de lijst komt te staan.
-  function toNotification(item, now = Date.now()) {
+  function toNotification(item, now = Date.now(), { hideGrade = false } = {}) {
     const when = [dayText(item.date), item.time].filter(Boolean).join(" ");
+    if (item.kind === "grade" && hideGrade) {
+      // Het cijfer zelf blijft geheim tot je het pack opent
+      return { id: item.key, kind: "grade", title: "Nieuw cijfer", text: "Open een pack om het te onthullen", href: "/resultaten", at: now, read: false };
+    }
     if (item.kind === "grade") {
       return { id: item.key, kind: "grade", title: `Nieuw cijfer: ${number(item.result)}`, text: item.title, href: "/resultaten", at: now, read: false };
     }
