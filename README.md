@@ -10,7 +10,7 @@ eigen agenda. Geïnspireerd door [Study Tools voor
 Magister](https://github.com/QkeleQ10/Study-Tools).
 
 **[Installeer Eduarte Tools in de Chrome Web Store](https://chromewebstore.google.com/detail/mmjkngjpdflanccahmndkofkpgnkbcnm)**
-(werkt ook in Edge) · [Website](https://sbase25.github.io/eduarte-tools/) · Volg [@eduartetools](https://www.instagram.com/eduartetools/) op Instagram
+(werkt ook in Edge) · **[Firefox Add-ons](https://addons.mozilla.org/nl/firefox/addon/eduarte-tools/)** · [Website](https://sbase25.github.io/eduarte-tools/) · Volg [@eduartetools](https://www.instagram.com/eduartetools/) op Instagram
 
 ## Functies
 
@@ -89,7 +89,11 @@ extensie onder **Over**, en als sluitbare melding op de Eduarte-startpagina.
 
 ## Firefox
 
-Eduarte Tools werkt ook in Firefox 128 of nieuwer. Bouw de Firefox-versie met:
+Eduarte Tools staat op [Firefox Add-ons](https://addons.mozilla.org/nl/firefox/addon/eduarte-tools/) en werkt in Firefox 128 of
+nieuwer. Geef de extensie na het installeren toegang tot je Eduarte-site
+(Add-ons → Eduarte Tools → Machtigingen), anders draait hij daar niet.
+
+Zelf bouwen kan met:
 
 ```
 node scripts/build-firefox.mjs
@@ -97,13 +101,16 @@ node scripts/build-firefox.mjs
 
 Dit maakt `dist/firefox/` en `dist/eduarte-tools-firefox-<versie>.zip`. Laad tijdelijk via
 `about:debugging` → **Deze Firefox** → **Tijdelijke add-on laden** (kies `dist/firefox/manifest.json`),
-of upload de zip naar addons.mozilla.org. Geef de extensie in Firefox toegang tot je
-Eduarte-site (Add-ons → Eduarte Tools → Machtigingen), anders draait hij daar niet.
+of upload de zip naar addons.mozilla.org.
+
+Een nieuwe versie naar Firefox Add-ons sturen: merge `main` in de branch `firefox`
+en push. De workflow op die branch test, bouwt en dient de versie in bij Mozilla.
 
 ## Installatie
 
 De makkelijkste manier: installeer Eduarte Tools via de
-[Chrome Web Store](https://chromewebstore.google.com/detail/mmjkngjpdflanccahmndkofkpgnkbcnm).
+[Chrome Web Store](https://chromewebstore.google.com/detail/mmjkngjpdflanccahmndkofkpgnkbcnm)
+of, in Firefox, via [Firefox Add-ons](https://addons.mozilla.org/nl/firefox/addon/eduarte-tools/).
 Je krijgt dan ook automatisch updates.
 
 ### Zelf laden (voor ontwikkelaars)
@@ -142,7 +149,7 @@ een eigen startdashboard en cijfertools.
 | `scripts/` | `build-firefox.mjs` (Firefox-pakket) en `gen_icons.py` (iconen genereren). |
 | `calendar-server/` | De server voor het agenda-abonnement. |
 | `docs/` | De website op GitHub Pages. |
-| `.github/workflows/` | Publicatie naar de Chrome Web Store bij een push naar `main`. |
+| `.github/workflows/` | Publicatie naar de Chrome Web Store bij een push naar `main` (Firefox Add-ons: bij een push naar de branch `firefox`). |
 
 ## Bijdragen
 
