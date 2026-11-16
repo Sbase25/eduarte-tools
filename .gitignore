@@ -5,3 +5,12 @@ Thumbs.db
 .vscode/
 *.log
 dist/
+
+# Build-uitvoer van de workflows
+extension-package/
+*.xpi
+
+# Lokale geheimen en editorbestanden
+.env
+.env.*
+.idea/

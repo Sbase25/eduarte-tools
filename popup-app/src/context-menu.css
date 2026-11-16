@@ -4,14 +4,16 @@
   z-index: 2147483647;
   inset: 0;
   pointer-events: none;
-  color-scheme: dark;
   font-family: Roboto, "Noto Sans", system-ui, sans-serif;
 
-  --menu-primary: #79a6ff;
-  --menu-surface-container: rgba(14, 24, 62, .96);
-  --menu-text: #f3f6ff;
-  --menu-text-secondary: #b6c5e8;
-  --menu-outline: rgba(139, 169, 255, .3);
+  /* Kleuren van het actieve Eduarte Tools-thema (dezelfde als het menu links en de bovenbalk) */
+  --menu-accent: var(--color-bg-fill-action, #3b82f6);
+  --menu-surface: var(--color-bg-surface, #1f2937);
+  --menu-text: var(--color-text-primary, #f9fafb);
+  --menu-primary: color-mix(in srgb, var(--menu-accent) 82%, var(--menu-text));
+  --menu-surface-container: color-mix(in srgb, var(--menu-surface) 96%, var(--menu-text) 4%);
+  --menu-text-secondary: color-mix(in srgb, var(--menu-text) 68%, transparent);
+  --menu-outline: color-mix(in srgb, var(--menu-text) 9%, transparent);
 }
 
 #eduarte-tools-context-menu *,
@@ -28,14 +30,10 @@
   padding: 12px;
   overflow: hidden;
   border: 1px solid var(--menu-outline);
-  border-radius: 20px;
-  background:
-    radial-gradient(ellipse at 100% 0%, rgba(52, 94, 224, .3), transparent 58%),
-    linear-gradient(145deg, rgba(20, 35, 88, .98), var(--menu-surface-container));
+  border-radius: 24px;
+  background: var(--menu-surface-container);
   color: var(--menu-text);
-  box-shadow: 0 18px 48px rgba(1, 5, 24, .48), inset 0 1px rgba(255, 255, 255, .08);
-  backdrop-filter: blur(20px) saturate(145%);
-  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .34), 0 2px 8px rgba(0, 0, 0, .18);
   pointer-events: auto;
   animation: eduarte-menu-enter 150ms cubic-bezier(.2, 0, 0, 1) both;
 }
@@ -68,12 +66,11 @@
 
 #eduarte-tools-context-menu .menu-item:hover,
 #eduarte-tools-context-menu .menu-item:focus-visible {
-  border-color: rgba(121, 166, 255, .22);
-  background: linear-gradient(105deg, rgba(51, 101, 238, .3), rgba(108, 78, 223, .18));
+  background: color-mix(in srgb, var(--menu-accent) 22%, var(--menu-surface));
 }
 
 #eduarte-tools-context-menu .menu-item:focus-visible {
-  outline: 2px solid #91b5ff;
+  outline: 2px solid var(--menu-primary);
   outline-offset: -2px;
 }
 
@@ -81,8 +78,7 @@
   flex: 0 0 22px;
   width: 22px;
   height: 22px;
-  fill: #91b5ff;
-  filter: drop-shadow(0 1px 5px rgba(91, 135, 255, .3));
+  fill: var(--menu-primary);
 }
 
 #eduarte-tools-context-menu .menu-item-text {

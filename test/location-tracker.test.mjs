@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 
-const trackerSource = readFileSync(new URL("../location-tracker.js", import.meta.url), "utf8");
+const trackerSource = readFileSync(new URL("../extension/location-tracker.js", import.meta.url), "utf8");
 
 function createTracker(geolocation) {
   let messageListener;

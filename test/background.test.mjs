@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { describe, expect, it, vi } from "vitest";
 
-const backgroundSource = readFileSync(new URL("../background.js", import.meta.url), "utf8");
+const backgroundSource = readFileSync(new URL("../extension/background.js", import.meta.url), "utf8");
 
 function createBackground(cachedGrades) {
   const messageListeners = [];

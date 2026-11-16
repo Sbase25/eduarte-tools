@@ -2,9 +2,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { JSDOM } from "jsdom";
 
-const overlaySource = readFileSync(new URL("../overlay.js", import.meta.url), "utf8");
-const badgeLogicSource = readFileSync(new URL("../badge-logic.js", import.meta.url), "utf8");
-const eduarteApiSource = readFileSync(new URL("../eduarte-api.js", import.meta.url), "utf8");
+const overlaySource = readFileSync(new URL("../extension/overlay.js", import.meta.url), "utf8");
+const badgeLogicSource = readFileSync(new URL("../extension/badge-logic.js", import.meta.url), "utf8");
+const eduarteApiSource = readFileSync(new URL("../extension/eduarte-api.js", import.meta.url), "utf8");
 
 describe("portal action toolbar", () => {
   it("adds working search, notifications, and profile actions without observing its own updates", () => {

@@ -7,23 +7,22 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "dist", "firefox");
-const manifest = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8"));
+const source = join(root, "extension");
+const manifest = JSON.parse(readFileSync(join(source, "manifest.json"), "utf8"));
 
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
-for (const entry of [
-  "background.js", "badge-logic.js", "badge.js", "content.js", "eduarte-api.js",
-  "grade-calculator.js", "overlay.js", "theme.js", "privacy.html",
-  "popup-dist", "icons", "assets", "LICENSE", "THIRD_PARTY_NOTICES.txt",
-]) {
-  cpSync(join(root, entry), join(out, entry), { recursive: true });
+// De hele map extension/ (behalve het manifest, dat hieronder wordt aangepast) plus licentie en privacybeleid
+cpSync(source, out, { recursive: true, filter: (path) => path !== join(source, "manifest.json") });
+for (const [from, to] of [["LICENSE", "LICENSE"], ["THIRD_PARTY_NOTICES.txt", "THIRD_PARTY_NOTICES.txt"], ["docs/privacy.html", "privacy.html"]]) {
+  cpSync(join(root, from), join(out, to));
 }
 
 // Firefox: geen service worker en geen offscreen-API (background.js valt dan
 // terug op navigator.geolocation in de achtergrondpagina).
 const firefox = { ...manifest };
 firefox.permissions = manifest.permissions.filter((permission) => permission !== "offscreen");
-firefox.background = { scripts: ["background.js"] };
+firefox.background = { scripts: ["calendar-feed.js", "background.js"] };
 firefox.browser_specific_settings = {
   gecko: {
     id: "eduarte-tools@sbase25.github.io",

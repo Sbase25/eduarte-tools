@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { JSDOM } from "jsdom";
-import { getGrades, parseGrade } from "../eduarte-api.js";
+import { getGrades, parseGrade } from "../extension/eduarte-api.js";
 
 describe("parseGrade", () => {
   it("parses Dutch decimal grades and respects configured bounds", () => {

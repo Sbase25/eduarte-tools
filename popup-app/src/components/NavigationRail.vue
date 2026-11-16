@@ -11,15 +11,15 @@ const value = computed({
 });
 
 function selectTab(tab) {
-  if (tab.id === "packs") {
+  if (tab.id === "packs" || tab.id === "team") {
     if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
-      chrome.runtime.sendMessage({ type: "OPEN_EDUARTE_TOOLS_PAGE", page: "packs" }, (response) => {
+      chrome.runtime.sendMessage({ type: "OPEN_EDUARTE_TOOLS_PAGE", page: tab.id }, (response) => {
         const error = chrome.runtime.lastError;
         if (error) console.error("Eduarte Tools kon de pack opening niet openen.", error.message);
         else if (!response?.success) console.error("Eduarte Tools kon de pack opening niet openen.", response?.error);
       });
     } else {
-      window.open(new URL("/packs.html", window.location.href).href, "_blank", "noopener");
+      window.open(new URL(`/${tab.id}.html`, window.location.href).href, "_blank", "noopener");
     }
     return;
   }
@@ -34,6 +34,7 @@ const tabs = [
   { id: "grades", name: "Cijfers", icon: "workspace_premium" },
   { id: "shortcuts", name: "Sneltoetsen", icon: "keyboard" },
   { id: "packs", name: "Packs", icon: "redeem" },
+  { id: "team", name: "Team", icon: "groups" },
   { id: "ideas", name: "Ideeën", icon: "lightbulb" },
   { id: "about", name: "Over", icon: "info" },
 ];

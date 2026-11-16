@@ -6,7 +6,7 @@ import { reactive, watch } from "vue";
  * theme.js ongewijzigd blijven werken met deze nieuwe Vue-popup.
  */
 const KEYS = [
-  "eduarteThemePreset", "eduarteDarkMode", "eduarteAccentColor", "eduarteModernStyle", "eduarteHumanTheme",
+  "eduarteThemePreset", "eduarteDarkMode", "eduarteAccentColor", "eduarteModernStyle",
   "eduarteWallpaperUrl", "eduarteWallpaperBlur", "eduarteWallpaperOverlay", "eduarteFont",
   "eduarteCustomTheme", "eduarteCustomColors", "eduarteEnabled", "eduarteUsername", "eduartePassword",
   "eduarteAutosubmit", "eduarteModernNav", "eduarteAnimations", "eduarteFloatingCards",
@@ -16,6 +16,7 @@ const KEYS = [
   "eduarteAnimationSpeed", "eduarteGradesEnabled", "eduarteGradeMinimum", "eduarteGradeMaximum",
   "eduartePassThreshold", "eduarteShortcutKeysEnabled", "eduarteShortcuts", "eduarteBadgeEnabled",
   "eduartePortalLayoutEnabled", "eduarteContextMenuEnabled",
+  "eduarteTodayEnabled", "eduarteCompactAgenda",
 ];
 
 const DEFAULTS = {
@@ -23,7 +24,6 @@ const DEFAULTS = {
   eduarteDarkMode: true,
   eduarteAccentColor: "#3b82f6",
   eduarteModernStyle: true,
-  eduarteHumanTheme: false,
   eduarteWallpaperUrl: "",
   eduarteWallpaperBlur: 12,
   eduarteWallpaperOverlay: 55,
@@ -60,6 +60,8 @@ const DEFAULTS = {
   eduarteBadgeEnabled: true,
   eduartePortalLayoutEnabled: true,
   eduarteContextMenuEnabled: true,
+  eduarteTodayEnabled: true,
+  eduarteCompactAgenda: true,
 };
 
 const hasChrome = typeof chrome !== "undefined" && chrome.storage && chrome.storage.local;

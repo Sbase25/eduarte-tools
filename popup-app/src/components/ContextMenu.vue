@@ -9,6 +9,7 @@ const position = ref({ x: 0, y: 0 });
 const actions = [
   { label: "Eduarte Tools openen", description: "Instellingen en functies", page: "settings", icon: "settings" },
   { label: "Pack opening", description: "Onthul cijfers van Eduarte", page: "packs", icon: "redeem" },
+  { label: "Mijn team", description: "Verzameling, team en penalty's", page: "team", icon: "groups" },
 ];
 
 function isBrowserContext(target) {

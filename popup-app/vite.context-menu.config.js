@@ -17,7 +17,7 @@ export default defineConfig({
     "process.env.NODE_ENV": JSON.stringify("production"),
   },
   build: {
-    outDir: "../popup-dist",
+    outDir: "../extension/popup-dist",
     emptyOutDir: false,
     lib: {
       entry: resolve(appDirectory, "src/context-menu-main.js"),

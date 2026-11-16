@@ -1,0 +1,11 @@
+name = "eduarte-agenda"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[triggers]
+crons = ["0 3 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "eduarte-agenda"
+database_id = "e4a92bd9-80fc-45b1-96e7-5bd80e2db86f"

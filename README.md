@@ -3,11 +3,14 @@
 
 # Eduarte Tools
 
-Een Chrome-extensie die het Eduarte-studentenportaal 
-fijner maakt om te gebruiken:
-automatisch inloggen op meerdere Eduarte-omgevingen, donkere modus, een
-eigen kleurenthema, een cijfercalculator en een glasmorfisme-preset. Geïnspireerd door [Study Tools voor
+Een browserextensie die het Eduarte-studentenportaal fijner maakt om te
+gebruiken: automatisch inloggen op meerdere Eduarte-omgevingen, donkere modus,
+thema's, widgets op de startpagina, een cijfercalculator en je rooster in je
+eigen agenda. Geïnspireerd door [Study Tools voor
 Magister](https://github.com/QkeleQ10/Study-Tools).
+
+**[Installeer Eduarte Tools in de Chrome Web Store](https://chromewebstore.google.com/detail/mmjkngjpdflanccahmndkofkpgnkbcnm)**
+(werkt ook in Edge) · [Website](https://sbase25.github.io/eduarte-tools/) · Volg [@eduartetools](https://www.instagram.com/eduartetools/) op Instagram
 
 ## Functies
 
@@ -25,6 +28,12 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   extensiepagina, niet naar een server gestuurd en niet bewaard. De
   3D-packanimatie is met toestemming aangepast van Magister Ultimate Team
   v6.10.2.3.
+- **Eduarte Team** — kaarten die je uit packs onthult worden lokaal verzameld
+  (rarity en rating uit je echte cijfer). Stel een team van 5 samen, krijg
+  teamchemie via vakgroepen (bijv. Engels + Duits), speel een penalty-minigame
+  en kies seizoensthema's. Geluidseffecten worden ter plekke gesynthetiseerd;
+  er is geen muziek en er worden geen gegevens verstuurd. Geïnspireerd op
+  Magister Ultimate Team, met toestemming van de maker.
 - **Material 3 Expressive-contextmenu** — rechtsklik op een lege plek op een
   Eduarte-pagina om Eduarte Tools of de pack-opening direct te openen. In
   invoervelden, op links en bij geselecteerde tekst blijft het browsermenu
@@ -53,6 +62,10 @@ Magister](https://github.com/QkeleQ10/Study-Tools).
   (`--color-bg`, `--color-text-primary`, ...) met dynamische accenten en custom CSS ondersteuning.
 - **Eigen thema** — kies 4 basiskleuren (achtergrond, oppervlak, tekst,
   randen); de rest wordt automatisch afgeleid.
+- **Rooster in je agenda** — zet je Eduarte-rooster in Outlook, Google Agenda
+  of de agenda van je telefoon via een persoonlijke agenda-link. Je agenda-app
+  haalt wijzigingen zelf op. Alleen lesnaam, tijden, lokaal en docentcode gaan
+  naar de agendaserver; zie het [privacybeleid](docs/privacy.html).
 - **Huiswerk & Deadlines Widget** — houd zelf je huiswerk en deadlines bij
   (vak, omschrijving, datum) met kleurcodering naar urgentie, direct op het
   dashboard.
@@ -83,21 +96,29 @@ node scripts/build-firefox.mjs
 ```
 
 Dit maakt `dist/firefox/` en `dist/eduarte-tools-firefox-<versie>.zip`. Laad tijdelijk via
-`about:debugging` → **Deze Firefox** → **Tijdelijke add-on laden** (kies `manifest.json`),
+`about:debugging` → **Deze Firefox** → **Tijdelijke add-on laden** (kies `dist/firefox/manifest.json`),
 of upload de zip naar addons.mozilla.org. Geef de extensie in Firefox toegang tot je
 Eduarte-site (Add-ons → Eduarte Tools → Machtigingen), anders draait hij daar niet.
 
 ## Installatie
 
+De makkelijkste manier: installeer Eduarte Tools via de
+[Chrome Web Store](https://chromewebstore.google.com/detail/mmjkngjpdflanccahmndkofkpgnkbcnm).
+Je krijgt dan ook automatisch updates.
+
+### Zelf laden (voor ontwikkelaars)
+
 1. Download of clone deze repository.
 2. Open `chrome://extensions` in Chrome of Edge.
 3. Zet **Ontwikkelaarsmodus** aan (rechtsboven).
-4. Klik **Uitgepakte extensie laden** en kies deze map.
+4. Klik **Uitgepakte extensie laden** en kies de map `extension/` in deze repository.
 5. Klik op het extensie-icoon, vul je gegevens in bij **Inloggen**, en
    stel je uiterlijk in bij **Uiterlijk** / **Eigen thema**.
 
-Gegevens worden alleen lokaal in je browser opgeslagen
-(`chrome.storage.local`) en nergens naartoe verzonden.
+Instellingen, inloggegevens en cijfers worden alleen lokaal in je browser
+opgeslagen (`chrome.storage.local`) en nergens naartoe verzonden. Alleen als je
+zelf een agenda-link maakt, gaat je rooster naar de agendaserver van Eduarte
+Tools (zie het [privacybeleid](docs/privacy.html)).
 
 Voor het weer kan de extensie, na jouw toestemming, je huidige locatie
 gebruiken. De coördinaten worden lokaal bewaard en alleen naar Open-Meteo
@@ -110,6 +131,18 @@ zonder een publieke JSON-API zoals Magister die heeft, dus de extensie
 leest wat de pagina zelf al toont. Ze richt zich op wat robuust en breed
 toepasbaar is: theming via Eduarte's eigen CSS-tokensysteem, aangevuld met
 een eigen startdashboard en cijfertools.
+
+## Mapindeling
+
+| Pad | Wat |
+| --- | --- |
+| `extension/` | De extensie zelf: `manifest.json`, de scripts, `icons/` en de gebouwde popup (`popup-dist/`). **Deze map laad je als uitgepakte extensie.** |
+| `popup-app/` | Bron van het instellingenvenster (Vue + Vite). `npm run build --prefix popup-app` schrijft naar `extension/popup-dist/`. |
+| `test/` | Tests (`npm test`). |
+| `scripts/` | `build-firefox.mjs` (Firefox-pakket) en `gen_icons.py` (iconen genereren). |
+| `calendar-server/` | De server voor het agenda-abonnement. |
+| `docs/` | De website op GitHub Pages. |
+| `.github/workflows/` | Publicatie naar de Chrome Web Store bij een push naar `main`. |
 
 ## Bijdragen
 
